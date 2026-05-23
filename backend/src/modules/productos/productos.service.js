@@ -4,8 +4,8 @@ const productosRepository = require('./productos.repository');
 const { AppError } = require('../../shared/errors/AppError');
 const { createProductoSchema, updateProductoSchema } = require('./productos.schema');
 
-async function listarProductos() {
-  return productosRepository.findAll();
+async function listarProductos(filters) {
+  return productosRepository.findAll(filters);
 }
 
 async function obtenerProducto(id) {
@@ -31,6 +31,9 @@ async function crearProducto(payload) {
 async function actualizarProducto(id, payload) {
   try {
     const data = updateProductoSchema.parse(payload);
+    if (Object.keys(data).length === 0) {
+      throw new AppError('Debe enviar al menos un campo para actualizar', 400);
+    }
     return productosRepository.update(id, data);
   } catch (error) {
     if (error instanceof ZodError) {

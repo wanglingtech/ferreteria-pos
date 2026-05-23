@@ -8,6 +8,11 @@ const createUsuarioSchema = z.object({
   role: z.enum(['ADMIN', 'SELLER']),
 });
 
+const updateStatusSchema = z.object({
+  isActive: z.boolean(),
+});
+
 module.exports = {
   createUsuarioSchema,
+  updateStatusSchema,
 };

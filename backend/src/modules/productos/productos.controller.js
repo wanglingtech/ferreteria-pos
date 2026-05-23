@@ -3,7 +3,16 @@ const { asyncHandler } = require('../../shared/utils/async-handler');
 const { sendSuccess } = require('../../shared/utils/http-response');
 
 const listar = asyncHandler(async (req, res) => {
-  const data = await productosService.listarProductos();
+  const filters = {
+    search: req.query.search?.trim() || undefined,
+    categoryId: req.query.categoryId ? Number(req.query.categoryId) : undefined,
+    isActive:
+      req.query.isActive !== undefined
+        ? req.query.isActive === 'true'
+        : undefined,
+  };
+
+  const data = await productosService.listarProductos(filters);
   return sendSuccess(res, data, 'Listado de productos');
 });
 

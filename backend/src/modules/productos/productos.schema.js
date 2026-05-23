@@ -4,10 +4,12 @@ const createProductoSchema = z.object({
   sku: z.string().min(2),
   nombre: z.string().min(2),
   descripcion: z.string().optional(),
-  precio: z.number().positive(),
-  stock: z.number().int().nonnegative(),
-  stockMinimo: z.number().int().nonnegative(),
-  categoriaId: z.number().int().positive().nullable().optional(),
+  precio: z.coerce.number().positive(),
+  stock: z.coerce.number().int().nonnegative(),
+  stockMinimo: z.coerce.number().int().nonnegative(),
+  categoriaId: z
+    .union([z.coerce.number().int().positive(), z.null()])
+    .optional(),
   imagenUrl: z.string().url().optional(),
 });
 

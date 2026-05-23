@@ -1,8 +1,8 @@
 const { z } = require('zod');
 
 const ventaItemSchema = z.object({
-  productoId: z.number().int().positive(),
-  cantidad: z.number().int().positive(),
+  productoId: z.coerce.number().int().positive(),
+  cantidad: z.coerce.number().int().positive(),
 });
 
 const createVentaSchema = z.object({
