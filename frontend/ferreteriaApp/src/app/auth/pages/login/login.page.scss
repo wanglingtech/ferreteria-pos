@@ -1,108 +1,211 @@
-:host {
-  --brand-primary: #0f4fa8;
-  --brand-secondary: #1f72db;
-  --brand-text: #153052;
-}
-
 .login-content {
-  --background: radial-gradient(circle at 20% 15%, #eaf2ff 0%, #dce9ff 45%, #cddfff 100%);
+  --background: #ffffffe0;
+  height: 100%;
 }
 
-.login-shell {
+/* =========================
+   IONIC SCROLL FIX
+========================= */
+ion-content {
+  --overflow: auto;
+}
+
+/* =========================
+   CONTENEDOR
+========================= */
+.login-container {
+  position: relative;
+  z-index: 2;
+  padding: 24px;
   min-height: 100dvh;
-  padding: 24px 16px 32px;
-  display: grid;
-  gap: 18px;
-  align-content: center;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
 }
 
-.brand-panel {
-  color: var(--brand-text);
-  padding-inline: 6px;
+/* =========================
+   BRAND
+========================= */
+.brand-section {
+  text-align: center;
+  color: #0a1a5c;
+  margin-top: 10px;
 }
 
-.brand-panel h1 {
-  margin: 8px 0 10px;
-  font-size: 1.65rem;
-  font-weight: 800;
-  line-height: 1.15;
+/* LOGO */
+.logo {
+  width: clamp(180px, 18vw, 160px);
+  height: clamp(180px, 18vw, 160px);
+
+  object-fit: contain;
+  border-radius: 18px;
 }
 
-.brand-panel p {
-  margin: 0;
-  font-size: 0.95rem;
-  opacity: 0.9;
-}
-
-.brand-eyebrow {
-  margin: 0;
-  font-weight: 700;
-  font-size: 0.74rem;
-  letter-spacing: 0.12em;
-  color: var(--brand-secondary);
-}
-
+/* =========================
+   CARD PREMIUM
+========================= */
 .login-card {
-  margin: 0;
-  border-radius: 20px;
-  box-shadow: 0 20px 35px rgba(13, 34, 72, 0.18);
+  border-radius: 22px;
+  box-shadow: 0 30px 60px rgba(10, 26, 92, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  background: rgb(255, 255, 255);
 }
 
-.login-card ion-card-content {
-  padding: 20px 18px 22px;
+/* =========================
+   HEADER
+========================= */
+.header {
+  text-align: center;
+  margin-bottom: 18px;
 }
 
-ion-title {
-  padding-inline: 0;
-  color: #0e2a4a;
-  font-weight: 800;
-}
-
-.subtitle {
-  margin: 6px 0 14px;
-  color: #4c5f77;
-  font-size: 0.9rem;
-}
-
-.login-form {
-  display: grid;
-  gap: 12px;
-}
-
-ion-item {
-  --background: #f5f8ff;
-  --border-color: #d5e3fa;
-  --highlight-color-focused: var(--brand-secondary);
-  border-radius: 12px;
-}
-
-.error-text {
-  margin: 2px 2px 0;
-  font-size: 0.82rem;
-}
-
-.submit-button {
-  margin-top: 2px;
-  --background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-  --border-radius: 12px;
-  height: 46px;
+.header h2 {
+  font-size: 20px;
   font-weight: 700;
+  color: #0a1a5c;
+  letter-spacing: -0.2px;
 }
 
-.submit-button ion-spinner {
-  margin-right: 8px;
+.header p {
+  font-size: 12px;
+  color: rgba(10, 26, 92, 0.65);
 }
 
-@media (min-width: 768px) {
-  .login-shell {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 32px;
-    grid-template-columns: 1fr 430px;
-    align-items: center;
-  }
+/* =========================
+   INPUTS
+========================= */
+.input_user,
+.input_pass {
+  --background: #f8faff;
+  --color: #072291;
+  --placeholder-color: rgba(10, 26, 92, 0.45);
 
-  .brand-panel h1 {
-    font-size: 2.2rem;
-  }
+  border-radius: 18px;
+  margin-bottom: 14px;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+/* hover */
+.input_user:hover,
+.input_pass:hover {
+  transform: translateY(-1px);
+}
+
+/* border */
+.input_user::part(native),
+.input_pass::part(native) {
+  border: 1.5px solid rgba(7, 15, 133, 0.801);
+  border-radius: 20px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* focus */
+.input_user.ion-focused::part(native),
+.input_pass.ion-focused::part(native) {
+  border-color: #0a1a5c;
+  box-shadow: 0 0 0 3px rgba(10, 26, 92, 0.12);
+}
+
+/* =========================
+   PASSWORD FIELD
+========================= */
+ion-item.input_pass {
+  display: flex;
+  align-items: center;
+}
+
+/* BOTÓN OJO -> MISMO AZUL QUE LOGIN BUTTON */
+ion-item.input_pass ion-button {
+  height: 100%;
+  margin-top: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  --padding-start: 0;
+  --padding-end: 0;
+
+  /* 🔵 FIX: mismo azul del botón principal */
+  --color: #0a1a5c;
+}
+
+/* ICONO */
+.eye-icon {
+  font-size: 20px;
+  color: #0a1a5c;
+}
+
+/* wrapper opcional */
+.toggle-password {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   OPTIONS
+========================= */
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin: 14px 0 18px;
+}
+
+.remember {
+  --background: transparent;
+  --padding-start: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 13px;
+  color: #0a1a5c;
+  margin-left: 35%;
+}
+
+.remember ion-checkbox {
+  --size: 16px;
+  margin-right: 6px;
+}
+
+/* =========================
+   LINK
+========================= */
+.link {
+  font-size: 12px;
+  color: #0f2788;
+  text-decoration: none;
+}
+
+/* =========================
+   BUTTON PRIMARY
+========================= */
+.btn-primary {
+  --background: linear-gradient(#0a1a5c);
+  --border-radius: 18px;
+
+  font-weight: 600;
+  height: 48px;
+
+  box-shadow: 0 14px 30px rgb(255, 255, 255);
+}
+
+/* =========================
+   FIX GLOBAL BUTTON (ELIMINA FONDO BLANCO DOBLE)
+========================= */
+ion-button {
+  --box-shadow: none;
+  --background: transparent;
 }

@@ -1,52 +1,83 @@
 <ion-content [fullscreen]="true" class="login-content">
-  <div class="login-shell">
-    <section class="brand-panel">
-      <p class="brand-eyebrow">FERRETERIA JULY</p>
-      <h1>Control Interno Empresarial</h1>
-      <p>
-        Accede con tus credenciales corporativas para gestionar ventas,
-        inventario y métricas en tiempo real.
-      </p>
-    </section>
+  <div class="login-bg"></div>
 
+  <div class="login-container">
+    <!-- BRAND -->
+    <div class="brand-section">
+      <img
+        class="logo"
+        src="assets/logo/logo_ferreteria.png"
+        alt="Ferretería July"
+      />
+    </div>
+
+    <!-- LOGIN CARD -->
     <ion-card class="login-card">
       <ion-card-content>
-        <ion-title size="large">Iniciar Sesión</ion-title>
-        <p class="subtitle">Acceso privado para personal autorizado</p>
+        <div class="header">
+          <h2>Iniciar sesión</h2>
+          <p>Acceso autorizado al sistema</p>
+        </div>
 
-        <form [formGroup]="form" (ngSubmit)="submitLogin()" class="login-form">
-          <ion-item lines="full">
+        <form [formGroup]="form" (ngSubmit)="submitLogin()" class="form">
+          <!-- USER -->
+          <ion-item class="input_user" lines="none">
             <ion-label position="stacked">Usuario o correo</ion-label>
+
             <ion-input
               formControlName="identifier"
               type="text"
-              autocomplete="username"
-              inputmode="email"
-              placeholder="usuario o correo corporativo">
-            </ion-input>
+              placeholder="usuario@correo.com"
+            ></ion-input>
           </ion-item>
 
-          <ion-item lines="full">
+          <!-- PASSWORD -->
+          <ion-item class="input_pass" lines="none">
             <ion-label position="stacked">Contraseña</ion-label>
+
             <ion-input
+              [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
-              type="password"
-              autocomplete="current-password"
-              placeholder="••••••••">
-            </ion-input>
+              placeholder="••••••••"
+            ></ion-input>
+
+            <!-- TOGGLE PASSWORD -->
+            <ion-button
+              fill="clear"
+              slot="end"
+              type="button"
+              class="toggle-password"
+              (click)="togglePassword()"
+            >
+              <ion-icon
+                class="eye-icon"
+                [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+              ></ion-icon>
+            </ion-button>
           </ion-item>
 
+          <!-- OPTIONS (FUERA DEL INPUT) -->
+          <div class="options">
+            <ion-item lines="none" class="remember">
+              <ion-checkbox formControlName="remember"></ion-checkbox>
+              <ion-label>Recordarme</ion-label>
+            </ion-item>
+          </div>
+
+          <!-- ERROR -->
           <ion-text color="danger" *ngIf="apiError">
-            <p class="error-text">{{ apiError }}</p>
+            <p class="error">{{ apiError }}</p>
           </ion-text>
 
+          <!-- BUTTON -->
           <ion-button
-            class="submit-button"
-            type="submit"
             expand="block"
-            [disabled]="submitting">
-            <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
-            <span *ngIf="!submitting">Ingresar</span>
+            type="submit"
+            class="btn-primary"
+            [disabled]="submitting"
+          >
+            <ion-spinner *ngIf="submitting"></ion-spinner>
+            <span *ngIf="!submitting">Iniciar sesión</span>
           </ion-button>
         </form>
       </ion-card-content>
