@@ -1,0 +1,7 @@
+{
+  "name": "ferreteriaApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

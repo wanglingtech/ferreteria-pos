@@ -1,0 +1,39 @@
+.dashboard-content {
+  --background: #f3f7ff;
+}
+
+.dashboard-shell {
+  padding: 16px;
+}
+
+ion-card {
+  margin: 0;
+  border-radius: 16px;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  color: #17375f;
+}
+
+p {
+  margin: 0 0 12px;
+  color: #435e81;
+  line-height: 1.45;
+}
+
+.meta-row {
+  margin-bottom: 12px;
+  display: grid;
+  gap: 4px;
+  color: #1f3f66;
+}
+
+@media (min-width: 768px) {
+  .dashboard-shell {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+}

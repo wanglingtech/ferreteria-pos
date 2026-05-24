@@ -1,0 +1,30 @@
+<ion-header translucent="true">
+  <ion-toolbar color="light">
+    <ion-title>Dashboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="dashboard-content">
+  <div class="dashboard-shell">
+    <ion-card>
+      <ion-card-content>
+        <ion-text>
+          <h2>Bienvenido{{ user ? ', ' + user.fullName : '' }}</h2>
+          <p>
+            Sesión activa del módulo corporativo. El siguiente paso será conectar
+            KPIs y métricas del negocio.
+          </p>
+        </ion-text>
+
+        <div class="meta-row" *ngIf="user">
+          <span><strong>Usuario:</strong> {{ user.username }}</span>
+          <span><strong>Rol:</strong> {{ user.role }}</span>
+        </div>
+
+        <ion-button expand="block" fill="outline" color="primary" (click)="logout()">
+          Cerrar sesión
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

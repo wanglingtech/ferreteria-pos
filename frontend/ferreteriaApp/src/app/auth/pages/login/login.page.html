@@ -1,0 +1,55 @@
+<ion-content [fullscreen]="true" class="login-content">
+  <div class="login-shell">
+    <section class="brand-panel">
+      <p class="brand-eyebrow">FERRETERIA JULY</p>
+      <h1>Control Interno Empresarial</h1>
+      <p>
+        Accede con tus credenciales corporativas para gestionar ventas,
+        inventario y métricas en tiempo real.
+      </p>
+    </section>
+
+    <ion-card class="login-card">
+      <ion-card-content>
+        <ion-title size="large">Iniciar Sesión</ion-title>
+        <p class="subtitle">Acceso privado para personal autorizado</p>
+
+        <form [formGroup]="form" (ngSubmit)="submitLogin()" class="login-form">
+          <ion-item lines="full">
+            <ion-label position="stacked">Usuario o correo</ion-label>
+            <ion-input
+              formControlName="identifier"
+              type="text"
+              autocomplete="username"
+              inputmode="email"
+              placeholder="usuario o correo corporativo">
+            </ion-input>
+          </ion-item>
+
+          <ion-item lines="full">
+            <ion-label position="stacked">Contraseña</ion-label>
+            <ion-input
+              formControlName="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••">
+            </ion-input>
+          </ion-item>
+
+          <ion-text color="danger" *ngIf="apiError">
+            <p class="error-text">{{ apiError }}</p>
+          </ion-text>
+
+          <ion-button
+            class="submit-button"
+            type="submit"
+            expand="block"
+            [disabled]="submitting">
+            <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
+            <span *ngIf="!submitting">Ingresar</span>
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
