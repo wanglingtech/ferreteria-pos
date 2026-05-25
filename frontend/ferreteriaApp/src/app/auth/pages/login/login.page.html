@@ -2,7 +2,9 @@
   <div class="login-bg"></div>
 
   <div class="login-container">
-    <!-- BRAND -->
+    <!-- =========================
+         BRAND
+    ========================= -->
     <div class="brand-section">
       <img
         class="logo"
@@ -11,35 +13,90 @@
       />
     </div>
 
-    <!-- LOGIN CARD -->
+    <!-- =========================
+         LOGIN CARD
+    ========================= -->
     <ion-card class="login-card">
       <ion-card-content>
+        <!-- HEADER -->
         <div class="header">
           <h2>Iniciar sesión</h2>
           <p>Acceso autorizado al sistema</p>
         </div>
 
+        <!-- =========================
+             FORM
+        ========================= -->
         <form [formGroup]="form" (ngSubmit)="submitLogin()" class="form">
-          <!-- USER -->
-          <ion-item class="input_user" lines="none">
-            <ion-label position="stacked">Usuario o correo</ion-label>
+          <!-- =========================
+               USER
+          ========================= -->
+          <ion-item
+            class="input_user"
+            lines="none"
+            [class.invalid]="
+              f.identifier.touched &&
+              f.identifier.invalid
+            "
+          >
+            <ion-label position="stacked"> Usuario o correo </ion-label>
 
             <ion-input
               formControlName="identifier"
               type="text"
               placeholder="usuario@correo.com"
-            ></ion-input>
+              autocomplete="username"
+            >
+            </ion-input>
           </ion-item>
 
-          <!-- PASSWORD -->
-          <ion-item class="input_pass" lines="none">
-            <ion-label position="stacked">Contraseña</ion-label>
+          <!-- USER ERROR -->
+          <div
+            class="field-error"
+            *ngIf="
+              f.identifier.touched &&
+              f.identifier.invalid
+            "
+          >
+            <!-- required -->
+            <span
+              *ngIf="
+                f.identifier.errors?.['required']
+              "
+            >
+              El usuario o correo es obligatorio
+            </span>
+
+            <!-- minlength -->
+            <span
+              *ngIf="
+                f.identifier.errors?.['minlength']
+              "
+            >
+              Debe tener mínimo 3 caracteres
+            </span>
+          </div>
+
+          <!-- =========================
+               PASSWORD
+          ========================= -->
+          <ion-item
+            class="input_pass"
+            lines="none"
+            [class.invalid]="
+              f.password.touched &&
+              f.password.invalid
+            "
+          >
+            <ion-label position="stacked"> Contraseña </ion-label>
 
             <ion-input
               [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
               placeholder="••••••••"
-            ></ion-input>
+              autocomplete="current-password"
+            >
+            </ion-input>
 
             <!-- TOGGLE PASSWORD -->
             <ion-button
@@ -51,33 +108,79 @@
             >
               <ion-icon
                 class="eye-icon"
-                [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
-              ></ion-icon>
+                [name]="
+                  showPassword
+                    ? 'eye-off-outline'
+                    : 'eye-outline'
+                "
+              >
+              </ion-icon>
             </ion-button>
           </ion-item>
 
-          <!-- OPTIONS (FUERA DEL INPUT) -->
+          <!-- PASSWORD ERROR -->
+          <div
+            class="field-error"
+            *ngIf="
+              f.password.touched &&
+              f.password.invalid
+            "
+          >
+            <!-- required -->
+            <span
+              *ngIf="
+                f.password.errors?.['required']
+              "
+            >
+              La contraseña es obligatoria
+            </span>
+
+            <!-- minlength -->
+            <span
+              *ngIf="
+                f.password.errors?.['minlength']
+              "
+            >
+              La contraseña debe tener mínimo 6 caracteres
+            </span>
+          </div>
+
+          <!-- =========================
+               OPTIONS
+          ========================= -->
           <div class="options">
+            <!-- REMEMBER -->
             <ion-item lines="none" class="remember">
-              <ion-checkbox formControlName="remember"></ion-checkbox>
-              <ion-label>Recordarme</ion-label>
+              <ion-checkbox formControlName="remember"> </ion-checkbox>
+
+              <ion-label> Recordarme </ion-label>
             </ion-item>
           </div>
 
-          <!-- ERROR -->
+          <!-- =========================
+               API ERROR
+          ========================= -->
           <ion-text color="danger" *ngIf="apiError">
             <p class="error">{{ apiError }}</p>
           </ion-text>
 
-          <!-- BUTTON -->
+          <!-- =========================
+               SUBMIT BUTTON
+          ========================= -->
           <ion-button
             expand="block"
             type="submit"
             class="btn-primary"
-            [disabled]="submitting"
+            [disabled]="
+              form.invalid ||
+              submitting
+            "
           >
-            <ion-spinner *ngIf="submitting"></ion-spinner>
-            <span *ngIf="!submitting">Iniciar sesión</span>
+            <!-- LOADING -->
+            <ion-spinner *ngIf="submitting" name="crescent"> </ion-spinner>
+
+            <!-- TEXT -->
+            <span *ngIf="!submitting"> Iniciar sesión </span>
           </ion-button>
         </form>
       </ion-card-content>
