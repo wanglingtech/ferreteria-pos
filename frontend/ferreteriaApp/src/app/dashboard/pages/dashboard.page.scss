@@ -1,128 +1,128 @@
 :root {
-  --dashboard-blue: #0a1a5c;
-  --dashboard-indigo: #243cbb;
-  --dashboard-bg: #f4f7ff;
-  --dashboard-text: #1f2d4d;
-  --dashboard-soft: #6d7b99;
+  --primary-blue: #0a1a5c;
+  --primary-hover: #17317f;
+  --soft-bg: #f4f7ff;
+  --card-radius: 22px;
 }
 
-/* =========================================================
+/* =======================================================
    CONTENT
-========================================================= */
+======================================================= */
 
 .dashboard-content {
-  --background: var(--dashboard-bg);
+  --background: var(--soft-bg);
 }
 
-/* =========================================================
+.dashboard-shell {
+  padding: 18px;
+  padding-bottom: 120px;
+}
+
+/* =======================================================
    HEADER
-========================================================= */
+======================================================= */
 
 .dashboard-header ion-toolbar {
-  --background: rgba(255, 255, 255, 0.82);
+  --background: #0a1a5c;
+  --border-width: 0;
 
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-
-  padding: 12px 18px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 10px 14px;
 }
 
-/* LEFT */
+.toolbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
 
-.toolbar-left {
+.toolbar-left,
+.toolbar-right {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .brand-badge {
   width: 42px;
   height: 42px;
-
   border-radius: 14px;
 
-  background: linear-gradient(
-    135deg,
-    var(--dashboard-blue),
-    var(--dashboard-indigo)
-  );
+  background: rgba(255, 255, 255, 0.12);
 
   display: flex;
   align-items: center;
   justify-content: center;
-
-  box-shadow: 0 12px 25px rgba(10, 26, 92, 0.22);
 }
 
 .brand-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: white;
-}
 
-/* TEXT */
+  background: #4ade80;
+}
 
 .toolbar-text h1 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--dashboard-blue);
+  color: white;
 }
 
 .toolbar-text p {
   margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--dashboard-soft);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-/* RIGHT */
+.toolbar-icon-btn {
+  --background: rgba(255, 255, 255, 0.1);
+  --color: white;
+  --border-radius: 14px;
 
-.toolbar-right {
-  display: flex;
-  align-items: center;
+  width: 42px;
+  height: 42px;
 }
 
-/* =========================================================
+.toolbar-icon-btn ion-icon {
+  font-size: 20px;
+}
+
+/* =======================================================
    USER CHIP
-========================================================= */
+======================================================= */
 
 .user-chip {
   display: flex;
   align-items: center;
   gap: 10px;
 
-  background: white;
+  padding: 6px 10px;
 
   border-radius: 18px;
 
-  padding: 8px 12px;
-
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .user-avatar {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
 
-  border-radius: 12px;
-
-  background: linear-gradient(
-    135deg,
-    var(--dashboard-blue),
-    var(--dashboard-indigo)
-  );
-
-  color: white;
+  background: linear-gradient(135deg, #4f7cff, #7b9cff);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  color: white;
   font-weight: 700;
 }
 
@@ -133,241 +133,422 @@
 
 .user-name {
   font-size: 13px;
+  color: white;
   font-weight: 600;
-  color: var(--dashboard-text);
 }
 
 .user-role {
   font-size: 11px;
-  color: var(--dashboard-soft);
+  color: rgba(255, 255, 255, 0.7);
 }
 
-/* =========================================================
-   SHELL
-========================================================= */
+/* =======================================================
+   NOTIFICATION
+======================================================= */
 
-.dashboard-shell {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+.notification-btn {
+  position: relative;
 }
 
-/* =========================================================
+.notification-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+
+  background: #ff4d67;
+}
+
+/* =======================================================
    HERO
-========================================================= */
+======================================================= */
 
 .hero-section {
-  background: linear-gradient(135deg, #0a1a5c, #243cbb);
+  position: relative;
+
+  overflow: hidden;
 
   border-radius: 28px;
 
   padding: 28px;
 
-  color: white;
+  background: linear-gradient(135deg, #0a1a5c, #17317f);
 
-  box-shadow: 0 24px 40px rgba(10, 26, 92, 0.18);
+  margin-bottom: 24px;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 255, 255, 0.15),
+    transparent 40%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
 }
 
 .hero-badge {
-  display: inline-flex;
+  width: fit-content;
 
-  padding: 6px 12px;
+  padding: 8px 14px;
 
   border-radius: 999px;
 
   background: rgba(255, 255, 255, 0.12);
 
-  font-size: 11px;
+  color: white;
+  font-size: 12px;
   font-weight: 600;
 
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
-.hero-section h2 {
-  margin: 0 0 10px;
-
-  font-size: 26px;
-  font-weight: 700;
-
-  line-height: 1.2;
-}
-
-.hero-section p {
+.hero-content h2 {
   margin: 0;
 
-  font-size: 14px;
-  line-height: 1.6;
+  color: white;
 
-  opacity: 0.9;
+  font-size: 28px;
+  font-weight: 700;
 }
 
-/* =========================================================
+.hero-content p {
+  margin-top: 12px;
+
+  max-width: 560px;
+
+  color: rgba(255, 255, 255, 0.78);
+
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.hero-btn {
+  --background: white;
+  --color: #0a1a5c;
+  --border-radius: 16px;
+}
+
+.hero-btn-outline {
+  --border-color: rgba(255, 255, 255, 0.3);
+  --color: white;
+  --border-radius: 16px;
+}
+
+/* =======================================================
    SECTION
-========================================================= */
+======================================================= */
 
 .section-block {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.section-header {
+  margin-bottom: 18px;
 }
 
 .section-header h3 {
   margin: 0;
-  font-size: 18px;
-  color: var(--dashboard-text);
+  font-weight: 600;
+  font-family: roboto, sans-serif;
+  font-size: 20px;
+  color: #0a1a5c;
 }
 
 .section-header span {
-  font-size: 12px;
-  color: var(--dashboard-soft);
+  font-size: 13px;
+  color: #535c6e;
+  font-family: roboto, sans-serif;
+  font-weight: 400;
 }
 
-/* =========================================================
-   QUICK GRID
-========================================================= */
+/* =======================================================
+   KPI GRID
+======================================================= */
 
-.quick-grid {
+.kpi-grid {
   display: grid;
   gap: 16px;
 
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
-/* CARD */
+.kpi-card {
+  border-radius: 24px;
 
-.quick-card {
-  background: white;
+  padding: 22px;
 
-  border-radius: 22px;
-
-  padding: 18px;
+  color: white;
 
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+}
 
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+.kpi-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+
+  background: rgba(255, 255, 255, 0.15);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon ion-icon {
+  font-size: 28px;
+}
+
+.kpi-info span {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.kpi-info h4 {
+  margin: 4px 0 0;
+  font-size: 26px;
+}
+
+.sales {
+  background: linear-gradient(135deg, #0a1a5c, #2247c7);
+}
+
+.orders {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.products {
+  background: linear-gradient(135deg, #0891b2, #0ea5e9);
+}
+
+.stock {
+  background: linear-gradient(135deg, #ea580c, #f97316);
+}
+
+/* =======================================================
+   QUICK GRID
+======================================================= */
+
+.quick-grid {
+  display: grid;
+  gap: 18px;
+
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.quick-card {
+  border-radius: 24px;
+
+  padding: 22px;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  transition: 0.25s ease;
+
+  cursor: pointer;
 }
 
 .quick-card:hover {
-  transform: translateY(-2px);
-
-  box-shadow: 0 18px 30px rgba(10, 26, 92, 0.08);
+  transform: translateY(-4px);
 }
 
-/* ICON */
-
 .quick-icon {
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
 
-  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-icon ion-icon {
+  font-size: 30px;
+  color: white;
+}
+
+.quick-info h4 {
+  margin: 0 0 6px;
+
+  color: #0a1a5c;
+  font-size: 18px;
+}
+
+.quick-info p {
+  margin: 0;
+  color: #5e6f97;
+  font-size: 13px;
+}
+
+/* CARD COLORS */
+
+.inventory-card {
+  background: #e8efff;
+}
+
+.inventory-card .quick-icon {
+  background: #275df5;
+}
+
+.sales-card {
+  background: #f0ebff;
+}
+
+.sales-card .quick-icon {
+  background: #6d28d9;
+}
+
+.clients-card {
+  background: #e8fbff;
+}
+
+.clients-card .quick-icon {
+  background: #0891b2;
+}
+
+.reports-card {
+  background: #eef2ff;
+}
+
+.reports-card .quick-icon {
+  background: #4338ca;
+}
+
+.products-card {
+  background: #fff4e8;
+}
+
+.products-card .quick-icon {
+  background: #ea580c;
+}
+
+.settings-card {
+  background: #edf7ee;
+}
+
+.settings-card .quick-icon {
+  background: #16a34a;
+}
+
+/* =======================================================
+   CHARTS
+======================================================= */
+
+.chart-toggle-btn {
+  --background: #0a1a5c;
+  --border-radius: 18px;
+
+  margin-bottom: 20px;
+}
+
+.charts-grid {
+  display: grid;
+  gap: 20px;
+
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.chart-card {
+  background: white;
+
+  border-radius: 24px;
+
+  padding: 20px;
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+.chart-header h4 {
+  margin: 0;
+  color: #0a1a5c;
+}
+
+.chart-header ion-icon {
+  font-size: 22px;
+  color: #0a1a5c;
+}
+
+.chart-placeholder {
+  height: 220px;
+
+  border-radius: 18px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 24px;
-}
-
-.quick-icon.blue {
-  background: rgba(36, 60, 187, 0.1);
-}
-
-.quick-icon.indigo {
-  background: rgba(76, 81, 255, 0.1);
-}
-
-.quick-icon.cyan {
-  background: rgba(0, 170, 255, 0.1);
-}
-
-.quick-icon.dark {
-  background: rgba(10, 26, 92, 0.1);
-}
-
-/* INFO */
-
-.quick-info h4 {
-  margin: 0 0 4px;
-  font-size: 15px;
-  color: var(--dashboard-text);
-}
-
-.quick-info p {
-  margin: 0;
-  font-size: 12px;
-  color: var(--dashboard-soft);
-}
-
-/* =========================================================
-   SESSION CARD
-========================================================= */
-
-.session-card {
-  background: white;
-
-  border-radius: 22px;
-
-  padding: 18px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
-}
-
-.session-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.label {
-  font-size: 13px;
-  color: var(--dashboard-soft);
-}
-
-.value {
-  font-size: 14px;
+  color: #5e6f97;
   font-weight: 600;
-  color: var(--dashboard-text);
 }
 
-/* =========================================================
-   LOGOUT BUTTON
-========================================================= */
+.line-chart {
+  background: #eef4ff;
+}
+
+.pie-chart {
+  background: #f5efff;
+}
+
+.bar-chart {
+  background: #eefcff;
+}
+
+/* =======================================================
+   LOGOUT
+======================================================= */
 
 .logout-btn {
   --background: #0a1a5c;
-  --background-hover: #132878;
-
   --border-radius: 18px;
 
-  height: 50px;
+  height: 52px;
 
   font-weight: 600;
-
-  box-shadow: 0 14px 30px rgba(10, 26, 92, 0.18);
 }
 
-/* =========================================================
+/* =======================================================
    RESPONSIVE
-========================================================= */
+======================================================= */
 
-@media (min-width: 992px) {
-  .dashboard-shell {
-    max-width: 1280px;
-    margin: 0 auto;
+@media (max-width: 768px) {
+  .toolbar-text p,
+  .user-meta {
+    display: none;
   }
 
-  .hero-section {
-    padding: 34px;
+  .hero-content h2 {
+    font-size: 22px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
   }
 }
