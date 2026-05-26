@@ -1,30 +1,142 @@
-<ion-header translucent="true">
-  <ion-toolbar color="light">
-    <ion-title>Dashboard</ion-title>
+<ion-header translucent="true" class="dashboard-header">
+  <ion-toolbar>
+    <!-- LEFT -->
+    <div class="toolbar-left">
+      <div class="brand-badge">
+        <div class="brand-dot"></div>
+      </div>
+
+      <div class="toolbar-text">
+        <h1>Dashboard</h1>
+        <p>Panel corporativo</p>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="toolbar-right">
+      <!-- USER INFO -->
+      <div class="user-chip" *ngIf="user">
+        <div class="user-avatar">{{ user.fullName?.charAt(0) }}</div>
+
+        <div class="user-meta">
+          <span class="user-name"> {{ user.fullName }} </span>
+
+          <span class="user-role"> {{ user.role }} </span>
+        </div>
+      </div>
+    </div>
   </ion-toolbar>
 </ion-header>
 
+<!-- ===================================================== -->
+<!-- CONTENT -->
+<!-- ===================================================== -->
+
 <ion-content [fullscreen]="true" class="dashboard-content">
   <div class="dashboard-shell">
-    <ion-card>
-      <ion-card-content>
-        <ion-text>
-          <h2>Bienvenido{{ user ? ', ' + user.fullName : '' }}</h2>
-          <p>
-            Sesión activa del módulo corporativo. El siguiente paso será conectar
-            KPIs y métricas del negocio.
-          </p>
-        </ion-text>
+    <!-- ===================================================== -->
+    <!-- HERO -->
+    <!-- ===================================================== -->
 
-        <div class="meta-row" *ngIf="user">
-          <span><strong>Usuario:</strong> {{ user.username }}</span>
-          <span><strong>Rol:</strong> {{ user.role }}</span>
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-badge">Sistema Corporativo</div>
+
+        <h2>Bienvenido{{ user ? ', ' + user.fullName : '' }}</h2>
+
+        <p>
+          Administra operaciones, monitorea procesos y conecta los módulos
+          empresariales desde un único entorno centralizado.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- QUICK ACTIONS -->
+    <!-- SOLO ESTRUCTURA VISUAL
+         luego conectarás rutas reales
+    ===================================================== -->
+
+    <section class="section-block">
+      <div class="section-header">
+        <h3>Accesos rápidos</h3>
+        <span>Módulos principales</span>
+      </div>
+
+      <div class="quick-grid">
+        <!-- CARD -->
+        <div class="quick-card">
+          <div class="quick-icon blue">📦</div>
+
+          <div class="quick-info">
+            <h4>Inventario</h4>
+            <p>Gestión de productos y stock</p>
+          </div>
         </div>
 
-        <ion-button expand="block" fill="outline" color="primary" (click)="logout()">
-          Cerrar sesión
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
+        <!-- CARD -->
+        <div class="quick-card">
+          <div class="quick-icon indigo">🧾</div>
+
+          <div class="quick-info">
+            <h4>Ventas</h4>
+            <p>Control de operaciones comerciales</p>
+          </div>
+        </div>
+
+        <!-- CARD -->
+        <div class="quick-card">
+          <div class="quick-icon cyan">👥</div>
+
+          <div class="quick-info">
+            <h4>Clientes</h4>
+            <p>Administración de clientes</p>
+          </div>
+        </div>
+
+        <!-- CARD -->
+        <div class="quick-card">
+          <div class="quick-icon dark">📊</div>
+
+          <div class="quick-info">
+            <h4>Reportes</h4>
+            <p>Análisis y métricas empresariales</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- USER INFO -->
+    <!-- ===================================================== -->
+
+    <section class="section-block">
+      <div class="section-header">
+        <h3>Información de sesión</h3>
+        <span>Datos autenticados</span>
+      </div>
+
+      <div class="session-card" *ngIf="user">
+        <div class="session-row">
+          <span class="label">Usuario</span>
+          <span class="value">{{ user.username }}</span>
+        </div>
+
+        <div class="session-row">
+          <span class="label">Rol</span>
+          <span class="value">{{ user.role }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- ACTIONS -->
+    <!-- ===================================================== -->
+
+    <section class="section-block">
+      <ion-button expand="block" class="logout-btn" (click)="logout()">
+        Cerrar sesión
+      </ion-button>
+    </section>
   </div>
 </ion-content>

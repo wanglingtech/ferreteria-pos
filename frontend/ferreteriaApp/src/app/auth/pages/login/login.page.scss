@@ -160,8 +160,17 @@ ion-item.input_pass {
   --padding-start: 0;
   --padding-end: 0;
 
+  /* FIX fondo fantasma */
   --background: transparent !important;
+  --background-hover: transparent !important;
+  --background-activated: transparent !important;
+  --box-shadow: none !important;
+  --border-style: none;
+
+  /* mismo azul login */
   --color: #0a1a5c;
+
+  margin-top: 18px;
 }
 
 /* ICONO */
@@ -176,7 +185,7 @@ ion-item.input_pass {
 
 /* animación ojo */
 .toggle-password.active .eye-icon {
-  transform: scale(1.15);
+  transform: rotate(180deg) scale(1.1);
 }
 
 /* =========================
@@ -210,6 +219,7 @@ ion-item.input_pass {
 
   --checkbox-background-checked: #0a1a5c;
   --border-color-checked: #0a1a5c;
+  --checkmark-color: #ffffff;
 
   margin-right: 4px;
 }
@@ -282,6 +292,13 @@ ion-item.input_pass {
   margin-top: 6px;
   margin-bottom: 10px;
   text-align: center;
+}
+
+/* =========================
+   GLOBAL BUTTON FIX
+========================= */
+ion-button {
+  --box-shadow: none;
 }
 
 /* =========================

@@ -49,4 +49,8 @@ export class DashboardPage implements OnInit {
     this.authSession.logout();
     void this.router.navigateByUrl('/auth/login', { replaceUrl: true });
   }
+
+  protected get initials(): string {
+    return this.user?.fullName?.charAt(0)?.toUpperCase() || 'U';
+  }
 }

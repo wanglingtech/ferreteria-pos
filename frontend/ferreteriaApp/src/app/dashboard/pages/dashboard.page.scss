@@ -1,39 +1,373 @@
-.dashboard-content {
-  --background: #f3f7ff;
+:root {
+  --dashboard-blue: #0a1a5c;
+  --dashboard-indigo: #243cbb;
+  --dashboard-bg: #f4f7ff;
+  --dashboard-text: #1f2d4d;
+  --dashboard-soft: #6d7b99;
 }
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.dashboard-content {
+  --background: var(--dashboard-bg);
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.dashboard-header ion-toolbar {
+  --background: rgba(255, 255, 255, 0.82);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  padding: 12px 18px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* LEFT */
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-badge {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    var(--dashboard-blue),
+    var(--dashboard-indigo)
+  );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 12px 25px rgba(10, 26, 92, 0.22);
+}
+
+.brand-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+}
+
+/* TEXT */
+
+.toolbar-text h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dashboard-blue);
+}
+
+.toolbar-text p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--dashboard-soft);
+}
+
+/* RIGHT */
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+}
+
+/* =========================================================
+   USER CHIP
+========================================================= */
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: white;
+
+  border-radius: 18px;
+
+  padding: 8px 12px;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    var(--dashboard-blue),
+    var(--dashboard-indigo)
+  );
+
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 700;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dashboard-text);
+}
+
+.user-role {
+  font-size: 11px;
+  color: var(--dashboard-soft);
+}
+
+/* =========================================================
+   SHELL
+========================================================= */
 
 .dashboard-shell {
-  padding: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-ion-card {
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero-section {
+  background: linear-gradient(135deg, #0a1a5c, #243cbb);
+
+  border-radius: 28px;
+
+  padding: 28px;
+
+  color: white;
+
+  box-shadow: 0 24px 40px rgba(10, 26, 92, 0.18);
+}
+
+.hero-badge {
+  display: inline-flex;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.12);
+
+  font-size: 11px;
+  font-weight: 600;
+
+  margin-bottom: 14px;
+}
+
+.hero-section h2 {
+  margin: 0 0 10px;
+
+  font-size: 26px;
+  font-weight: 700;
+
+  line-height: 1.2;
+}
+
+.hero-section p {
   margin: 0;
-  border-radius: 16px;
+
+  font-size: 14px;
+  line-height: 1.6;
+
+  opacity: 0.9;
 }
 
-h2 {
-  margin: 0 0 8px;
-  font-size: 1.3rem;
-  color: #17375f;
+/* =========================================================
+   SECTION
+========================================================= */
+
+.section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-p {
-  margin: 0 0 12px;
-  color: #435e81;
-  line-height: 1.45;
+.section-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--dashboard-text);
 }
 
-.meta-row {
-  margin-bottom: 12px;
+.section-header span {
+  font-size: 12px;
+  color: var(--dashboard-soft);
+}
+
+/* =========================================================
+   QUICK GRID
+========================================================= */
+
+.quick-grid {
   display: grid;
-  gap: 4px;
-  color: #1f3f66;
+  gap: 16px;
+
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-@media (min-width: 768px) {
+/* CARD */
+
+.quick-card {
+  background: white;
+
+  border-radius: 22px;
+
+  padding: 18px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+}
+
+.quick-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 18px 30px rgba(10, 26, 92, 0.08);
+}
+
+/* ICON */
+
+.quick-icon {
+  width: 52px;
+  height: 52px;
+
+  border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+}
+
+.quick-icon.blue {
+  background: rgba(36, 60, 187, 0.1);
+}
+
+.quick-icon.indigo {
+  background: rgba(76, 81, 255, 0.1);
+}
+
+.quick-icon.cyan {
+  background: rgba(0, 170, 255, 0.1);
+}
+
+.quick-icon.dark {
+  background: rgba(10, 26, 92, 0.1);
+}
+
+/* INFO */
+
+.quick-info h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: var(--dashboard-text);
+}
+
+.quick-info p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--dashboard-soft);
+}
+
+/* =========================================================
+   SESSION CARD
+========================================================= */
+
+.session-card {
+  background: white;
+
+  border-radius: 22px;
+
+  padding: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+}
+
+.session-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--dashboard-soft);
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dashboard-text);
+}
+
+/* =========================================================
+   LOGOUT BUTTON
+========================================================= */
+
+.logout-btn {
+  --background: #0a1a5c;
+  --background-hover: #132878;
+
+  --border-radius: 18px;
+
+  height: 50px;
+
+  font-weight: 600;
+
+  box-shadow: 0 14px 30px rgba(10, 26, 92, 0.18);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (min-width: 992px) {
   .dashboard-shell {
-    max-width: 900px;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 24px;
+  }
+
+  .hero-section {
+    padding: 34px;
   }
 }
