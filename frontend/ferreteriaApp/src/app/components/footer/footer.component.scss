@@ -1,0 +1,58 @@
+.app-footer ion-toolbar {
+  --background: #ffffff;
+  --border-color: #d8e4f6;
+  --min-height: 62px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.footer-nav {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.footer-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.footer-link {
+  flex: 0 0 auto;
+  min-width: 84px;
+  padding: 8px 10px 6px;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  color: #6480a0;
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.footer-link ion-icon {
+  font-size: 1.2rem;
+}
+
+.footer-link.active-link {
+  color: #0f4fa8;
+}
+
+@media (min-width: 1024px) {
+  .app-footer ion-toolbar {
+    max-width: 980px;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .footer-nav {
+    justify-content: center;
+  }
+}

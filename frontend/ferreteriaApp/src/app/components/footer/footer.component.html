@@ -1,3 +1,14 @@
-<p>
-  footer works!
-</p>
+<ion-footer class="app-footer">
+  <ion-toolbar>
+    <nav class="footer-nav" aria-label="Navegación principal">
+      <a
+        *ngFor="let item of items"
+        [routerLink]="item.path"
+        routerLinkActive="active-link"
+        class="footer-link">
+        <ion-icon [name]="item.icon"></ion-icon>
+        <ion-label>{{ item.label }}</ion-label>
+      </a>
+    </nav>
+  </ion-toolbar>
+</ion-footer>

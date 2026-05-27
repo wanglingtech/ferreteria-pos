@@ -1,0 +1,144 @@
+.dashboard-header {
+  box-shadow: none;
+}
+
+.dashboard-header ion-toolbar {
+  --background: #ffffff;
+  --border-color: #dbe7f8;
+  --min-height: 70px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+}
+
+.toolbar-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.toolbar-icon-btn {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --color: #1e568c;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.brand-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e8f1ff;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0f4fa8;
+}
+
+.toolbar-text {
+  min-width: 0;
+}
+
+.toolbar-text h1 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #133b66;
+  line-height: 1.15;
+}
+
+.toolbar-text p {
+  margin: 1px 0 0;
+  font-size: 0.74rem;
+  color: #5a7494;
+  line-height: 1.2;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notification-btn {
+  position: relative;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4f6c;
+  border: 2px solid #ffffff;
+}
+
+.user-chip {
+  display: none;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background: #dbe9fd;
+  color: #12467c;
+  font-weight: 800;
+  font-size: 0.75rem;
+  display: grid;
+  place-items: center;
+}
+
+@media (min-width: 768px) {
+  .dashboard-header ion-toolbar {
+    --padding-start: 14px;
+    --padding-end: 14px;
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border: 1px solid #d9e5f7;
+    border-radius: 999px;
+    background: #f6faff;
+  }
+
+  .user-meta {
+    display: grid;
+    line-height: 1.1;
+  }
+
+  .user-name {
+    color: #1a426d;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .user-role {
+    color: #5b7697;
+    font-size: 0.67rem;
+  }
+}

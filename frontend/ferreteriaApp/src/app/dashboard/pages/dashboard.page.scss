@@ -1,555 +1,259 @@
-:root {
-  --primary-blue: #0a1a5c;
-  --primary-hover: #17317f;
-  --soft-bg: #f4f7ff;
-  --card-radius: 22px;
-}
-
-/* =======================================================
-   CONTENT
-======================================================= */
-
 .dashboard-content {
-  --background: #f4f7ff !important;
-  background: #f4f7ff !important;
+  --background: linear-gradient(180deg, #f3f8ff 0%, #ebf3ff 100%);
 }
 
 .dashboard-shell {
-  padding: 18px;
-  padding-bottom: 120px;
-}
-
-/* =======================================================
-   HEADER
-======================================================= */
-
-.dashboard-header ion-toolbar {
-  --background: #0a1a5c;
-  --border-width: 0;
-
-  padding: 10px 14px;
-}
-
-.toolbar-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 14px;
+  padding-bottom: 86px;
+  display: grid;
   gap: 14px;
 }
-
-.toolbar-left,
-.toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.brand-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-badge {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-
-  background: rgba(255, 255, 255, 0.12);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.brand-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-
-  background: #4ade80;
-}
-
-.toolbar-text h1 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: white;
-}
-
-.toolbar-text p {
-  margin: 2px 0 0;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.toolbar-icon-btn {
-  --background: rgba(255, 255, 255, 0.1);
-  --color: white;
-  --border-radius: 14px;
-
-  width: 42px;
-  height: 42px;
-}
-
-.toolbar-icon-btn ion-icon {
-  font-size: 20px;
-}
-
-/* =======================================================
-   USER CHIP
-======================================================= */
-
-.user-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  padding: 6px 10px;
-
-  border-radius: 18px;
-
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-
-  background: linear-gradient(135deg, #4f7cff, #7b9cff);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: white;
-  font-weight: 700;
-}
-
-.user-meta {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-name {
-  font-size: 13px;
-  color: white;
-  font-weight: 600;
-}
-
-.user-role {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-/* =======================================================
-   NOTIFICATION
-======================================================= */
-
-.notification-btn {
-  position: relative;
-}
-
-.notification-dot {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-
-  background: #ff4d67;
-}
-
-/* =======================================================
-   HERO
-======================================================= */
 
 .hero-section {
   position: relative;
-
+  border-radius: 20px;
   overflow: hidden;
-
-  border-radius: 28px;
-
-  padding: 28px;
-
-  background: linear-gradient(135deg, #0a1a5c, #17317f);
-
-  margin-bottom: 24px;
+  min-height: 190px;
+  background:
+    radial-gradient(circle at 15% 20%, #4a8de0 0%, transparent 40%),
+    linear-gradient(135deg, #0f4fa8 0%, #1c6fd6 65%, #2b8bf2 100%);
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.15),
-    transparent 40%
-  );
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12), transparent 50%),
+    repeating-linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.04) 0 12px,
+      transparent 12px 24px
+    );
 }
 
 .hero-content {
   position: relative;
   z-index: 2;
+  color: #ffffff;
+  padding: 18px 16px 16px;
 }
 
 .hero-badge {
-  width: fit-content;
-
-  padding: 8px 14px;
-
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 4px 10px;
   border-radius: 999px;
-
-  background: rgba(255, 255, 255, 0.12);
-
-  color: white;
-  font-size: 12px;
-  font-weight: 600;
-
-  margin-bottom: 16px;
 }
 
 .hero-content h2 {
-  margin: 0;
-
-  color: white;
-
-  font-size: 28px;
-  font-weight: 700;
+  margin: 10px 0 8px;
+  font-size: 1.24rem;
+  line-height: 1.2;
+  font-weight: 800;
 }
 
 .hero-content p {
-  margin-top: 12px;
-
-  max-width: 560px;
-
-  color: rgba(255, 255, 255, 0.78);
-
-  line-height: 1.6;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .hero-actions {
+  margin-top: 14px;
   display: flex;
-  gap: 12px;
-  margin-top: 24px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .hero-btn {
-  --background: white;
-  --color: #0a1a5c;
-  --border-radius: 16px;
+  --background: #ffffff;
+  --color: #0f4fa8;
+  --border-radius: 10px;
+  font-weight: 700;
 }
 
 .hero-btn-outline {
-  --border-color: rgba(255, 255, 255, 0.3);
-  --color: white;
-  --border-radius: 16px;
+  --color: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.7);
+  --border-radius: 10px;
 }
 
-/* =======================================================
-   SECTION
-======================================================= */
-
 .section-block {
-  margin-bottom: 26px;
+  background: #ffffff;
+  border: 1px solid #dce8fa;
+  border-radius: 16px;
+  padding: 14px;
 }
 
 .section-header {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
 .section-header h3 {
   margin: 0;
-  font-weight: 600;
-  font-family: roboto, sans-serif;
-  font-size: 20px;
-  color: #0a1a5c;
+  font-size: 1rem;
+  color: #143c67;
+  font-weight: 800;
 }
 
 .section-header span {
-  font-size: 13px;
-  color: #535c6e;
-  font-family: roboto, sans-serif;
-  font-weight: 400;
+  font-size: 0.76rem;
+  color: #5e7898;
 }
-
-/* =======================================================
-   KPI GRID
-======================================================= */
 
 .kpi-grid {
   display: grid;
-  gap: 16px;
-
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .kpi-card {
-  border-radius: 24px;
-
-  padding: 22px;
-
-  color: white;
-
-  display: flex;
+  border-radius: 14px;
+  padding: 11px;
+  display: grid;
+  grid-template-columns: 34px 1fr;
   align-items: center;
-  gap: 16px;
-
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+  gap: 8px;
 }
 
+.kpi-card.sales { background: #edf7ff; }
+.kpi-card.orders { background: #edf8f2; }
+.kpi-card.products { background: #fff6ed; }
+.kpi-card.stock { background: #fff0f2; }
+
 .kpi-icon {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
-
-  background: rgba(255, 255, 255, 0.15);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  border: 1px solid #deebfa;
 }
 
 .kpi-icon ion-icon {
-  font-size: 28px;
+  font-size: 1.08rem;
+  color: #2b6094;
 }
 
 .kpi-info span {
-  font-size: 13px;
-  opacity: 0.85;
+  display: block;
+  font-size: 0.74rem;
+  color: #5d7595;
 }
 
 .kpi-info h4 {
-  margin: 4px 0 0;
-  font-size: 26px;
+  margin: 2px 0 0;
+  font-size: 0.96rem;
+  color: #1d466f;
 }
-
-.sales {
-  background: linear-gradient(135deg, #0a1a5c, #2247c7);
-}
-
-.orders {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-}
-
-.products {
-  background: linear-gradient(135deg, #0891b2, #0ea5e9);
-}
-
-.stock {
-  background: linear-gradient(135deg, #ea580c, #f97316);
-}
-
-/* =======================================================
-   QUICK GRID
-======================================================= */
-
-.quick-grid {
-  display: grid;
-  gap: 18px;
-
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-
-.quick-card {
-  border-radius: 24px;
-
-  padding: 22px;
-
-  display: flex;
-  align-items: center;
-  gap: 18px;
-
-  transition: 0.25s ease;
-
-  cursor: pointer;
-}
-
-.quick-card:hover {
-  transform: translateY(-4px);
-}
-
-.quick-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quick-icon ion-icon {
-  font-size: 30px;
-  color: white;
-}
-
-.quick-info h4 {
-  margin: 0 0 6px;
-
-  color: #0a1a5c;
-  font-size: 18px;
-}
-
-.quick-info p {
-  margin: 0;
-  color: #5e6f97;
-  font-size: 13px;
-}
-
-/* CARD COLORS */
-
-.inventory-card {
-  background: #e8efff;
-}
-
-.inventory-card .quick-icon {
-  background: #275df5;
-}
-
-.sales-card {
-  background: #f0ebff;
-}
-
-.sales-card .quick-icon {
-  background: #6d28d9;
-}
-
-.clients-card {
-  background: #e8fbff;
-}
-
-.clients-card .quick-icon {
-  background: #0891b2;
-}
-
-.reports-card {
-  background: #eef2ff;
-}
-
-.reports-card .quick-icon {
-  background: #4338ca;
-}
-
-.products-card {
-  background: #fff4e8;
-}
-
-.products-card .quick-icon {
-  background: #ea580c;
-}
-
-.settings-card {
-  background: #edf7ee;
-}
-
-.settings-card .quick-icon {
-  background: #16a34a;
-}
-
-/* =======================================================
-   CHARTS
-======================================================= */
 
 .chart-toggle-btn {
-  --background: #0a1a5c;
-  --border-radius: 18px;
-
-  margin-bottom: 20px;
+  --background: #0f4fa8;
+  --border-radius: 10px;
+  margin-bottom: 10px;
 }
 
 .charts-grid {
   display: grid;
-  gap: 20px;
-
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 10px;
 }
 
 .chart-card {
-  background: white;
-
-  border-radius: 24px;
-
-  padding: 20px;
-
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid #dce8fa;
+  border-radius: 12px;
+  padding: 10px;
 }
 
 .chart-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-
-  margin-bottom: 18px;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .chart-header h4 {
   margin: 0;
-  color: #0a1a5c;
+  font-size: 0.88rem;
+  color: #1d466f;
 }
 
 .chart-header ion-icon {
-  font-size: 22px;
-  color: #0a1a5c;
+  font-size: 1rem;
+  color: #366694;
 }
 
 .chart-placeholder {
-  height: 220px;
-
-  border-radius: 18px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: #5e6f97;
-  font-weight: 600;
+  min-height: 90px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #6380a0;
+  background: #f5f9ff;
 }
 
-.line-chart {
-  background: #eef4ff;
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.pie-chart {
-  background: #f5efff;
+.quick-card {
+  border-radius: 12px;
+  border: 1px solid #dce8fa;
+  padding: 10px;
+  background: #fbfdff;
 }
 
-.bar-chart {
-  background: #eefcff;
+.quick-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #eaf2ff;
+  display: grid;
+  place-items: center;
+  margin-bottom: 7px;
 }
 
-/* =======================================================
-   LOGOUT
-======================================================= */
-
-.logout-btn {
-  --background: #0a1a5c;
-  --border-radius: 18px;
-
-  height: 52px;
-
-  font-weight: 600;
+.quick-icon ion-icon {
+  font-size: 1rem;
+  color: #245b90;
 }
 
-/* =======================================================
-   RESPONSIVE
-======================================================= */
+.quick-info h4 {
+  margin: 0;
+  font-size: 0.87rem;
+  color: #1d466f;
+}
 
-@media (max-width: 768px) {
-  .toolbar-text p,
-  .user-meta {
-    display: none;
+.quick-info p {
+  margin: 4px 0 0;
+  font-size: 0.74rem;
+  color: #607b9c;
+}
+
+@media (min-width: 768px) {
+  .dashboard-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 18px 18px 90px;
   }
 
-  .hero-content h2 {
-    font-size: 22px;
+  .kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .hero-actions {
-    flex-direction: column;
+  .charts-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .quick-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

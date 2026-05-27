@@ -1,3 +1,37 @@
-<p>
-  header works!
-</p>
+<ion-header translucent="true" class="dashboard-header">
+  <ion-toolbar>
+    <div class="toolbar-container">
+      <div class="toolbar-left">
+        <ion-button fill="clear" class="toolbar-icon-btn menu-btn" (click)="onMenuClick()">
+          <ion-icon name="menu-outline"></ion-icon>
+        </ion-button>
+
+        <div class="brand-wrapper">
+          <div class="brand-badge">
+            <div class="brand-dot"></div>
+          </div>
+
+          <div class="toolbar-text">
+            <h1>{{ title }}</h1>
+            <p>{{ subtitle }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <ion-button fill="clear" class="toolbar-icon-btn notification-btn" (click)="onNotificationClick()">
+          <ion-icon name="notifications-outline"></ion-icon>
+          <div class="notification-dot"></div>
+        </ion-button>
+
+        <div class="user-chip" *ngIf="user">
+          <ion-avatar class="user-avatar">{{ userInitials }}</ion-avatar>
+          <div class="user-meta">
+            <span class="user-name">{{ user.fullName }}</span>
+            <span class="user-role">{{ user.role }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>

@@ -1,58 +1,3 @@
-<!-- ===================================================== -->
-<!-- HEADER -->
-<!-- ===================================================== -->
-
-<ion-header translucent="true" class="dashboard-header">
-  <ion-toolbar>
-    <div class="toolbar-container">
-      <!-- LEFT -->
-      <div class="toolbar-left">
-        <!-- SIDEBAR BUTTON -->
-        <ion-button fill="clear" class="toolbar-icon-btn menu-btn">
-          <ion-icon name="menu-outline"></ion-icon>
-        </ion-button>
-
-        <!-- BRAND -->
-        <div class="brand-wrapper">
-          <div class="brand-badge">
-            <div class="brand-dot"></div>
-          </div>
-
-          <div class="toolbar-text">
-            <h1>Dashboard</h1>
-            <p>Ferretería July</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT -->
-      <div class="toolbar-right">
-        <!-- NOTIFICATIONS -->
-        <ion-button fill="clear" class="toolbar-icon-btn notification-btn">
-          <ion-icon name="notifications-outline"></ion-icon>
-
-          <div class="notification-dot"></div>
-        </ion-button>
-
-        <!-- USER -->
-        <div class="user-chip" *ngIf="user">
-          <div class="user-avatar">{{ initials }}</div>
-
-          <div class="user-meta">
-            <span class="user-name"> {{ user.fullName }} </span>
-
-            <span class="user-role"> {{ user.role }} </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ion-toolbar>
-</ion-header>
-
-<!-- ===================================================== -->
-<!-- CONTENT -->
-<!-- ===================================================== -->
-
 <ion-content [fullscreen]="true" class="dashboard-content">
   <div class="dashboard-shell">
     <!-- ===================================================== -->
@@ -93,51 +38,43 @@
       </div>
 
       <div class="kpi-grid">
-        <!-- KPI -->
         <div class="kpi-card sales">
           <div class="kpi-icon">
             <ion-icon name="cash-outline"></ion-icon>
           </div>
-
           <div class="kpi-info">
             <span>Ventas del día</span>
-            <h4>S/ 0.00</h4>
+            <h4>Sin datos</h4>
           </div>
         </div>
 
-        <!-- KPI -->
         <div class="kpi-card orders">
           <div class="kpi-icon">
             <ion-icon name="receipt-outline"></ion-icon>
           </div>
-
           <div class="kpi-info">
             <span>Órdenes</span>
-            <h4>0</h4>
+            <h4>Sin datos</h4>
           </div>
         </div>
 
-        <!-- KPI -->
         <div class="kpi-card products">
           <div class="kpi-icon">
             <ion-icon name="cube-outline"></ion-icon>
           </div>
-
           <div class="kpi-info">
             <span>Productos</span>
-            <h4>0</h4>
+            <h4>Sin datos</h4>
           </div>
         </div>
 
-        <!-- KPI -->
         <div class="kpi-card stock">
           <div class="kpi-icon">
             <ion-icon name="alert-circle-outline"></ion-icon>
           </div>
-
           <div class="kpi-info">
             <span>Stock bajo</span>
-            <h4>0</h4>
+            <h4>Sin datos</h4>
           </div>
         </div>
       </div>
@@ -153,53 +90,43 @@
         <span>Visualización de métricas</span>
       </div>
 
-      <!-- BUTTON -->
       <ion-button expand="block" class="chart-toggle-btn">
         Mostrar gráficas
       </ion-button>
 
-      <!-- CHARTS CONTAINER -->
       <div class="charts-grid">
-        <!-- CHART CARD -->
         <div class="chart-card">
           <div class="chart-header">
             <h4>Ventas mensuales</h4>
-
             <ion-icon name="stats-chart-outline"></ion-icon>
           </div>
-
           <div class="chart-placeholder line-chart">
-            Área para gráfica lineal
+            No hay datos disponibles todavía
           </div>
         </div>
 
-        <!-- CHART CARD -->
         <div class="chart-card">
           <div class="chart-header">
             <h4>Productos vendidos</h4>
-
             <ion-icon name="pie-chart-outline"></ion-icon>
           </div>
-
           <div class="chart-placeholder pie-chart">
-            Área para gráfica circular
+            No hay datos disponibles todavía
           </div>
         </div>
 
-        <!-- CHART CARD -->
         <div class="chart-card">
           <div class="chart-header">
             <h4>Rendimiento</h4>
-
             <ion-icon name="analytics-outline"></ion-icon>
           </div>
-
           <div class="chart-placeholder bar-chart">
-            Área para gráfica de barras
+            No hay datos disponibles todavía
           </div>
         </div>
       </div>
     </section>
+
     <!-- ===================================================== -->
     <!-- QUICK ACTIONS -->
     <!-- ===================================================== -->
@@ -211,90 +138,66 @@
       </div>
 
       <div class="quick-grid">
-        <!-- INVENTARIO -->
         <div class="quick-card inventory-card">
           <div class="quick-icon">
             <ion-icon name="layers-outline"></ion-icon>
           </div>
-
           <div class="quick-info">
             <h4>Inventario</h4>
             <p>Gestión de stock y almacenes</p>
           </div>
         </div>
 
-        <!-- VENTAS -->
         <div class="quick-card sales-card">
           <div class="quick-icon">
             <ion-icon name="cart-outline"></ion-icon>
           </div>
-
           <div class="quick-info">
             <h4>Ventas</h4>
             <p>Operaciones comerciales</p>
           </div>
         </div>
 
-        <!-- CLIENTES -->
         <div class="quick-card clients-card">
           <div class="quick-icon">
             <ion-icon name="people-outline"></ion-icon>
           </div>
-
           <div class="quick-info">
             <h4>Clientes</h4>
             <p>Administración de clientes</p>
           </div>
         </div>
 
-        <!-- REPORTES -->
         <div class="quick-card reports-card">
           <div class="quick-icon">
             <ion-icon name="bar-chart-outline"></ion-icon>
           </div>
-
           <div class="quick-info">
             <h4>Reportes</h4>
             <p>Análisis y métricas</p>
           </div>
         </div>
 
-        <!-- PRODUCTOS -->
         <div class="quick-card products-card">
           <div class="quick-icon">
             <ion-icon name="pricetags-outline"></ion-icon>
           </div>
-
           <div class="quick-info">
             <h4>Productos</h4>
             <p>Gestión del catálogo</p>
           </div>
         </div>
 
-        <!-- CONFIG -->
         <div class="quick-card settings-card">
           <div class="quick-icon">
             <ion-icon name="settings-outline"></ion-icon>
           </div>
-
           <div class="quick-info">
             <h4>Configuración</h4>
             <p>Preferencias del sistema</p>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- ===================================================== -->
-    <!-- FOOT ACTION -->
-    <!-- ===================================================== -->
-
-    <section class="section-block">
-      <ion-button expand="block" class="logout-btn" (click)="logout()">
-        <ion-icon slot="start" name="log-out-outline"></ion-icon>
-
-        Cerrar sesión
-      </ion-button>
     </section>
   </div>
 </ion-content>

@@ -93,7 +93,7 @@ export class LoginPage implements OnInit {
   ngOnInit(): void {
     // si ya inició sesión
     if (this.authSession.isAuthenticated()) {
-      void this.router.navigateByUrl('/dashboard', {
+      void this.router.navigateByUrl('/app/dashboard', {
         replaceUrl: true,
       });
     }
@@ -151,7 +151,7 @@ export class LoginPage implements OnInit {
         next: () => {
           const redirect = this.route.snapshot.queryParamMap.get('redirect');
 
-          void this.router.navigateByUrl(redirect || '/dashboard', {
+          void this.router.navigateByUrl(redirect || '/app/dashboard', {
             replaceUrl: true,
           });
         },
