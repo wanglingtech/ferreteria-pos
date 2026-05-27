@@ -1,59 +1,134 @@
-.dashboard-header {
-  box-shadow: none;
+:host {
+  display: block;
 }
 
-.dashboard-header ion-toolbar {
-  --background: #ffffff;
-  --border-color: #dbe7f8;
-  --min-height: 70px;
-  --padding-start: 10px;
-  --padding-end: 10px;
+/* =======================================================
+   HEADER FIXED
+======================================================= */
+
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  z-index: 9999;
+
+  backdrop-filter: blur(14px);
+
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.04);
 }
+
+/* =======================================================
+   TOOLBAR
+======================================================= */
+
+.dashboard-header ion-toolbar {
+  --background: linear-gradient(135deg, #071447 0%, #0a1a5c 40%, #17317f 100%);
+
+  --min-height: 76px;
+
+  --padding-start: 14px;
+  --padding-end: 14px;
+
+  --border-width: 0;
+
+  color: #ffffff;
+}
+
+/* =======================================================
+   CONTAINER
+======================================================= */
 
 .toolbar-container {
   width: 100%;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+
+  gap: 12px;
 }
+
+/* =======================================================
+   LEFT
+======================================================= */
 
 .toolbar-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+
   min-width: 0;
 }
 
+/* =======================================================
+   BUTTONS
+======================================================= */
+
 .toolbar-icon-btn {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --color: #1e568c;
+  --padding-start: 10px;
+  --padding-end: 10px;
+
+  --background: rgba(255, 255, 255, 0.08);
+
+  --border-radius: 14px;
+
+  --color: #ffffff;
+
+  width: 44px;
+  height: 44px;
+
+  backdrop-filter: blur(10px);
 }
+
+.toolbar-icon-btn ion-icon {
+  font-size: 1.2rem;
+}
+
+/* =======================================================
+   BRAND
+======================================================= */
 
 .brand-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+
   min-width: 0;
 }
 
 .brand-badge {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #e8f1ff;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.12);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
 }
 
 .brand-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
+
   border-radius: 50%;
-  background: #0f4fa8;
+
+  background: #60a5fa;
+
+  box-shadow: 0 0 18px rgba(96, 165, 250, 0.8);
 }
+
+/* =======================================================
+   TEXT
+======================================================= */
 
 .toolbar-text {
   min-width: 0;
@@ -61,24 +136,38 @@
 
 .toolbar-text h1 {
   margin: 0;
-  font-size: 1.02rem;
+
+  font-size: 1.1rem;
   font-weight: 800;
-  color: #133b66;
-  line-height: 1.15;
+
+  line-height: 1.1;
+
+  color: #ffffff;
 }
 
 .toolbar-text p {
-  margin: 1px 0 0;
-  font-size: 0.74rem;
-  color: #5a7494;
+  margin: 3px 0 0;
+
+  font-size: 0.76rem;
+
+  color: rgba(255, 255, 255, 0.72);
+
   line-height: 1.2;
 }
+
+/* =======================================================
+   RIGHT
+======================================================= */
 
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 10px;
 }
+
+/* =======================================================
+   NOTIFICATION
+======================================================= */
 
 .notification-btn {
   position: relative;
@@ -86,59 +175,87 @@
 
 .notification-dot {
   position: absolute;
+
   top: 10px;
   right: 10px;
+
   width: 8px;
   height: 8px;
+
   border-radius: 50%;
+
   background: #ff4f6c;
-  border: 2px solid #ffffff;
+
+  border: 2px solid #0a1a5c;
 }
+
+/* =======================================================
+   USER CHIP
+======================================================= */
 
 .user-chip {
   display: none;
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
-  background: #dbe9fd;
-  color: #12467c;
+  width: 38px;
+  height: 38px;
+
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+
+  color: #ffffff;
+
+  font-size: 0.78rem;
   font-weight: 800;
-  font-size: 0.75rem;
-  display: grid;
-  place-items: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* =======================================================
+   DESKTOP
+======================================================= */
 
 @media (min-width: 768px) {
   .dashboard-header ion-toolbar {
-    --padding-start: 14px;
-    --padding-end: 14px;
+    --padding-start: 22px;
+    --padding-end: 22px;
   }
 
   .user-chip {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
-    border: 1px solid #d9e5f7;
+    gap: 10px;
+
+    padding: 6px 10px;
+
     border-radius: 999px;
-    background: #f6faff;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    backdrop-filter: blur(10px);
   }
 
   .user-meta {
-    display: grid;
+    display: flex;
+    flex-direction: column;
+
     line-height: 1.1;
   }
 
   .user-name {
-    color: #1a426d;
-    font-size: 0.74rem;
+    color: #ffffff;
+
+    font-size: 0.76rem;
     font-weight: 700;
   }
 
   .user-role {
-    color: #5b7697;
-    font-size: 0.67rem;
+    color: rgba(255, 255, 255, 0.68);
+
+    font-size: 0.68rem;
   }
 }

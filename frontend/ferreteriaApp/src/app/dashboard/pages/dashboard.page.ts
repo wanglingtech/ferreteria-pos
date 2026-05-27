@@ -25,12 +25,7 @@ import { AuthSessionService } from '../../core/services/auth-session.service';
   standalone: true,
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
-  imports: [
-    CommonModule,
-    IonContent,
-    IonButton,
-    IonIcon,
-  ],
+  imports: [CommonModule, IonContent, IonButton, IonIcon],
 })
 export class DashboardPage {
   protected readonly user = this.authSession.getCurrentUser();
