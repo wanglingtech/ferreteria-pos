@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+
 import {
+  IonButton,
   IonContent,
   IonIcon,
   IonItem,
   IonLabel,
   IonList,
-  IonListHeader,
   IonMenuToggle,
-  IonNote,
+  MenuController,
 } from '@ionic/angular/standalone';
+
 import { addIcons } from 'ionicons';
 import {
   barChartOutline,
@@ -18,8 +20,11 @@ import {
   cubeOutline,
   gridOutline,
   layersOutline,
+  logOutOutline,
   peopleOutline,
 } from 'ionicons/icons';
+
+import { AuthSessionService } from '../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-siderbar',
@@ -32,17 +37,14 @@ import {
     RouterLinkActive,
     IonContent,
     IonList,
-    IonListHeader,
-    IonNote,
     IonMenuToggle,
     IonItem,
     IonIcon,
     IonLabel,
+    IonButton,
   ],
 })
 export class SiderbarComponent {
-  @Output() navigate = new EventEmitter<void>();
-
   protected readonly items = [
     { label: 'Dashboard', path: '/app/dashboard', icon: 'grid-outline' },
     { label: 'Productos', path: '/app/productos', icon: 'cube-outline' },
@@ -52,7 +54,11 @@ export class SiderbarComponent {
     { label: 'Reportes', path: '/app/reportes', icon: 'bar-chart-outline' },
   ];
 
-  constructor() {
+  constructor(
+    private readonly router: Router,
+    private readonly menuCtrl: MenuController,
+    private readonly authSession: AuthSessionService,
+  ) {
     addIcons({
       gridOutline,
       cubeOutline,
@@ -60,10 +66,21 @@ export class SiderbarComponent {
       layersOutline,
       peopleOutline,
       barChartOutline,
+      logOutOutline,
     });
   }
 
-  protected onNavigate(): void {
-    this.navigate.emit();
+  async onNavigate(): Promise<void> {
+    await this.menuCtrl.close('main-menu');
+  }
+
+  logout(): void {
+    this.authSession.clearSession();
+
+    this.menuCtrl.close('main-menu');
+
+    this.router.navigateByUrl('/auth/login', {
+      replaceUrl: true,
+    });
   }
 }

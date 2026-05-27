@@ -1,34 +1,183 @@
-#menu-list {
-  padding: 16px 10px 20px;
-  background: linear-gradient(180deg, #032c63 0%, #041227 100%);
-  min-height: 100%;
+.sidebar-content {
+  --background: linear-gradient(180deg, #07122f 0%, #0a1a5c 45%, #0f2a7a 100%);
+  --color: #eaf0ff;
+
+  height: 100%;
 }
 
-ion-list-header {
-  font-size: 1.05rem;
+/* =======================================================
+   HEADER
+======================================================= */
+
+.sidebar-header {
+  padding: 26px 20px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background-color: #0a1a5c;
+  border-radius: 0 0 10px 10px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-brand h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
   font-weight: 800;
-  color: #113760;
-  margin-bottom: 4px;
+  letter-spacing: 0.3px;
 }
 
-ion-note {
-  display: block;
-  margin: 0 16px 14px;
-  color: #607b9c;
-  font-size: 0.76rem;
+.sidebar-brand p {
+  margin: 3px 0 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+}
+
+/* =======================================================
+   MENU
+======================================================= */
+
+.sidebar-menu {
+  padding: 14px 10px 120px;
+}
+
+ion-list {
+  background: transparent;
 }
 
 ion-item {
   --background: transparent;
-  --border-radius: 12px;
-  --padding-start: 12px;
-  --min-height: 44px;
-  margin: 2px 0;
-  color: #27527f;
+  --color: rgba(0, 0, 0, 0.85);
+
+  --border-radius: 14px;
+  --padding-start: 16px;
+  --inner-padding-end: 12px;
+  --min-height: 52px;
+
+  margin-bottom: 6px;
+
+  font-weight: 600;
+  transition: all 0.25s ease;
+
+  position: relative;
 }
 
+/* ICON */
+ion-item ion-icon {
+  color: rgba(96, 165, 250, 0.9);
+  font-size: 1.15rem;
+}
+
+/* HOVER EFFECT */
+ion-item:hover {
+  --background: rgba(255, 255, 255, 0.06);
+  transform: translateX(4px);
+}
+
+/* ACTIVE ITEM */
 ion-item.active-menu-item {
-  --background: #000000;
-  --color: #0f4fa8;
+  --background: linear-gradient(90deg, #122f8f, #0a1a5c);
+  --color: #ffffff;
+
+  border-left: 4px solid #60a5fa;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+ion-item.active-menu-item ion-icon {
+  color: #60a5fa;
+}
+
+/* =======================================================
+   FOOTER
+======================================================= */
+
+.sidebar-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #0a1a5c;
+
+  padding: 18px 14px 24px;
+}
+
+/* LOGOUT BUTTON (TU COLOR PRINCIPAL) */
+.logout-btn {
+  --background: linear-gradient(135deg, #ffffff, #ffffff);
+  --color: #000000;
+
+  --border-radius: 16px;
+  height: 54px;
+
   font-weight: 700;
+
+  transition: all 0.25s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(10, 26, 92, 0.45);
+}
+
+/* GLASS EFFECT EDGE */
+.sidebar-content::part(scroll) {
+  scrollbar-width: thin;
+}
+
+.sidebar-logo {
+  width: 56px;
+  height: 56px;
+
+  border-radius: 16px;
+
+  overflow: hidden;
+
+  position: relative;
+
+  background: #0a1a5c;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  transition: all 0.25s ease;
+}
+
+/* EFECTO HOVER SUAVE */
+.sidebar-logo:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 14px 35px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px #0a1a5c;
+}
+
+/* LOGO IMG */
+.logo-img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  padding: 6px;
+
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+
+/* opcional: glow sutil tipo branding */
+.sidebar-logo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  border-radius: 16px;
+
+  background: radial-gradient(circle at top left, #0a1a5c, transparent 60%);
+
+  pointer-events: none;
 }

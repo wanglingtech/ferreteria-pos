@@ -1,0 +1,14 @@
+<ion-footer class="bottom-nav" position="center">
+  <div class="bottom-nav-container">
+    <a
+      *ngFor="let item of items"
+      [routerLink]="item.path"
+      routerLinkActive="active-nav-item"
+      class="nav-item"
+    >
+      <ion-icon [name]="item.icon"></ion-icon>
+
+      <span>{{ item.label }}</span>
+    </a>
+  </div>
+</ion-footer>

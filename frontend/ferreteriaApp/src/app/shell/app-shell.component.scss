@@ -1,0 +1,75 @@
+/* shell styles */
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* =======================================================
+   LAYOUT BASE
+======================================================= */
+
+.app-layout {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  background: #eef4ff;
+
+  position: relative;
+  z-index: 1;
+}
+
+/* =======================================================
+   HEADER (CRÍTICO PARA TU PROBLEMA)
+======================================================= */
+
+app-header {
+  position: sticky;
+  top: 0;
+
+  z-index: 10; /* menor que ion-menu */
+  flex-shrink: 0;
+}
+
+/* =======================================================
+   CONTENT
+======================================================= */
+
+.app-content {
+  flex: 1;
+
+  position: relative;
+  z-index: 1;
+
+  overflow: auto;
+}
+
+/* =======================================================
+   BOTTOM NAV
+======================================================= */
+
+app-bottom-nav {
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+/* =======================================================
+   ION MENU FIX (ESTO ES CLAVE)
+======================================================= */
+
+ion-menu {
+  --width: 300px;
+
+  z-index: 9999 !important;
+}
+
+/* sombra overlay correcta */
+ion-menu::part(backdrop) {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* contenedor interno del menú */
+ion-menu::part(container) {
+  border-right: none;
+}

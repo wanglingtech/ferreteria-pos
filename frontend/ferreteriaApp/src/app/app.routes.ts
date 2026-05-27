@@ -7,22 +7,28 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./auth/pages/login/login.page').then((m) => m.LoginPage),
   },
+
   {
     path: 'app',
     canActivate: [authGuard],
-    loadComponent: () => import('./shell/app-shell.page').then((m) => m.AppShellPage),
+    loadComponent: () =>
+      import('./shell/app-shell.component').then((m) => m.AppShellComponent),
     children: [
       {
         path: 'dashboard',
         data: { title: 'Dashboard', subtitle: 'Ferretería July' },
         loadComponent: () =>
-          import('./dashboard/pages/dashboard.page').then((m) => m.DashboardPage),
+          import('./dashboard/pages/dashboard.page').then(
+            (m) => m.DashboardPage,
+          ),
       },
       {
         path: 'productos',
         data: { title: 'Productos', subtitle: 'Gestión de catálogo' },
         loadComponent: () =>
-          import('./productos/pages/productos.page').then((m) => m.ProductosPage),
+          import('./productos/pages/productos.page').then(
+            (m) => m.ProductosPage,
+          ),
       },
       {
         path: 'ventas',
@@ -34,7 +40,9 @@ export const routes: Routes = [
         path: 'inventario',
         data: { title: 'Inventario', subtitle: 'Control de stock' },
         loadComponent: () =>
-          import('./inventario/pages/inventario.page').then((m) => m.InventarioPage),
+          import('./inventario/pages/inventario.page').then(
+            (m) => m.InventarioPage,
+          ),
       },
       {
         path: 'usuarios',
@@ -55,11 +63,13 @@ export const routes: Routes = [
       },
     ],
   },
+
   {
     path: '',
     redirectTo: 'app/dashboard',
     pathMatch: 'full',
   },
+
   {
     path: '**',
     redirectTo: 'auth/login',

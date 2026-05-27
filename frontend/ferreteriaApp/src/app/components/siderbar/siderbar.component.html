@@ -1,19 +1,47 @@
-<ion-content>
-  <ion-list id="menu-list">
-    <ion-list-header>Ferretería July</ion-list-header>
-    <ion-note>Sistema interno</ion-note>
+<ion-content class="sidebar-content" forceOverscroll="false">
+  <!-- HEADER -->
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <img
+        src="assets/logo/logo_ferreteria.png"
+        alt="Ferretería July"
+        class="logo-img"
+      />
+    </div>
 
-    <ion-menu-toggle auto-hide="false" *ngFor="let item of items">
-      <ion-item
-        [routerLink]="item.path"
-        routerDirection="root"
-        lines="none"
-        detail="false"
-        routerLinkActive="active-menu-item"
-        (click)="onNavigate()">
-        <ion-icon slot="start" [name]="item.icon"></ion-icon>
-        <ion-label>{{ item.label }}</ion-label>
-      </ion-item>
-    </ion-menu-toggle>
-  </ion-list>
+    <div class="sidebar-brand">
+      <h2>Ferretería July</h2>
+      <p>Sistema Corporativo</p>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div class="sidebar-menu">
+    <ion-list lines="none">
+      <ion-menu-toggle auto-hide="true" *ngFor="let item of items">
+        <ion-item
+          [routerLink]="item.path"
+          routerDirection="root"
+          routerLinkActive="active-menu-item"
+          [routerLinkActiveOptions]="{ exact: true }"
+          detail="false"
+          (click)="onNavigate()"
+        >
+          <ion-icon slot="start" [name]="item.icon"></ion-icon>
+
+          <ion-label>
+            {{ item.label }}
+          </ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    </ion-list>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="sidebar-footer">
+    <ion-button expand="block" class="logout-btn" (click)="logout()">
+      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      Cerrar sesión
+    </ion-button>
+  </div>
 </ion-content>
