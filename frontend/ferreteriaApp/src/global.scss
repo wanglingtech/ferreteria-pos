@@ -34,4 +34,38 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* @import '@ionic/angular/css/palettes/dark.system.css'; */
+
+/* =======================================================
+   FORCE LIGHT MODE
+======================================================= */
+
+:root {
+  color-scheme: light;
+
+  --ion-background-color: #f4f7ff;
+  --ion-text-color: #000000;
+
+  --ion-card-background: #ffffff;
+  --ion-item-background: #ffffff;
+  --ion-toolbar-background: #ffffff;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  background: #f4f7ff !important;
+  color: #000 !important;
+}
+
+ion-app,
+ion-content,
+ion-page {
+  --background: #f4f7ff !important;
+
+  background: #f4f7ff !important;
+
+  color: #000 !important;
+}
