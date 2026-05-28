@@ -65,28 +65,27 @@ ion-item {
 
 /* ICON */
 ion-item ion-icon {
-  color: rgba(96, 165, 250, 0.9);
+  color: rgba(0, 0, 0, 0.9);
   font-size: 1.15rem;
 }
 
 /* HOVER EFFECT */
 ion-item:hover {
   --background: rgba(255, 255, 255, 0.06);
-  transform: translateX(4px);
+  transform: translateY(4px);
 }
 
 /* ACTIVE ITEM */
 ion-item.active-menu-item {
   --background: linear-gradient(90deg, #122f8f, #0a1a5c);
   --color: #ffffff;
+  border-radius: 14px 14px 14px 14px;
 
-  border-left: 4px solid #60a5fa;
-
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 25px rgba(65, 104, 209, 0.25);
 }
 
 ion-item.active-menu-item ion-icon {
-  color: #60a5fa;
+  color: #ffffff;
 }
 
 /* =======================================================
@@ -99,6 +98,7 @@ ion-item.active-menu-item ion-icon {
   right: 0;
   bottom: 0;
   background-color: #0a1a5c;
+  border-radius: 10px 10px 0 0;
 
   padding: 18px 14px 24px;
 }
@@ -117,8 +117,9 @@ ion-item.active-menu-item ion-icon {
 }
 
 .logout-btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   box-shadow: 0 14px 28px rgba(10, 26, 92, 0.45);
+  color: #0a1a5c;
 }
 
 /* GLASS EFFECT EDGE */
@@ -136,37 +137,25 @@ ion-item.active-menu-item ion-icon {
 
   position: relative;
 
-  background: #0a1a5c;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.35),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-
-  transition: all 0.25s ease;
 }
 
 /* EFECTO HOVER SUAVE */
 .sidebar-logo:hover {
   transform: scale(1.05);
-  box-shadow:
-    0 14px 35px rgba(0, 0, 0, 0.45),
-    inset 0 0 0 1px #0a1a5c;
+  transition: transform 0.3s ease;
 }
 
 /* LOGO IMG */
 .logo-img {
   width: 100%;
   height: 100%;
+  border-radius: 16px;
 
   object-fit: cover;
-
   padding: 6px;
-
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
 }
 
 /* opcional: glow sutil tipo branding */
