@@ -1,3 +1,7 @@
+/* =====================================================
+   FOOTER FIJO
+===================================================== */
+
 .bottom-nav {
   position: fixed;
 
@@ -8,9 +12,12 @@
   z-index: 999;
 
   background: transparent;
-
   box-shadow: none;
 }
+
+/* =====================================================
+   CONTENEDOR PRINCIPAL
+===================================================== */
 
 .bottom-nav-container {
   height: 78px;
@@ -19,58 +26,126 @@
 
   backdrop-filter: blur(14px);
 
-  border-top: 1px solid #d9e6f7;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 
   display: flex;
   align-items: center;
+
+  padding: 0 10px;
+  gap: 10px;
+
+  /* =====================================================
+     SCROLL HORIZONTAL
+  ===================================================== */
 
   overflow-x: auto;
   overflow-y: hidden;
 
   white-space: nowrap;
 
-  padding: 0 10px;
+  /* Scroll suave en móviles */
+  -webkit-overflow-scrolling: touch;
 
-  gap: 10px;
+  /* permite deslizar con el dedo */
+  touch-action: pan-x;
 
+  /* evita que seleccione texto al arrastrar */
+  user-select: none;
+
+  /* Firefox */
   scrollbar-width: none;
+
+  /* evita saltos bruscos */
+  scroll-behavior: smooth;
+
+  /* mejora sensación táctil */
+  cursor: grab;
 }
 
+/* =====================================================
+   OCULTAR SCROLL
+===================================================== */
+
 .bottom-nav-container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
   display: none;
 }
 
+/* =====================================================
+   ITEM
+===================================================== */
+
 .nav-item {
-  min-width: 74px;
+  min-width: 78px;
 
   flex: 0 0 auto;
 
   display: flex;
   flex-direction: column;
-  align-items: center;
+
   justify-content: center;
+  align-items: center;
 
   gap: 4px;
+
+  padding: 8px 12px;
 
   text-decoration: none;
 
   color: #ffffff;
 
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  border-radius: 14px;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
 }
+
+/* =====================================================
+   ICONOS
+===================================================== */
 
 .nav-item ion-icon {
-  font-size: 1.22rem;
+  font-size: 1.35rem;
 }
 
-.nav-item.active-nav-item {
-  position: center;
-  color: #000000;
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 8px 12px;
+/* =====================================================
+   HOVER DESKTOP
+===================================================== */
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
+
+/* =====================================================
+   ACTIVO
+===================================================== */
+
+.active-nav-item {
+  background: #ffffff;
+
+  color: #0a1a5c;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(10, 26, 92, 0.08);
+
+  transform: translateY(-1px);
+}
+
+/* icono activo */
+.active-nav-item ion-icon {
+  color: #0a1a5c;
+}
+
+/* =====================================================
+   TABLET Y DESKTOP
+===================================================== */
 
 @media (min-width: 992px) {
   .bottom-nav {
@@ -79,10 +154,10 @@
   }
 
   .bottom-nav-container {
-    width: 720px;
+    width: 780px;
 
     border-radius: 18px 18px 0 0;
 
-    overflow: hidden;
+    overflow-x: auto;
   }
 }
