@@ -1,18 +1,5 @@
-<!--
-  Footer fijo inferior.
-  No cambia de posición aunque cambie la página.
--->
 <ion-footer class="bottom-nav">
-  <!--
-    Contenedor horizontal desplazable.
-    Aquí viven todos los módulos.
-  -->
-  <div class="bottom-nav-container">
-    <!--
-      Cada elemento representa un módulo.
-      routerLinkActive agrega automáticamente
-      la clase active-nav-item cuando coincide la ruta.
-    -->
+  <div class="bottom-nav-container" #scrollContainer>
     <a
       *ngFor="let item of items"
       [routerLink]="item.path"

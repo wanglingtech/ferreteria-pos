@@ -18,57 +18,35 @@
 /* =====================================================
    CONTENEDOR PRINCIPAL
 ===================================================== */
-
 .bottom-nav-container {
-  height: 78px;
+  height: 70px;
 
   background: #0a1a5c;
-
-  backdrop-filter: blur(14px);
-
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 
   display: flex;
   align-items: center;
 
-  padding: 0 10px;
   gap: 10px;
 
-  /* =====================================================
-     SCROLL HORIZONTAL
-  ===================================================== */
+  padding: 0 10px;
 
   overflow-x: auto;
   overflow-y: hidden;
 
-  white-space: nowrap;
-
-  /* Scroll suave en móviles */
-  -webkit-overflow-scrolling: touch;
-
-  /* permite deslizar con el dedo */
-  touch-action: pan-x;
-
-  /* evita que seleccione texto al arrastrar */
-  user-select: none;
-
-  /* Firefox */
   scrollbar-width: none;
 
-  /* evita saltos bruscos */
+  -webkit-overflow-scrolling: touch;
+
   scroll-behavior: smooth;
 
-  /* mejora sensación táctil */
   cursor: grab;
+
+  white-space: nowrap;
+
+  touch-action: pan-x;
 }
 
-/* =====================================================
-   OCULTAR SCROLL
-===================================================== */
-
 .bottom-nav-container::-webkit-scrollbar {
-  width: 0;
-  height: 0;
   display: none;
 }
 

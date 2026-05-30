@@ -1,5 +1,6 @@
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
 
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -23,7 +24,10 @@ import {
   styleUrls: ['./bottom-nav.component.scss'],
   imports: [CommonModule, RouterLink, RouterLinkActive, IonFooter, IonIcon],
 })
-export class BottomNavComponent {
+export class BottomNavComponent implements AfterViewInit {
+  @ViewChild('scrollContainer')
+  scrollContainer!: ElementRef<HTMLDivElement>;
+
   protected readonly items = [
     {
       label: 'Inicio',
@@ -65,6 +69,39 @@ export class BottomNavComponent {
       layersOutline,
       peopleOutline,
       barChartOutline,
+    });
+  }
+
+  ngAfterViewInit(): void {
+    const slider = this.scrollContainer.nativeElement;
+
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    slider.addEventListener('mousedown', (e) => {
+      isDown = true;
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener('mouseleave', () => {
+      isDown = false;
+    });
+
+    slider.addEventListener('mouseup', () => {
+      isDown = false;
+    });
+
+    slider.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+
+      e.preventDefault();
+
+      const x = e.pageX - slider.offsetLeft;
+      const walk = (x - startX) * 2;
+
+      slider.scrollLeft = scrollLeft - walk;
     });
   }
 }
