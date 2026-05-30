@@ -1,10 +1,100 @@
-<ion-content class="module-content">
-  <ion-card class="module-card">
-    <ion-card-content>
-      <ion-text>
-        <h2>Usuarios</h2>
-        <p>Interfaz de administración de usuarios y roles.</p>
-      </ion-text>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="usuarios-content">
+  <div class="usuarios-shell">
+    <!-- =====================================================
+         HEADER CORPORATIVO
+    ===================================================== -->
+    <section class="hero-header">
+      <div class="hero-badge">Gestión de usuarios</div>
+
+      <h1>Usuarios</h1>
+
+      <p>Administración de usuarios, permisos y accesos del sistema.</p>
+    </section>
+
+    <!-- =====================================================
+         BUSCADOR + ACCIÓN
+    ===================================================== -->
+    <section class="toolbar-section">
+      <!-- BUSCADOR -->
+      <div class="search-box">
+        <ion-icon name="search-outline"></ion-icon>
+
+        <input
+          type="text"
+          placeholder="Buscar usuario..."
+          [(ngModel)]="search"
+        />
+      </div>
+
+      <!-- NUEVO USUARIO -->
+      <ion-button class="add-user-btn" (click)="openCreateUser()">
+        <ion-icon slot="start" name="person-add-outline"></ion-icon>
+
+        Nuevo Usuario
+      </ion-button>
+    </section>
+
+    <!-- =====================================================
+         LISTADO
+    ===================================================== -->
+    <section class="users-section">
+      <div class="section-title">
+        <h2>Usuarios registrados</h2>
+
+        <p>Usuarios disponibles en el sistema corporativo.</p>
+      </div>
+
+      <!-- =====================================================
+           LISTA DE USUARIOS
+      ===================================================== -->
+      <div class="users-list" *ngIf="filteredUsers.length > 0">
+        <div class="user-card" *ngFor="let user of filteredUsers">
+          <!-- USUARIO -->
+          <div class="user-info">
+            <div class="avatar">{{ getInitials(user.fullName) }}</div>
+
+            <div class="user-data">
+              <h3>{{ user.fullName }}</h3>
+
+              <span class="email"> {{ user.email }} </span>
+            </div>
+          </div>
+
+          <!-- ROL -->
+          <div class="role-chip">
+            {{ user.role === 'ADMIN' ? 'Administrador' : 'Vendedor' }}
+          </div>
+
+          <!-- ESTADO -->
+          <div
+            class="status-chip"
+            [class.active]="user.isActive"
+            [class.inactive]="!user.isActive"
+          >
+            {{ user.isActive ? 'Activo' : 'Inactivo' }}
+          </div>
+
+          <!-- MENÚ -->
+          <ion-button
+            fill="clear"
+            class="menu-btn"
+            (click)="openUserMenu(user)"
+          >
+            <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- =====================================================
+           EMPTY STATE
+      ===================================================== -->
+      <div class="empty-state" *ngIf="filteredUsers.length === 0">
+        <ion-icon name="people-outline"></ion-icon>
+
+        <h3>No hay usuarios registrados</h3>
+
+        <p>Cuando existan usuarios en la base de datos aparecerán aquí.</p>
+      </div>
+    </section>
+  </div>
 </ion-content>
