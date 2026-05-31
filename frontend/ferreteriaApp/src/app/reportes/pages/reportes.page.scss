@@ -1,4 +1,494 @@
-.module-content { --background: #f4f8ff; }
-.module-card { margin: 14px; border: 1px solid #dce8fa; border-radius: 14px; }
-h2 { margin: 0 0 6px; color: #133b66; font-size: 1.05rem; font-weight: 800; }
-p { margin: 0; color: #4b6788; font-size: 0.84rem; }
+/* =====================================================
+   CONTENEDOR GENERAL
+===================================================== */
+
+.reportes-content {
+  --background: #f4f7fc;
+}
+
+.reportes-shell {
+  max-width: 1400px;
+
+  margin: 0 auto;
+
+  padding-top: 95px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 110px;
+}
+
+/* =====================================================
+   HERO HEADER
+===================================================== */
+
+.hero-header {
+  position: relative;
+
+  overflow: hidden;
+
+  margin-bottom: 24px;
+
+  padding: 30px;
+
+  border-radius: 28px;
+
+  color: white;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 255, 255, 0.12),
+      transparent 35%
+    ),
+    linear-gradient(135deg, #071447 0%, #0a1a5c 35%, #17317f 70%, #2754d8 100%);
+
+  box-shadow:
+    0 20px 45px rgba(10, 26, 92, 0.25),
+    0 8px 20px rgba(10, 26, 92, 0.12);
+}
+
+.hero-header::before {
+  content: "";
+
+  position: absolute;
+
+  width: 280px;
+  height: 280px;
+
+  right: -120px;
+  top: -120px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hero-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 8px 16px;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.14);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  backdrop-filter: blur(10px);
+
+  margin-bottom: 14px;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hero-header h1 {
+  margin: 0;
+
+  font-size: 2.3rem;
+
+  font-weight: 800;
+}
+
+.hero-header p {
+  margin-top: 10px;
+
+  max-width: 700px;
+
+  color: rgba(255, 255, 255, 0.88);
+
+  line-height: 1.6;
+}
+
+/* =====================================================
+   CARDS GENERALES
+===================================================== */
+
+.filters-card,
+.table-card,
+.export-card {
+  background: white;
+
+  border-radius: 24px;
+
+  border: 1px solid #dce8fa;
+
+  padding: 24px;
+
+  margin-bottom: 22px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+}
+
+.card-title {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 20px;
+
+  color: #0a1a5c;
+
+  font-size: 18px;
+
+  font-weight: 800;
+}
+
+/* =====================================================
+   FILTROS
+===================================================== */
+
+.filters-grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+
+  gap: 18px;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-field label {
+  margin-bottom: 8px;
+
+  color: #4d6485;
+
+  font-size: 13px;
+
+  font-weight: 700;
+}
+
+.date-field input {
+  height: 56px;
+
+  border-radius: 16px;
+
+  border: 2px solid #dce8fa;
+
+  background: #f8fbff;
+
+  padding: 0 16px;
+
+  transition: all 0.25s ease;
+}
+
+.date-field input:focus {
+  outline: none;
+
+  border-color: #0a1a5c;
+
+  box-shadow: 0 0 0 4px rgba(10, 26, 92, 0.08);
+}
+
+.filter-btn {
+  margin-top: 22px;
+
+  --background: #0a1a5c;
+
+  --border-radius: 16px;
+}
+
+/* =====================================================
+   KPI GRID
+===================================================== */
+
+.kpi-grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+
+  gap: 18px;
+
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  position: relative;
+
+  overflow: hidden;
+
+  min-height: 145px;
+
+  border-radius: 24px;
+
+  padding: 24px;
+
+  color: white;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.15);
+}
+
+.kpi-card::before {
+  content: "";
+
+  position: absolute;
+
+  width: 140px;
+  height: 140px;
+
+  top: -60px;
+  right: -60px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.kpi-card span {
+  font-size: 13px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+
+  margin-bottom: 10px;
+
+  opacity: 0.9;
+}
+
+.kpi-card strong {
+  font-size: 2rem;
+
+  font-weight: 800;
+}
+
+.kpi-card ion-icon {
+  position: absolute;
+
+  right: 18px;
+  bottom: 18px;
+
+  font-size: 58px;
+
+  opacity: 0.18;
+}
+
+/* COLORES KPI */
+
+.kpi-sales {
+  background: linear-gradient(135deg, #071447, #0a1a5c, #2754d8);
+}
+
+.kpi-orders {
+  background: linear-gradient(135deg, #00897b, #26a69a);
+}
+
+.kpi-ticket {
+  background: linear-gradient(135deg, #6a1b9a, #ab47bc);
+}
+
+.kpi-customers {
+  background: linear-gradient(135deg, #ef6c00, #ffa726);
+}
+
+.kpi-subtotal {
+  background: linear-gradient(135deg, #1565c0, #42a5f5);
+}
+
+.kpi-igv {
+  background: linear-gradient(135deg, #c62828, #ef5350);
+}
+
+/* =====================================================
+   TABS
+===================================================== */
+
+.tabs-section {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  margin-bottom: 24px;
+}
+
+.tabs-section button {
+  border: none;
+
+  cursor: pointer;
+
+  background: white;
+
+  color: #0a1a5c;
+
+  padding: 12px 20px;
+
+  border-radius: 14px;
+
+  border: 1px solid #dce8fa;
+
+  font-weight: 700;
+
+  transition: all 0.25s ease;
+}
+
+.tabs-section button.active {
+  background: #0a1a5c;
+
+  color: white;
+
+  box-shadow: 0 10px 25px rgba(10, 26, 92, 0.2);
+}
+
+/* =====================================================
+   CHART CARD
+===================================================== */
+
+.chart-card {
+  margin-bottom: 22px;
+
+  padding: 24px;
+
+  border-radius: 24px;
+
+  background: linear-gradient(135deg, #071447, #0a1a5c, #17317f);
+
+  color: white;
+
+  box-shadow: 0 18px 35px rgba(10, 26, 92, 0.18);
+}
+
+.chart-card .card-title {
+  color: white;
+}
+
+.chart-placeholder {
+  height: 400px;
+
+  border-radius: 18px;
+
+  border: 2px dashed rgba(255, 255, 255, 0.12);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.chart-placeholder ion-icon {
+  font-size: 90px;
+
+  margin-bottom: 12px;
+}
+
+/* =====================================================
+   TABLA
+===================================================== */
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f7faff;
+}
+
+th {
+  padding: 16px;
+
+  text-align: left;
+
+  color: #0a1a5c;
+
+  font-weight: 800;
+}
+
+td {
+  padding: 16px;
+
+  border-top: 1px solid #edf2fb;
+}
+
+tbody tr:hover {
+  background: #f8fbff;
+}
+
+/* =====================================================
+   EXPORTACIÓN
+===================================================== */
+
+.export-card {
+  background: linear-gradient(135deg, #0a1a5c, #17379f);
+
+  color: white;
+}
+
+.export-card h3 {
+  margin-top: 0;
+}
+
+.export-card p {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.export-btn {
+  margin-top: 14px;
+
+  --background: white;
+
+  --color: #0a1a5c;
+
+  --border-radius: 16px;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  .reportes-shell {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .hero-header {
+    padding: 22px;
+  }
+
+  .hero-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .chart-placeholder {
+    height: 280px;
+  }
+
+  .kpi-card strong {
+    font-size: 1.6rem;
+  }
+}

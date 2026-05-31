@@ -1,10 +1,181 @@
-<ion-content class="module-content">
-  <ion-card class="module-card">
-    <ion-card-content>
-      <ion-text>
-        <h2>Reportes</h2>
-        <p>Interfaz de reportes y métricas empresariales.</p>
-      </ion-text>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="reportes-content">
+  <div class="reportes-shell">
+    <!-- HERO -->
+
+    <section class="hero-header">
+      <div class="hero-badge">
+        <ion-icon name="analytics-outline"></ion-icon>
+        Reportes de Ventas y Productos
+      </div>
+
+      <h1>Reportes Generales</h1>
+
+      <p>
+        Analiza ventas, indicadores financieros, comportamiento comercial y
+        rendimiento general del negocio.
+      </p>
+    </section>
+
+    <!-- FILTROS -->
+
+    <section class="filters-card">
+      <div class="card-title">
+        <ion-icon name="calendar-outline"></ion-icon>
+        Filtro de Fechas
+      </div>
+
+      <div class="filters-grid">
+        <div class="date-field">
+          <label>Desde</label>
+
+          <input type="date" [(ngModel)]="from" />
+        </div>
+
+        <div class="date-field">
+          <label>Hasta</label>
+
+          <input type="date" [(ngModel)]="to" />
+        </div>
+
+        <ion-button class="filter-btn" (click)="loadReport()">
+          Consultar
+        </ion-button>
+      </div>
+    </section>
+
+    <!-- KPI -->
+
+    <section class="kpi-grid">
+      <div class="kpi-card kpi-sales">
+        <span>Ventas Totales</span>
+        <strong>{{ reporte?.ventasTotales ?? '--' }}</strong>
+        <ion-icon name="cash-outline"></ion-icon>
+      </div>
+
+      <div class="kpi-card kpi-orders">
+        <span>Total Órdenes</span>
+        <strong>{{ reporte?.totalOrdenes ?? '--' }}</strong>
+        <ion-icon name="receipt-outline"></ion-icon>
+      </div>
+
+      <div class="kpi-card kpi-ticket">
+        <span>Ticket Promedio</span>
+        <strong>{{ reporte?.ticketPromedio ?? '--' }}</strong>
+        <ion-icon name="wallet-outline"></ion-icon>
+      </div>
+
+      <div class="kpi-card kpi-customers">
+        <span>Clientes Atendidos</span>
+        <strong>{{ reporte?.clientesAtendidos ?? '--' }}</strong>
+        <ion-icon name="people-outline"></ion-icon>
+      </div>
+
+      <div class="kpi-card kpi-subtotal">
+        <span>Subtotal</span>
+        <strong>{{ reporte?.subtotalTotal ?? '--' }}</strong>
+        <ion-icon name="calculator-outline"></ion-icon>
+      </div>
+
+      <div class="kpi-card kpi-igv">
+        <span>IGV</span>
+        <strong>{{ reporte?.igvTotal ?? '--' }}</strong>
+        <ion-icon name="document-text-outline"></ion-icon>
+      </div>
+    </section>
+
+    <!-- TABS -->
+
+    <section class="tabs-section">
+      <button
+        [class.active]="activeTab === 'resumen'"
+        (click)="changeTab('resumen')"
+      >
+        Resumen
+      </button>
+
+      <button
+        [class.active]="activeTab === 'ventas'"
+        (click)="changeTab('ventas')"
+      >
+        Ventas
+      </button>
+
+      <button
+        [class.active]="activeTab === 'productos'"
+        (click)="changeTab('productos')"
+      >
+        Productos
+      </button>
+
+      <button
+        [class.active]="activeTab === 'exportar'"
+        (click)="changeTab('exportar')"
+      >
+        Exportar
+      </button>
+    </section>
+
+    <!-- GRAFICO -->
+
+    <section class="chart-card">
+      <div class="card-title">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        Rendimiento Comercial
+      </div>
+
+      <div class="chart-placeholder">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+
+        <p>Gráfico de ventas por período</p>
+      </div>
+    </section>
+
+    <!-- TOP PRODUCTOS -->
+
+    <section class="table-card">
+      <div class="card-title">
+        <ion-icon name="trending-up-outline"></ion-icon>
+        Productos Más Vendidos
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Total Vendido</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of reporte?.topProductos">
+              <td>{{ item.sku }}</td>
+
+              <td>{{ item.nombre }}</td>
+
+              <td>{{ item.cantidadVendida }}</td>
+
+              <td>{{ item.totalVendido }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- EXPORTAR -->
+
+    <section class="export-card" *ngIf="activeTab === 'exportar'">
+      <h3>Exportar Reportes</h3>
+
+      <p>Genera reportes PDF o Excel para compartir información empresarial.</p>
+
+      <ion-button class="export-btn" (click)="exportReport()">
+        <ion-icon slot="start" name="download-outline"></ion-icon>
+
+        Exportar Reporte
+      </ion-button>
+    </section>
+  </div>
 </ion-content>
