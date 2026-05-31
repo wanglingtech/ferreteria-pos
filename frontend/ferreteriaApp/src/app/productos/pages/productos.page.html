@@ -1,10 +1,114 @@
-<ion-content class="module-content">
-  <ion-card class="module-card">
-    <ion-card-content>
-      <ion-text>
-        <h2>Productos</h2>
-        <p>Interfaz de catálogo de productos.</p>
-      </ion-text>
-    </ion-card-content>
-  </ion-card>
+<ion-content [fullscreen]="true" class="products-content">
+  <div class="products-shell">
+    <!-- HEADER -->
+
+    <section class="hero-section">
+      <div class="hero-info">
+        <h1>Productos</h1>
+        <p>Gestión completa del catálogo e inventario de productos.</p>
+      </div>
+    </section>
+
+    <!-- SEARCH -->
+
+    <section class="toolbar-section">
+      <div class="search-box">
+        <ion-icon name="search-outline" class="search-icon"> </ion-icon>
+
+        <input type="text" placeholder="Buscar producto..." />
+      </div>
+
+      <ion-button fill="solid" class="filter-btn">
+        <ion-icon slot="icon-only" name="filter-outline"> </ion-icon>
+      </ion-button>
+    </section>
+
+    <!-- TABS -->
+
+    <section class="segment-wrapper">
+      <ion-segment mode="md" value="all">
+        <ion-segment-button value="all">
+          <ion-label>Todos</ion-label>
+        </ion-segment-button>
+
+        <ion-segment-button value="active">
+          <ion-label>Activos</ion-label>
+        </ion-segment-button>
+
+        <ion-segment-button value="inactive">
+          <ion-label>Inactivos</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </section>
+
+    <!-- PRODUCT LIST -->
+
+    <section class="products-list">
+      <!-- PRODUCTO -->
+
+      <div class="product-card">
+        <div class="product-image">
+          <img
+            src="https://images.unsplash.com/photo-1504148455328-c376907d081c"
+            alt="producto"
+          />
+        </div>
+
+        <div class="product-info">
+          <h3>Taladro Percutor Bosch</h3>
+
+          <span class="sku"> SKU: TLD-001 </span>
+
+          <div class="meta-row">
+            <div class="stock-badge">Stock: 25</div>
+
+            <div class="price">S/ 399.90</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <ion-button fill="clear" class="edit-btn">
+            <ion-icon name="create-outline"> </ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- PRODUCTO -->
+
+      <div class="product-card">
+        <div class="product-image">
+          <img
+            src="https://images.unsplash.com/photo-1586864387967-d02ef85d93e8"
+            alt="producto"
+          />
+        </div>
+
+        <div class="product-info">
+          <h3>Martillo Profesional</h3>
+
+          <span class="sku"> SKU: MRT-015 </span>
+
+          <div class="meta-row">
+            <div class="stock-badge warning">Stock: 3</div>
+
+            <div class="price">S/ 35.00</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <ion-button fill="clear" class="edit-btn">
+            <ion-icon name="create-outline"> </ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FAB -->
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button class="add-product-btn">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

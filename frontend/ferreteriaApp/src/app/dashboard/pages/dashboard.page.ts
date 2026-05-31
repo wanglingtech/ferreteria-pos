@@ -1,18 +1,29 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonContent,
+  IonIcon,
+  IonLabel,
+  IonSegment,
+  IonSegmentButton,
+} from '@ionic/angular/standalone';
+
+import { FormsModule } from '@angular/forms';
+
 import { addIcons } from 'ionicons';
+
 import {
   alertCircleOutline,
   analyticsOutline,
   barChartOutline,
+  businessOutline,
   cartOutline,
   cashOutline,
   cubeOutline,
   layersOutline,
   peopleOutline,
   pieChartOutline,
-  pricetagsOutline,
   receiptOutline,
   settingsOutline,
   statsChartOutline,
@@ -25,13 +36,25 @@ import { AuthSessionService } from '../../core/services/auth-session.service';
   standalone: true,
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
-  imports: [CommonModule, IonContent, IonButton, IonIcon],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonSegment,
+    IonSegmentButton,
+    IonLabel,
+  ],
 })
 export class DashboardPage {
   protected readonly user = this.authSession.getCurrentUser();
 
+  protected activeView = 'overview';
+
   constructor(private readonly authSession: AuthSessionService) {
     addIcons({
+      businessOutline,
       cashOutline,
       receiptOutline,
       cubeOutline,
@@ -43,7 +66,6 @@ export class DashboardPage {
       cartOutline,
       peopleOutline,
       barChartOutline,
-      pricetagsOutline,
       settingsOutline,
     });
   }
