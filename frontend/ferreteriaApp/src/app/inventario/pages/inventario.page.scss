@@ -1,4 +1,187 @@
-.module-content { --background: #f4f8ff; }
-.module-card { margin: 14px; border: 1px solid #dce8fa; border-radius: 14px; }
-h2 { margin: 0 0 6px; color: #133b66; font-size: 1.05rem; font-weight: 800; }
-p { margin: 0; color: #4b6788; font-size: 0.84rem; }
+.inventario-content {
+  --background: #f4f7fc;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+.inventario-shell {
+  max-width: 1400px;
+  margin: 0 auto;
+
+  padding-top: 95px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 110px;
+}
+
+/* =========================
+   HERO HEADER (IGUAL TU ESTILO REPORTES)
+========================= */
+.hero-header {
+  position: relative;
+  overflow: hidden;
+
+  margin-bottom: 24px;
+  padding: 30px;
+
+  border-radius: 28px;
+
+  color: white;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 255, 255, 0.12),
+      transparent 40%
+    ),
+    linear-gradient(135deg, #071447 0%, #0a1a5c 40%, #17317f 80%);
+
+  box-shadow:
+    0 20px 45px rgba(10, 26, 92, 0.25),
+    0 8px 20px rgba(10, 26, 92, 0.12);
+}
+
+.hero-header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+.hero-header p {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 700px;
+  line-height: 1.6;
+}
+
+.hero-badge {
+  display: inline-flex;
+  gap: 8px;
+
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  font-size: 13px;
+  font-weight: 700;
+
+  margin-bottom: 14px;
+}
+
+/* =========================
+   KPI GRID (ERP STYLE)
+========================= */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+
+  border-radius: 24px;
+  padding: 24px;
+
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+
+  transition: transform 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+}
+
+.kpi-card span {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.kpi-card strong {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+/* COLORES KPI */
+.kpi-total {
+  background: linear-gradient(135deg, #071447, #0a1a5c, #2754d8);
+}
+
+.kpi-warning {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+
+.kpi-danger {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+}
+
+.kpi-success {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+/* =========================
+   FILTER / ALERT CARD
+========================= */
+.filters-card {
+  background: white;
+
+  border-radius: 24px;
+  border: 1px solid #dce8fa;
+
+  padding: 24px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0a1a5c;
+
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #4d6485;
+
+  margin-bottom: 18px;
+}
+
+/* =========================
+   LISTA
+========================= */
+ion-item h3 {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+ion-item p {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+.empty-state {
+  text-align: center;
+  padding: 20px;
+
+  color: #94a3b8;
+}

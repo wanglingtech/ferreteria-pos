@@ -1,10 +1,67 @@
-<ion-content class="module-content">
-  <ion-card class="module-card">
-    <ion-card-content>
-      <ion-text>
-        <h2>Inventario</h2>
-        <p>Interfaz de control de stock y almacén.</p>
-      </ion-text>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="inventario-content">
+  <!-- WRAPPER PRINCIPAL -->
+  <div class="inventario-shell">
+    <!-- HERO HEADER -->
+    <div class="hero-header">
+      <div class="hero-badge">📦 Módulo de Inventario</div>
+
+      <h1>Inventario</h1>
+
+      <p>
+        Supervisión en tiempo real del almacén, valorización total y alertas de
+        reabastecimiento.
+      </p>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-total">
+        <span>Total productos</span>
+        <strong>{{ resumen?.totalProductos ?? 0 }}</strong>
+      </div>
+
+      <div class="kpi-card kpi-warning">
+        <span>Stock bajo</span>
+        <strong>{{ resumen?.productosStockBajo ?? 0 }}</strong>
+      </div>
+
+      <div class="kpi-card kpi-danger">
+        <span>Sin stock</span>
+        <strong>{{ resumen?.productosSinStock ?? 0 }}</strong>
+      </div>
+
+      <div class="kpi-card kpi-success">
+        <span>Valor inventario</span>
+        <strong
+          >S/ {{ resumen?.valorizacionTotal ?? 0 | number:'1.2-2' }}</strong
+        >
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="filters-card">
+      <div class="card-title">⚠️ Alertas de reabastecimiento</div>
+
+      <p class="subtitle">
+        Productos que requieren atención inmediata para evitar quiebres de stock
+      </p>
+
+      <div class="table-wrapper">
+        <ion-list *ngIf="lowStockProducts.length > 0; else empty">
+          <ion-item *ngFor="let item of lowStockProducts">
+            <ion-label>
+              <h3>{{ item.name }}</h3>
+              <p>Stock: {{ item.stock }} · Mínimo: {{ item.minStock }}</p>
+            </ion-label>
+
+            <ion-badge color="danger">Crítico</ion-badge>
+          </ion-item>
+        </ion-list>
+
+        <ng-template #empty>
+          <div class="empty-state">No hay productos en estado crítico</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
 </ion-content>

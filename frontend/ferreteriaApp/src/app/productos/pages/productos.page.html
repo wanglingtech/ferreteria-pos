@@ -1,6 +1,8 @@
+<!-- QUITAMOS el botón del toolbar -->
+
 <ion-content [fullscreen]="true" class="products-content">
   <div class="products-shell">
-    <!-- HERO (FIX TOPBAR OVERLAP SAFE) -->
+    <!-- HERO -->
     <section class="hero-section">
       <div class="hero-info">
         <h1>Productos</h1>
@@ -22,12 +24,6 @@
 
       <ion-button fill="solid" class="filter-btn" (click)="openFilters()">
         <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
-      </ion-button>
-
-      <!-- BOTÓN RESPONSIVE AGREGAR -->
-      <ion-button class="add-btn" (click)="addProduct()">
-        <ion-icon name="add-outline" slot="start"></ion-icon>
-        Agregar
       </ion-button>
     </section>
 
@@ -62,7 +58,6 @@
 
           <div class="product-info">
             <h3>{{ producto.nombre }}</h3>
-
             <span class="sku">SKU: {{ producto.sku }}</span>
 
             <div class="meta-row">
@@ -89,7 +84,6 @@
         </div>
       </ng-container>
 
-      <!-- EMPTY STATE REAL -->
       <ng-template #emptyState>
         <div class="empty-state">
           <ion-icon name="cube-outline"></ion-icon>
@@ -98,4 +92,10 @@
       </ng-template>
     </section>
   </div>
+
+  <!-- 🔵 BOTÓN AGREGAR REUBICADO (FAB IZQUIERDO) -->
+  <ion-button class="fab-add" (click)="addProduct()">
+    <ion-icon name="add-outline"></ion-icon>
+    Agregar
+  </ion-button>
 </ion-content>
