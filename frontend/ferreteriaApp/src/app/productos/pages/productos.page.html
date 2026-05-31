@@ -1,7 +1,6 @@
 <ion-content [fullscreen]="true" class="products-content">
   <div class="products-shell">
-    <!-- HEADER -->
-
+    <!-- HERO (FIX TOPBAR OVERLAP SAFE) -->
     <section class="hero-section">
       <div class="hero-info">
         <h1>Productos</h1>
@@ -9,24 +8,36 @@
       </div>
     </section>
 
-    <!-- SEARCH -->
-
+    <!-- TOOLBAR -->
     <section class="toolbar-section">
       <div class="search-box">
-        <ion-icon name="search-outline" class="search-icon"> </ion-icon>
+        <ion-icon name="search-outline" class="search-icon"></ion-icon>
 
-        <input type="text" placeholder="Buscar producto..." />
+        <input
+          type="text"
+          placeholder="Buscar producto..."
+          (input)="onSearch($event)"
+        />
       </div>
 
-      <ion-button fill="solid" class="filter-btn">
-        <ion-icon slot="icon-only" name="filter-outline"> </ion-icon>
+      <ion-button fill="solid" class="filter-btn" (click)="openFilters()">
+        <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
+      </ion-button>
+
+      <!-- BOTÓN RESPONSIVE AGREGAR -->
+      <ion-button class="add-btn" (click)="addProduct()">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Agregar
       </ion-button>
     </section>
 
-    <!-- TABS -->
-
+    <!-- SEGMENT -->
     <section class="segment-wrapper">
-      <ion-segment mode="md" value="all">
+      <ion-segment
+        mode="md"
+        [value]="selectedFilter()"
+        (ionChange)="onFilterChange($event.detail.value)"
+      >
         <ion-segment-button value="all">
           <ion-label>Todos</ion-label>
         </ion-segment-button>
@@ -41,74 +52,50 @@
       </ion-segment>
     </section>
 
-    <!-- PRODUCT LIST -->
-
+    <!-- LISTA -->
     <section class="products-list">
-      <!-- PRODUCTO -->
+      <ng-container *ngIf="filteredProducts.length > 0; else emptyState">
+        <div class="product-card" *ngFor="let producto of filteredProducts">
+          <div class="product-image">
+            <img [src]="producto.imagenUrl" [alt]="producto.nombre" />
+          </div>
 
-      <div class="product-card">
-        <div class="product-image">
-          <img
-            src="https://images.unsplash.com/photo-1504148455328-c376907d081c"
-            alt="producto"
-          />
-        </div>
+          <div class="product-info">
+            <h3>{{ producto.nombre }}</h3>
 
-        <div class="product-info">
-          <h3>Taladro Percutor Bosch</h3>
+            <span class="sku">SKU: {{ producto.sku }}</span>
 
-          <span class="sku"> SKU: TLD-001 </span>
+            <div class="meta-row">
+              <div
+                class="stock-badge"
+                [ngClass]="getStockClass(producto.stock)"
+              >
+                Stock: {{ producto.stock }}
+              </div>
 
-          <div class="meta-row">
-            <div class="stock-badge">Stock: 25</div>
+              <div class="price">S/ {{ producto.precio | number:'1.2-2' }}</div>
+            </div>
+          </div>
 
-            <div class="price">S/ 399.90</div>
+          <div class="actions">
+            <ion-button
+              fill="clear"
+              class="edit-btn"
+              (click)="editProduct(producto)"
+            >
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
           </div>
         </div>
+      </ng-container>
 
-        <div class="actions">
-          <ion-button fill="clear" class="edit-btn">
-            <ion-icon name="create-outline"> </ion-icon>
-          </ion-button>
+      <!-- EMPTY STATE REAL -->
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <ion-icon name="cube-outline"></ion-icon>
+          <p>No hay productos disponibles</p>
         </div>
-      </div>
-
-      <!-- PRODUCTO -->
-
-      <div class="product-card">
-        <div class="product-image">
-          <img
-            src="https://images.unsplash.com/photo-1586864387967-d02ef85d93e8"
-            alt="producto"
-          />
-        </div>
-
-        <div class="product-info">
-          <h3>Martillo Profesional</h3>
-
-          <span class="sku"> SKU: MRT-015 </span>
-
-          <div class="meta-row">
-            <div class="stock-badge warning">Stock: 3</div>
-
-            <div class="price">S/ 35.00</div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <ion-button fill="clear" class="edit-btn">
-            <ion-icon name="create-outline"> </ion-icon>
-          </ion-button>
-        </div>
-      </div>
+      </ng-template>
     </section>
   </div>
-
-  <!-- FAB -->
-
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button class="add-product-btn">
-      <ion-icon name="add-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 </ion-content>

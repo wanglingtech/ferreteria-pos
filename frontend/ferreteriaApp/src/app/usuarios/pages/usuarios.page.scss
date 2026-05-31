@@ -716,3 +716,184 @@
     font-size: 0.9rem;
   }
 }
+
+/* =====================================================
+   MODAL CREAR USUARIO
+===================================================== */
+
+.modal-create-user {
+  --backdrop-opacity: 0.4;
+}
+
+.modal-header {
+  --background: linear-gradient(135deg, #071447 0%, #0a1a5c 35%, #17317f 72%, #2754d8 100%);
+  --border-bottom: none;
+}
+
+.modal-toolbar {
+  --background: transparent;
+  --border-bottom: none;
+  --min-height: 60px;
+}
+
+.modal-toolbar ion-title {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.modal-toolbar ion-button {
+  --color: #ffffff;
+}
+
+.modal-content {
+  --background: #f4f7fc;
+}
+
+/* =====================================================
+   CONTENEDOR FORMULARIO
+===================================================== */
+
+.form-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-item {
+  --background: #ffffff;
+  --background-focused: #fafbff;
+  --border-bottom: 1px solid #dce8fa;
+  --highlight-color-focus: #0a1a5c;
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.form-item ion-label {
+  color: #4a5a7a;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-item ion-input,
+.form-item ion-select {
+  color: #0a1a5c;
+  font-weight: 500;
+}
+
+.form-item ion-input::placeholder,
+.form-item ion-select::placeholder {
+  color: #9fb3d0;
+}
+
+/* =====================================================
+   MENSAJES DE ERROR
+===================================================== */
+
+.error-message {
+  display: block;
+  margin-top: 6px;
+  margin-left: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.error-message p {
+  margin: 2px 0;
+}
+
+/* =====================================================
+   ACCIONES DEL FORMULARIO
+===================================================== */
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.form-actions ion-button {
+  --border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  height: 48px;
+}
+
+.form-actions ion-button[fill="outline"] {
+  --border-color: #d9e5fb;
+  --color: #0a1a5c;
+}
+
+.form-actions ion-button:not([fill="outline"]) {
+  --background: #0a1a5c;
+}
+
+.form-actions ion-button[disabled] {
+  opacity: 0.6;
+}
+
+/* =====================================================
+   LOADING STATE
+===================================================== */
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.loading-state ion-spinner {
+  --color: #0a1a5c;
+}
+
+.loading-state p {
+  color: #4a5a7a;
+  font-weight: 600;
+}
+
+/* =====================================================
+   RESPONSIVE MODAL
+===================================================== */
+
+/* Tablets - modal en 75% de altura */
+@media (max-width: 1024px) {
+  .form-container {
+    padding: 16px;
+  }
+}
+
+/* Móviles - modal en full screen */
+@media (max-width: 768px) {
+  .modal-create-user {
+    --height: 95%;
+  }
+
+  .form-container {
+    padding: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions ion-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 14px;
+  }
+
+  .form-item {
+    margin-bottom: 12px;
+  }
+
+  .modal-toolbar ion-title {
+    font-size: 16px;
+  }
+}

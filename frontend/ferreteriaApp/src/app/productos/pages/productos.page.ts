@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 import {
   IonButton,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonIcon,
   IonLabel,
   IonSegment,
@@ -14,7 +13,6 @@ import {
 } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
-
 import {
   addOutline,
   createOutline,
@@ -23,7 +21,10 @@ import {
   searchOutline,
 } from 'ionicons/icons';
 
-interface ProductoViewModel {
+/**
+ * CONTRATO REAL (alineado a backend Prisma)
+ */
+interface Producto {
   id: number;
   sku: string;
   nombre: string;
@@ -41,60 +42,23 @@ interface ProductoViewModel {
   imports: [
     CommonModule,
     FormsModule,
-
     IonContent,
     IonButton,
-
     IonIcon,
-
     IonSegment,
     IonSegmentButton,
     IonLabel,
-
-    IonFab,
-    IonFabButton,
   ],
 })
 export class ProductosPage {
-  protected readonly search = signal('');
+  private http = inject(HttpClient);
 
-  protected readonly selectedFilter = signal<'all' | 'active' | 'inactive'>(
-    'all',
-  );
+  private API_URL = '/api/productos';
 
-  /**
-   * TEMPORAL
-   * Luego se reemplaza por la respuesta del backend
-   */
-  protected readonly productos = signal<ProductoViewModel[]>([
-    {
-      id: 1,
-      sku: 'TLD-001',
-      nombre: 'Taladro Percutor Bosch',
-      precio: 399.9,
-      stock: 25,
-      activo: true,
-      imagenUrl: 'https://images.unsplash.com/photo-1504148455328-c376907d081c',
-    },
-    {
-      id: 2,
-      sku: 'MRT-015',
-      nombre: 'Martillo Profesional',
-      precio: 35,
-      stock: 3,
-      activo: true,
-      imagenUrl: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8',
-    },
-    {
-      id: 3,
-      sku: 'DST-020',
-      nombre: 'Destornillador Industrial',
-      precio: 12.5,
-      stock: 0,
-      activo: false,
-      imagenUrl: 'https://images.unsplash.com/photo-1565793298595-6a879b1d9492',
-    },
-  ]);
+  search = signal('');
+  selectedFilter = signal<'all' | 'active' | 'inactive'>('all');
+
+  productos = signal<Producto[]>([]);
 
   constructor() {
     addIcons({
@@ -104,63 +68,54 @@ export class ProductosPage {
       addOutline,
       cubeOutline,
     });
+
+    this.loadProducts();
   }
 
-  protected onSearch(event: Event): void {
+  /**
+   * 🔥 BACKEND REAL
+   * GET /productos?search=&status=
+   */
+  loadProducts(): void {
+    const params: any = {
+      search: this.search(),
+      status: this.selectedFilter(),
+    };
+
+    this.http.get<Producto[]>(this.API_URL, { params }).subscribe({
+      next: (data) => this.productos.set(data),
+      error: (err) => console.error('Error cargando productos', err),
+    });
+  }
+
+  onSearch(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-
     this.search.set(value);
+    this.loadProducts();
   }
 
-  protected onFilterChange(value: 'all' | 'active' | 'inactive'): void {
+  onFilterChange(value: any): void {
     this.selectedFilter.set(value);
-
-    /**
-     * Aquí después llamas al backend
-     *
-     * GET /productos?isActive=true
-     * GET /productos?isActive=false
-     */
+    this.loadProducts();
   }
 
-  protected openFilters(): void {
+  openFilters(): void {
     console.log('Abrir filtros avanzados');
   }
 
-  protected addProduct(): void {
-    console.log('Abrir modal crear producto');
+  addProduct(): void {
+    console.log('Ir a formulario crear producto');
   }
 
-  protected editProduct(producto: ProductoViewModel): void {
-    console.log('Editar producto', producto);
+  editProduct(producto: Producto): void {
+    console.log('Editar producto', producto.id);
   }
 
-  protected getStockClass(stock: number): string {
-    if (stock <= 5) {
-      return 'warning';
-    }
-
-    return 'success';
+  getStockClass(stock: number): string {
+    return stock <= 5 ? 'warning' : '';
   }
 
-  protected get filteredProducts(): ProductoViewModel[] {
-    const search = this.search().toLowerCase().trim();
-
-    const filter = this.selectedFilter();
-
-    return this.productos().filter((producto) => {
-      const matchSearch =
-        producto.nombre.toLowerCase().includes(search) ||
-        producto.sku.toLowerCase().includes(search);
-
-      const matchFilter =
-        filter === 'all'
-          ? true
-          : filter === 'active'
-            ? producto.activo
-            : !producto.activo;
-
-      return matchSearch && matchFilter;
-    });
+  get filteredProducts(): Producto[] {
+    return this.productos();
   }
 }
