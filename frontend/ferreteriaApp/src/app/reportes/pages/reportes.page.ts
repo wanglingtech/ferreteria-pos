@@ -13,6 +13,12 @@ import {
   statsChartOutline,
   downloadOutline,
   trendingUpOutline,
+  calculatorOutline,
+  documentTextOutline,
+  peopleOutline,
+  walletOutline,
+  receiptOutline,
+  cashOutline,
 } from 'ionicons/icons';
 
 @Component({
@@ -38,6 +44,12 @@ export class ReportesPage {
       statsChartOutline,
       downloadOutline,
       trendingUpOutline,
+      calculatorOutline,
+      documentTextOutline,
+      peopleOutline,
+      walletOutline,
+      receiptOutline,
+      cashOutline,
     });
   }
 
