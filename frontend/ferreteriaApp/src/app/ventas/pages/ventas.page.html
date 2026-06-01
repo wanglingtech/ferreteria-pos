@@ -1,10 +1,136 @@
-<ion-content class="module-content">
-  <ion-card class="module-card">
-    <ion-card-content>
-      <ion-text>
-        <h2>Ventas</h2>
-        <p>Interfaz de operaciones de venta.</p>
-      </ion-text>
-    </ion-card-content>
-  </ion-card>
+<ion-content [fullscreen]="true" class="ventas-content">
+  <div class="ventas-shell">
+    <!-- HERO -->
+    <section class="hero-section">
+      <div class="hero-badge">Punto de Venta</div>
+
+      <h1>Nueva Venta</h1>
+
+      <p>
+        Registra ventas, controla productos seleccionados y procesa
+        transacciones en tiempo real.
+      </p>
+    </section>
+
+    <!-- BUSCADOR -->
+    <section class="search-card">
+      <div class="card-title">Buscar Producto</div>
+
+      <div class="search-box">
+        <ion-icon name="search-outline"></ion-icon>
+
+        <input
+          type="text"
+          placeholder="Buscar por nombre o SKU..."
+          (input)="onSearch($event)"
+        />
+      </div>
+
+      <div class="search-results" *ngIf="filteredProducts.length > 0">
+        <div
+          class="search-item"
+          *ngFor="let product of filteredProducts"
+          (click)="addToCart(product)"
+        >
+          <div>
+            <strong>{{ product.nombre }}</strong>
+            <span>SKU: {{ product.sku }}</span>
+          </div>
+
+          <div class="search-price">
+            S/ {{ product.precio | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLIENTE -->
+    <section class="client-card">
+      <div class="card-title">Cliente (Opcional)</div>
+
+      <input
+        class="client-input"
+        type="text"
+        placeholder="Nombre del cliente"
+        [(ngModel)]="clienteNombre"
+      />
+    </section>
+
+    <!-- CARRITO -->
+    <section class="cart-card">
+      <div class="card-title">Productos Seleccionados</div>
+
+      <ng-container *ngIf="cart.length > 0; else emptyCart">
+        <div class="cart-item" *ngFor="let item of cart">
+          <div class="cart-info">
+            <h3>{{ item.nombre }}</h3>
+
+            <span> S/ {{ item.precio | number:'1.2-2' }} </span>
+          </div>
+
+          <div class="cart-actions">
+            <input
+              type="number"
+              min="1"
+              [value]="item.cantidad"
+              (change)="updateQuantity(item,$event)"
+            />
+
+            <div class="line-total">
+              S/ {{ item.precio * item.cantidad | number:'1.2-2' }}
+            </div>
+
+            <ion-button
+              fill="clear"
+              color="danger"
+              (click)="removeItem(item.id)"
+            >
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #emptyCart>
+        <div class="empty-state">
+          <ion-icon name="cart-outline"></ion-icon>
+          <p>No hay productos agregados.</p>
+        </div>
+      </ng-template>
+    </section>
+
+    <!-- RESUMEN -->
+    <section class="summary-card">
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <strong>S/ {{ subtotal | number:'1.2-2' }}</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>IGV (18%)</span>
+        <strong>S/ {{ igv | number:'1.2-2' }}</strong>
+      </div>
+
+      <div class="summary-row total">
+        <span>Total</span>
+        <strong>S/ {{ total | number:'1.2-2' }}</strong>
+      </div>
+    </section>
+
+    <!-- ACCIONES -->
+    <section class="actions-section">
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="save-btn"
+        (click)="guardarVenta()"
+      >
+        Guardar
+      </ion-button>
+
+      <ion-button expand="block" class="pay-btn" (click)="cobrarVenta()">
+        Cobrar
+      </ion-button>
+    </section>
+  </div>
 </ion-content>
