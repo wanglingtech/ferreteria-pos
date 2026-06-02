@@ -4,26 +4,17 @@
     <section class="hero-section">
       <div class="hero-left">
         <div class="hero-badge">🏬 Catálogo Operativo</div>
-
         <h1>Productos</h1>
-
         <p>Gestión completa del catálogo, stock y precios en tiempo real.</p>
-
-        <!-- KPIS -->
         <div class="hero-kpis">
           <div class="kpi">
-            <span>Total</span>
-            <strong>{{ totalProductos }}</strong>
+            <span>Total</span><strong>{{ totalProductos }}</strong>
           </div>
-
           <div class="kpi">
-            <span>Activos</span>
-            <strong>{{ activos }}</strong>
+            <span>Activos</span><strong>{{ activos }}</strong>
           </div>
-
           <div class="kpi">
-            <span>Bajo stock</span>
-            <strong>{{ bajoStock }}</strong>
+            <span>Bajo stock</span><strong>{{ bajoStock }}</strong>
           </div>
         </div>
       </div>
@@ -33,18 +24,15 @@
     <section class="toolbar-section">
       <div class="search-box">
         <ion-icon name="search-outline" class="search-icon"></ion-icon>
-
         <input
           type="text"
           placeholder="Buscar producto o SKU..."
           (input)="onSearch($event)"
         />
       </div>
-
       <ion-button fill="solid" class="filter-btn" (click)="openFilters()">
         <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
       </ion-button>
-
       <ion-button class="add-btn" (click)="addProduct()">
         <ion-icon name="add-outline"></ion-icon>
       </ion-button>
@@ -60,30 +48,30 @@
         <ion-segment-button value="all">
           <ion-label>Todos</ion-label>
         </ion-segment-button>
-
         <ion-segment-button value="active">
           <ion-label>Activos</ion-label>
         </ion-segment-button>
-
         <ion-segment-button value="inactive">
           <ion-label>Inactivos</ion-label>
         </ion-segment-button>
       </ion-segment>
     </section>
 
-    <!-- LISTA -->
+    <!-- LISTA DE PRODUCTOS -->
     <section class="products-list">
-      <ng-container *ngIf="filteredProducts.length > 0; else emptyState">
+      <ng-container
+        *ngIf="!isLoading() && filteredProducts.length > 0; else loadingOrEmpty"
+      >
         <div class="product-card" *ngFor="let producto of filteredProducts">
           <div class="product-image">
-            <img [src]="producto.imagenUrl" [alt]="producto.nombre" />
+            <img
+              [src]="producto.imageUrl || 'assets/default-product.png'"
+              [alt]="producto.name"
+            />
           </div>
-
           <div class="product-info">
-            <h3>{{ producto.nombre }}</h3>
-
-            <span class="sku"> SKU: {{ producto.sku }} </span>
-
+            <h3>{{ producto.name }}</h3>
+            <span class="sku">SKU: {{ producto.sku }}</span>
             <div class="meta-row">
               <div
                 class="stock-badge"
@@ -91,12 +79,19 @@
               >
                 Stock: {{ producto.stock }}
               </div>
-
-              <div class="price">S/ {{ producto.precio | number:'1.2-2' }}</div>
+              <div class="price">S/ {{ producto.price | number:'1.2-2' }}</div>
+              <div
+                class="status"
+                [ngClass]="{'active-status': producto.isActive, 'inactive-status': !producto.isActive}"
+              >
+                {{ producto.isActive ? 'Activo' : 'Inactivo' }}
+              </div>
+            </div>
+            <div class="category" *ngIf="producto.category">
+              Categoría: {{ producto.category.name }}
             </div>
           </div>
-
-          <div class="actions">
+          <div class="actions" *ngIf="isAdmin()">
             <ion-button
               fill="clear"
               class="edit-btn"
@@ -104,16 +99,164 @@
             >
               <ion-icon name="create-outline"></ion-icon>
             </ion-button>
+            <ion-button
+              fill="clear"
+              class="delete-btn"
+              (click)="deleteProduct(producto)"
+            >
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
           </div>
         </div>
       </ng-container>
-
-      <ng-template #emptyState>
-        <div class="empty-state">
+      <ng-template #loadingOrEmpty>
+        <div class="loading-state" *ngIf="isLoading()">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>Cargando productos...</p>
+        </div>
+        <div
+          class="empty-state"
+          *ngIf="!isLoading() && filteredProducts.length === 0"
+        >
           <ion-icon name="cube-outline"></ion-icon>
           <p>No hay productos disponibles</p>
         </div>
       </ng-template>
     </section>
   </div>
+
+  <!-- MODAL PARA CREAR/EDITAR PRODUCTO -->
+  <ion-modal
+    #productModal
+    [breakpoints]="[0, 0.6, 0.9]"
+    [initialBreakpoint]="0.9"
+    class="product-modal"
+  >
+    <ng-template>
+      <ion-header class="modal-header">
+        <ion-toolbar class="modal-toolbar">
+          <ion-title
+            >{{ isEditing() ? 'Editar Producto' : 'Nuevo Producto' }}</ion-title
+          >
+          <ion-button slot="end" fill="clear" (click)="closeModal()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="modal-content">
+        <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
+          <!-- SKU (deshabilitado si es edición) -->
+          <ion-item class="form-item">
+            <ion-label position="floating">SKU *</ion-label>
+            <ion-input
+              formControlName="sku"
+              placeholder="Código único"
+              [readonly]="isEditing()"
+            ></ion-input>
+          </ion-item>
+
+          <!-- Nombre -->
+          <ion-item class="form-item">
+            <ion-label position="floating">Nombre *</ion-label>
+            <ion-input
+              formControlName="nombre"
+              placeholder="Nombre del producto"
+            ></ion-input>
+          </ion-item>
+
+          <!-- Descripción -->
+          <ion-item class="form-item">
+            <ion-label position="floating">Descripción</ion-label>
+            <ion-textarea formControlName="descripcion" rows="3"></ion-textarea>
+          </ion-item>
+
+          <!-- Precio -->
+          <ion-item class="form-item">
+            <ion-label position="floating">Precio (S/) *</ion-label>
+            <ion-input
+              type="number"
+              formControlName="precio"
+              step="0.01"
+            ></ion-input>
+          </ion-item>
+
+          <!-- Stock y stock mínimo -->
+          <div class="row-two-cols">
+            <ion-item class="form-item">
+              <ion-label position="floating">Stock actual *</ion-label>
+              <ion-input
+                type="number"
+                formControlName="stock"
+                step="1"
+              ></ion-input>
+            </ion-item>
+            <ion-item class="form-item">
+              <ion-label position="floating">Stock mínimo *</ion-label>
+              <ion-input
+                type="number"
+                formControlName="stockMinimo"
+                step="1"
+              ></ion-input>
+            </ion-item>
+          </div>
+
+          <!-- Categoría -->
+          <ion-item class="form-item">
+            <ion-label position="floating">Categoría</ion-label>
+            <ion-select formControlName="categoriaId" interface="popover">
+              <ion-select-option [value]="null"
+                >Sin categoría</ion-select-option
+              >
+              <ion-select-option
+                *ngFor="let cat of categorias()"
+                [value]="cat.id"
+                >{{ cat.name }}</ion-select-option
+              >
+            </ion-select>
+          </ion-item>
+
+          <!-- URL de imagen -->
+          <ion-item class="form-item">
+            <ion-label position="floating">URL de imagen</ion-label>
+            <ion-input
+              formControlName="imagenUrl"
+              placeholder="https://..."
+            ></ion-input>
+          </ion-item>
+
+          <!-- Vista previa -->
+          <div
+            class="image-preview"
+            *ngIf="productForm.get('imagenUrl')?.value"
+          >
+            <p>Vista previa:</p>
+            <img
+              [src]="productForm.get('imagenUrl')?.value"
+              alt="preview"
+              (error)="productForm.get('imagenUrl')?.setErrors({invalidUrl:true})"
+            />
+          </div>
+
+          <div class="form-actions">
+            <ion-button expand="block" fill="outline" (click)="closeModal()"
+              >Cancelar</ion-button
+            >
+            <ion-button
+              expand="block"
+              type="submit"
+              [disabled]="productForm.invalid || formSubmitting()"
+            >
+              <ion-spinner
+                name="crescent"
+                *ngIf="formSubmitting()"
+                slot="start"
+              ></ion-spinner>
+              {{ formSubmitting() ? 'Guardando...' : (isEditing() ? 'Actualizar'
+              : 'Crear') }}
+            </ion-button>
+          </div>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

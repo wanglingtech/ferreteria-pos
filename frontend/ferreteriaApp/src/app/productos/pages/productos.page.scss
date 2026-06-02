@@ -286,3 +286,67 @@
     height: 62px;
   }
 }
+
+/* MODAL ESTILOS */
+.product-modal {
+  --backdrop-opacity: 0.4;
+}
+.modal-header {
+  --background: linear-gradient(135deg, #071447 0%, #0a1a5c 100%);
+}
+.modal-toolbar {
+  --background: transparent;
+}
+.modal-content {
+  --background: #f4f7fc;
+}
+.form-item {
+  --background: white;
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+.row-two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.image-preview {
+  margin: 16px 0;
+  text-align: center;
+  img {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+.delete-btn {
+  --color: #dc2626;
+}
+.status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+}
+.active-status {
+  background: #e8f8ee;
+  color: #15803d;
+}
+.inactive-status {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+@media (max-width: 600px) {
+  .row-two-cols {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
