@@ -6,6 +6,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 import {
   IonButton,
@@ -39,6 +41,7 @@ import {
   closeOutline,
   trashOutline,
   saveOutline,
+  checkmarkCircleOutline,
 } from 'ionicons/icons';
 
 import { ProductosApiService } from '../services/productos-api.service';
@@ -59,6 +62,7 @@ import { AuthSessionService } from '../../core/services/auth-session.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     IonContent,
     IonButton,
     IonIcon,
@@ -80,23 +84,33 @@ import { AuthSessionService } from '../../core/services/auth-session.service';
 })
 export class ProductosPage implements OnInit {
   @ViewChild('productModal') productModal!: IonModal;
+  @ViewChild('filtersModal') filtersModal!: IonModal;
 
-  // Señales
+  // Señales para reactividad
   search = signal('');
   selectedFilter = signal<'all' | 'active' | 'inactive'>('all');
   productos = signal<Producto[]>([]);
   categorias = signal<Categoria[]>([]);
   isLoading = signal(false);
   isEditing = signal(false);
-  formSubmitting = signal(false); // ✅ Agregado
   editingId: number | null = null;
   imagenPreview = signal<string | null>(null);
   isAdmin = signal(false);
 
-  // Formulario
+  // Filtros avanzados
+  filtrosAvanzados = {
+    search: '',
+    categoryId: null as number | null,
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    minStock: null as number | null,
+    status: null as 'active' | 'inactive' | null,
+  };
+
+  // Formulario reactivo
   productForm: FormGroup;
 
-  // Servicios
+  // Inyección de servicios
   private productosApi = inject(ProductosApiService);
   private categoriasApi = inject(CategoriasApiService);
   private authSession = inject(AuthSessionService);
@@ -114,6 +128,7 @@ export class ProductosPage implements OnInit {
       closeOutline,
       trashOutline,
       saveOutline,
+      checkmarkCircleOutline,
     });
 
     this.productForm = this.fb.group({
@@ -131,27 +146,60 @@ export class ProductosPage implements OnInit {
   ngOnInit() {
     const user = this.authSession.getCurrentUser();
     this.isAdmin.set(user?.role === 'ADMIN');
+
     this.cargarProductos();
     this.cargarCategorias();
   }
 
+  // =================== CARGAR DATOS ===================
   cargarProductos() {
     this.isLoading.set(true);
+
+    // Construir filtros combinando segmento y filtros avanzados
     let isActive: boolean | undefined;
     if (this.selectedFilter() === 'active') isActive = true;
     else if (this.selectedFilter() === 'inactive') isActive = false;
 
-    this.productosApi.listar({ search: this.search(), isActive }).subscribe({
-      next: (data) => {
-        this.productos.set(data);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading.set(false);
-        this.mostrarError('Error al cargar productos', err?.error?.message);
-      },
-    });
+    // Si hay filtro de estado en avanzados, sobreescribe
+    if (this.filtrosAvanzados.status === 'active') isActive = true;
+    else if (this.filtrosAvanzados.status === 'inactive') isActive = false;
+
+    // Aquí deberías ampliar tu servicio para aceptar más filtros
+    // Por ahora enviamos solo los básicos
+    this.productosApi
+      .listar({
+        search: this.filtrosAvanzados.search || this.search(),
+        isActive,
+        categoryId: this.filtrosAvanzados.categoryId || undefined,
+      })
+      .subscribe({
+        next: (data) => {
+          // Aplicar filtros adicionales en cliente (precio, stock mínimo)
+          let filtered = data;
+          if (this.filtrosAvanzados.minPrice !== null) {
+            filtered = filtered.filter(
+              (p) => p.price >= this.filtrosAvanzados.minPrice!,
+            );
+          }
+          if (this.filtrosAvanzados.maxPrice !== null) {
+            filtered = filtered.filter(
+              (p) => p.price <= this.filtrosAvanzados.maxPrice!,
+            );
+          }
+          if (this.filtrosAvanzados.minStock !== null) {
+            filtered = filtered.filter(
+              (p) => p.stock >= this.filtrosAvanzados.minStock!,
+            );
+          }
+          this.productos.set(filtered);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoading.set(false);
+          this.mostrarError('Error al cargar productos', err?.error?.message);
+        },
+      });
   }
 
   cargarCategorias() {
@@ -161,23 +209,58 @@ export class ProductosPage implements OnInit {
     });
   }
 
+  // =================== FILTROS ===================
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.search.set(value);
+    this.filtrosAvanzados.search = value;
     this.cargarProductos();
   }
 
-  // ✅ CORREGIDO: acepta SegmentValue (string | number | undefined)
-  onFilterChange(value: string | number | undefined) {
-    const filterStr = String(value ?? 'all') as 'all' | 'active' | 'inactive';
-    this.selectedFilter.set(filterStr);
+  onFilterChange(event: CustomEvent) {
+    const value = event.detail.value as
+      | 'all'
+      | 'active'
+      | 'inactive'
+      | undefined;
+    const newFilter = value || 'all';
+    this.selectedFilter.set(newFilter);
+    // Limpiar filtro de estado en avanzados para no duplicar
+    if (newFilter !== 'all') this.filtrosAvanzados.status = null;
     this.cargarProductos();
   }
 
-  openFilters() {
-    this.mostrarInfo('Filtros avanzados próximamente');
+  openFiltersModal() {
+    this.filtersModal.present();
   }
 
+  closeFiltersModal() {
+    this.filtersModal.dismiss();
+  }
+
+  applyFilters() {
+    this.closeFiltersModal();
+    // Reiniciar el segmento a "todos" porque aplicamos filtro personalizado
+    this.selectedFilter.set('all');
+    this.cargarProductos();
+  }
+
+  resetFilters() {
+    this.filtrosAvanzados = {
+      search: '',
+      categoryId: null,
+      minPrice: null,
+      maxPrice: null,
+      minStock: null,
+      status: null,
+    };
+    this.search.set('');
+    this.selectedFilter.set('all');
+    this.cargarProductos();
+    this.closeFiltersModal();
+  }
+
+  // =================== CRUD ===================
   addProduct() {
     if (!this.isAdmin()) {
       this.mostrarError(
@@ -235,7 +318,7 @@ export class ProductosPage implements OnInit {
       return;
     }
 
-    this.formSubmitting.set(true);
+    this.isLoading.set(true);
     const formValue = this.productForm.value;
 
     if (this.isEditing() && this.editingId) {
@@ -251,13 +334,13 @@ export class ProductosPage implements OnInit {
       };
       this.productosApi.actualizar(this.editingId, payload).subscribe({
         next: (productoActualizado) => {
-          this.formSubmitting.set(false);
+          this.isLoading.set(false);
           this.productModal.dismiss();
           this.actualizarProductoEnLista(productoActualizado);
           this.mostrarExito('Producto actualizado correctamente');
         },
         error: (err) => {
-          this.formSubmitting.set(false);
+          this.isLoading.set(false);
           this.mostrarError('Error al actualizar', err?.error?.message);
         },
       });
@@ -275,13 +358,13 @@ export class ProductosPage implements OnInit {
       };
       this.productosApi.crear(payload).subscribe({
         next: (nuevoProducto) => {
-          this.formSubmitting.set(false);
+          this.isLoading.set(false);
           this.productModal.dismiss();
           this.productos.update((list) => [nuevoProducto, ...list]);
           this.mostrarExito('Producto creado exitosamente');
         },
         error: (err) => {
-          this.formSubmitting.set(false);
+          this.isLoading.set(false);
           this.mostrarError('Error al crear', err?.error?.message);
         },
       });
@@ -289,14 +372,7 @@ export class ProductosPage implements OnInit {
   }
 
   async deleteProduct(producto: Producto) {
-    if (!this.isAdmin()) {
-      this.mostrarError(
-        'Acceso denegado',
-        'Solo administradores pueden eliminar productos',
-      );
-      return;
-    }
-
+    if (!this.isAdmin()) return;
     const alert = await this.alertCtrl.create({
       header: 'Eliminar producto',
       message: `¿Estás seguro de que deseas eliminar "${producto.name}"? Se desactivará.`,
@@ -325,6 +401,38 @@ export class ProductosPage implements OnInit {
     await alert.present();
   }
 
+  // ✅ NUEVO: Activar producto (cambiar isActive a true)
+  async activateProduct(producto: Producto) {
+    if (!this.isAdmin()) return;
+    const alert = await this.alertCtrl.create({
+      header: 'Activar producto',
+      message: `¿Deseas activar "${producto.name}" nuevamente?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Activar',
+          handler: () => {
+            this.isLoading.set(true);
+            this.productosApi
+              .actualizar(producto.id, { isActive: true } as any)
+              .subscribe({
+                next: (productoActivado) => {
+                  this.isLoading.set(false);
+                  this.actualizarProductoEnLista(productoActivado);
+                  this.mostrarExito('Producto activado correctamente');
+                },
+                error: (err) => {
+                  this.isLoading.set(false);
+                  this.mostrarError('Error al activar', err?.error?.message);
+                },
+              });
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
   actualizarProductoEnLista(productoActualizado: Producto) {
     this.productos.update((list) =>
       list.map((p) =>
@@ -333,32 +441,27 @@ export class ProductosPage implements OnInit {
     );
   }
 
-  onImagenUrlChange(url: string) {
-    this.imagenPreview.set(url);
-  }
-
   getStockClass(stock: number): string {
-    const minStock = this.productForm?.get('stockMinimo')?.value || 5;
-    return stock <= minStock ? 'warning' : '';
+    return stock <= (this.productForm?.get('stockMinimo')?.value || 5)
+      ? 'warning'
+      : '';
   }
 
-  // KPIs
+  // =================== KPIs ===================
   get totalProductos(): number {
     return this.productos().length;
   }
-
   get activos(): number {
     return this.productos().filter((p) => p.isActive).length;
   }
-
   get bajoStock(): number {
     return this.productos().filter((p) => p.stock <= p.minStock).length;
   }
-
   get filteredProducts(): Producto[] {
     return this.productos();
   }
 
+  // =================== NOTIFICACIONES ===================
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
       header: titulo,
@@ -369,7 +472,6 @@ export class ProductosPage implements OnInit {
     });
     await toast.present();
   }
-
   private async mostrarExito(mensaje: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,
@@ -379,17 +481,6 @@ export class ProductosPage implements OnInit {
     });
     await toast.present();
   }
-
-  private async mostrarInfo(mensaje: string) {
-    const toast = await this.toastCtrl.create({
-      message: mensaje,
-      duration: 2000,
-      position: 'top',
-      color: 'primary',
-    });
-    await toast.present();
-  }
-
   closeModal() {
     this.productModal.dismiss();
   }

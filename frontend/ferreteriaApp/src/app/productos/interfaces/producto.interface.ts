@@ -41,4 +41,5 @@ export interface UpdateProductoRequest {
   stockMinimo?: number;
   categoriaId?: number | null;
   imagenUrl?: string;
+  isActive?: boolean; // ← AGREGAR para poder activar
 }

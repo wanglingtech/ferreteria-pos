@@ -223,6 +223,8 @@
   display: flex;
   gap: 10px;
   margin-top: 6px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .price {
@@ -250,10 +252,19 @@
 /* ACTIONS */
 .actions {
   margin-left: auto;
+  display: flex;
+  gap: 6px;
 }
 
-.edit-btn {
+.edit-btn,
+.activate-btn {
   --color: #0a1a5c;
+}
+.activate-btn {
+  --color: #16a34a;
+}
+.delete-btn {
+  --color: #dc2626;
 }
 
 /* EMPTY */
@@ -287,7 +298,9 @@
   }
 }
 
-/* MODAL ESTILOS */
+/* =========================
+   MODAL ESTILOS (Producto)
+========================= */
 .product-modal {
   --backdrop-opacity: 0.4;
 }
@@ -320,15 +333,71 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
-.form-actions {
+
+/* ✅ NUEVOS ESTILOS PARA BOTONES DEL MODAL (se aplican al modal de producto) */
+.product-modal .form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  margin-bottom: 32px;
+  padding: 0 8px;
+}
+.product-modal .form-actions ion-button {
+  flex: 1;
+  margin: 0;
+  height: 48px;
+  --border-radius: 12px;
+}
+@media (max-width: 600px) {
+  .product-modal .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .product-modal .form-actions ion-button {
+    width: 100%;
+  }
+}
+
+/* ESTILOS PARA MODAL DE FILTROS */
+.filters-modal {
+  --backdrop-opacity: 0.4;
+}
+.filters-modal .modal-content {
+  --background: #f4f7fc;
+}
+.filters-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.filter-group {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+}
+.filter-group ion-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+.price-range {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.price-range ion-item {
+  flex: 1;
+}
+.filter-actions {
   display: flex;
   gap: 12px;
   margin-top: 20px;
-  margin-bottom: 30px;
 }
-.delete-btn {
-  --color: #dc2626;
+.filter-actions ion-button {
+  flex: 1;
 }
+
 .status {
   font-size: 12px;
   font-weight: 600;
@@ -344,9 +413,13 @@
   background: #fee2e2;
   color: #b91c1c;
 }
+
 @media (max-width: 600px) {
   .row-two-cols {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+  .price-range {
+    flex-direction: column;
   }
 }

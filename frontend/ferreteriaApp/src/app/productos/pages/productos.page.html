@@ -30,10 +30,10 @@
           (input)="onSearch($event)"
         />
       </div>
-      <ion-button fill="solid" class="filter-btn" (click)="openFilters()">
+      <ion-button fill="solid" class="filter-btn" (click)="openFiltersModal()">
         <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
       </ion-button>
-      <ion-button class="add-btn" (click)="addProduct()">
+      <ion-button class="add-btn" (click)="addProduct()" *ngIf="isAdmin()">
         <ion-icon name="add-outline"></ion-icon>
       </ion-button>
     </section>
@@ -43,7 +43,7 @@
       <ion-segment
         mode="md"
         [value]="selectedFilter()"
-        (ionChange)="onFilterChange($event.detail.value)"
+        (ionChange)="onFilterChange($event)"
       >
         <ion-segment-button value="all">
           <ion-label>Todos</ion-label>
@@ -92,6 +92,16 @@
             </div>
           </div>
           <div class="actions" *ngIf="isAdmin()">
+            <!-- Botón Activar (solo si está inactivo) -->
+            <ion-button
+              *ngIf="!producto.isActive"
+              fill="clear"
+              class="activate-btn"
+              (click)="activateProduct(producto)"
+            >
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </ion-button>
+            <!-- Botón Editar (siempre) -->
             <ion-button
               fill="clear"
               class="edit-btn"
@@ -99,6 +109,7 @@
             >
               <ion-icon name="create-outline"></ion-icon>
             </ion-button>
+            <!-- Botón Eliminar (Desactivar) -->
             <ion-button
               fill="clear"
               class="delete-btn"
@@ -145,13 +156,13 @@
       </ion-header>
       <ion-content class="modal-content">
         <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
-          <!-- SKU (deshabilitado si es edición) -->
+          <!-- SKU (solo lectura si edición) -->
           <ion-item class="form-item">
             <ion-label position="floating">SKU *</ion-label>
             <ion-input
               formControlName="sku"
-              placeholder="Código único"
               [readonly]="isEditing()"
+              placeholder="Código único"
             ></ion-input>
           </ion-item>
 
@@ -224,7 +235,7 @@
             ></ion-input>
           </ion-item>
 
-          <!-- Vista previa -->
+          <!-- Vista previa de imagen -->
           <div
             class="image-preview"
             *ngIf="productForm.get('imagenUrl')?.value"
@@ -244,18 +255,124 @@
             <ion-button
               expand="block"
               type="submit"
-              [disabled]="productForm.invalid || formSubmitting()"
+              [disabled]="productForm.invalid || isLoading()"
             >
               <ion-spinner
                 name="crescent"
-                *ngIf="formSubmitting()"
+                *ngIf="isLoading()"
                 slot="start"
               ></ion-spinner>
-              {{ formSubmitting() ? 'Guardando...' : (isEditing() ? 'Actualizar'
-              : 'Crear') }}
+              {{ isLoading() ? 'Guardando...' : (isEditing() ? 'Actualizar' :
+              'Crear') }}
             </ion-button>
           </div>
         </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL PARA FILTROS AVANZADOS -->
+  <ion-modal
+    #filtersModal
+    [breakpoints]="[0, 0.5, 0.8]"
+    [initialBreakpoint]="0.8"
+    class="filters-modal"
+  >
+    <ng-template>
+      <ion-header class="modal-header">
+        <ion-toolbar class="modal-toolbar">
+          <ion-title>Filtros avanzados</ion-title>
+          <ion-button slot="end" fill="clear" (click)="closeFiltersModal()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="modal-content">
+        <div class="filters-container">
+          <!-- Búsqueda (ya existe pero la repetimos para comodidad) -->
+          <div class="filter-group">
+            <ion-label>Buscar por nombre o SKU</ion-label>
+            <ion-input
+              [(ngModel)]="filtrosAvanzados.search"
+              placeholder="Ej: tornillo"
+              clearInput
+            ></ion-input>
+          </div>
+
+          <!-- Categoría -->
+          <div class="filter-group">
+            <ion-label>Categoría</ion-label>
+            <ion-select
+              [(ngModel)]="filtrosAvanzados.categoryId"
+              interface="popover"
+              placeholder="Todas"
+              cancelText="Cancelar"
+            >
+              <ion-select-option [value]="null">Todas</ion-select-option>
+              <ion-select-option
+                *ngFor="let cat of categorias()"
+                [value]="cat.id"
+                >{{ cat.name }}</ion-select-option
+              >
+            </ion-select>
+          </div>
+
+          <!-- Rango de precios -->
+          <div class="filter-group">
+            <ion-label>Rango de precio (S/)</ion-label>
+            <div class="price-range">
+              <ion-item class="form-item">
+                <ion-label position="stacked">Desde</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="filtrosAvanzados.minPrice"
+                  placeholder="0"
+                ></ion-input>
+              </ion-item>
+              <ion-item class="form-item">
+                <ion-label position="stacked">Hasta</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="filtrosAvanzados.maxPrice"
+                  placeholder="999999"
+                ></ion-input>
+              </ion-item>
+            </div>
+          </div>
+
+          <!-- Stock mínimo -->
+          <div class="filter-group">
+            <ion-label>Stock mínimo</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="filtrosAvanzados.minStock"
+              placeholder="0"
+            ></ion-input>
+          </div>
+
+          <!-- Estado (activo/inactivo) -->
+          <div class="filter-group">
+            <ion-label>Estado</ion-label>
+            <ion-select
+              [(ngModel)]="filtrosAvanzados.status"
+              interface="popover"
+              placeholder="Todos"
+            >
+              <ion-select-option [value]="null">Todos</ion-select-option>
+              <ion-select-option value="active">Activos</ion-select-option>
+              <ion-select-option value="inactive">Inactivos</ion-select-option>
+            </ion-select>
+          </div>
+
+          <div class="filter-actions">
+            <ion-button fill="outline" expand="block" (click)="resetFilters()">
+              Limpiar
+            </ion-button>
+            <ion-button expand="block" (click)="applyFilters()">
+              Aplicar filtros
+            </ion-button>
+          </div>
+        </div>
       </ion-content>
     </ng-template>
   </ion-modal>
