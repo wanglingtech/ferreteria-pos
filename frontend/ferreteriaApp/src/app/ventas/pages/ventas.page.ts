@@ -1,10 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
   IonContent,
   IonIcon,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonItem,
+  IonLabel,
+  IonInput,
+  IonText,
   ToastController,
   AlertController,
 } from '@ionic/angular/standalone';
@@ -14,6 +22,9 @@ import {
   searchOutline,
   trashOutline,
   checkmarkCircleOutline,
+  printOutline,
+  shareSocialOutline,
+  closeOutline,
 } from 'ionicons/icons';
 
 import { ProductosApiService } from '../../productos/services/productos-api.service';
@@ -23,6 +34,7 @@ import {
   ProductoParaVenta,
   CartItem,
   CreateVentaRequest,
+  Venta,
 } from '../interfaces/venta.interface';
 
 @Component({
@@ -30,9 +42,25 @@ import {
   standalone: true,
   templateUrl: './ventas.page.html',
   styleUrls: ['./ventas.page.scss'],
-  imports: [CommonModule, FormsModule, IonContent, IonButton, IonIcon],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonModal,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonItem,
+    IonLabel,
+    IonInput,
+    IonText,
+  ],
 })
 export class VentasPage implements OnInit {
+  @ViewChild('resumenModal') resumenModal!: IonModal;
+
   clienteNombre = '';
   searchTerm = '';
   productos = signal<ProductoParaVenta[]>([]);
@@ -40,6 +68,7 @@ export class VentasPage implements OnInit {
   cart = signal<CartItem[]>([]);
   isLoading = signal(false);
   isAdmin = signal(false);
+  ventaConfirmada: Venta | null = null; // para mostrar en el modal
 
   private productosApi = inject(ProductosApiService);
   private ventasApi = inject(VentasApiService);
@@ -53,6 +82,9 @@ export class VentasPage implements OnInit {
       trashOutline,
       cartOutline,
       checkmarkCircleOutline,
+      printOutline,
+      shareSocialOutline,
+      closeOutline,
     });
   }
 
@@ -65,13 +97,13 @@ export class VentasPage implements OnInit {
   cargarProductos() {
     this.productosApi.listar({ isActive: true }).subscribe({
       next: (data) => {
-        // Mapear a formato local
         const mapped = data.map((p) => ({
           id: p.id,
           sku: p.sku,
           nombre: p.name,
           precio: p.price,
           stock: p.stock,
+          imageUrl: p.imageUrl || 'assets/default-product.png',
         }));
         this.productos.set(mapped);
       },
@@ -154,25 +186,33 @@ export class VentasPage implements OnInit {
     return Number((this.subtotal + this.igv).toFixed(2));
   }
 
+  // Guardar: abre resumen para confirmar
   async guardarVenta() {
+    if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
-      this.mostrarError('Carrito vacío', 'Agrega productos antes de guardar');
+      this.mostrarError('Carrito vacío', 'Agrega productos antes de continuar');
       return;
     }
-    await this.procesarVenta(false);
+    // Mostrar modal de resumen (aún sin confirmar)
+    this.ventaConfirmada = null;
+    this.resumenModal.present();
   }
 
+  // Cobrar: mismo flujo pero con enfoque de pago (podríamos cambiar título del botón)
   async cobrarVenta() {
-    if (this.cart().length === 0) {
-      this.mostrarError('Carrito vacío', 'Agrega productos antes de cobrar');
-      return;
-    }
-    await this.procesarVenta(true);
+    await this.guardarVenta(); // misma lógica, pero el modal indicará "Cobrar"
   }
 
-  private async procesarVenta(esCobro: boolean) {
+  // Confirmar la venta (desde el modal)
+  async confirmarVenta() {
+    if (!this.validarCliente()) return;
+    if (this.cart().length === 0) {
+      this.mostrarError('Carrito vacío', 'No hay productos para vender');
+      return;
+    }
+
     const payload: CreateVentaRequest = {
-      clienteNombre: this.clienteNombre.trim() || undefined,
+      clienteNombre: this.clienteNombre.trim(),
       items: this.cart().map((item) => ({
         productoId: item.id,
         cantidad: item.cantidad,
@@ -183,14 +223,14 @@ export class VentasPage implements OnInit {
     this.ventasApi.crear(payload).subscribe({
       next: (venta) => {
         this.isLoading.set(false);
-        const mensaje = esCobro
-          ? 'Venta cobrada exitosamente'
-          : 'Venta guardada como pendiente';
-        this.mostrarExito(mensaje);
+        this.ventaConfirmada = venta;
+        this.mostrarExito('Venta registrada exitosamente');
         this.limpiarCarrito();
-        if (esCobro) {
-          this.imprimirTicket(venta);
-        }
+        // Aquí podrías cerrar el modal y mostrar otro de éxito, pero ya tenemos la ventaConfirmada
+        // Podemos mantener el modal abierto y cambiar su contenido para mostrar el ticket.
+        // Por simplicidad, cerramos y mostramos un toast con opción de imprimir.
+        this.resumenModal.dismiss();
+        this.mostrarOpcionesPostVenta(venta);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -199,15 +239,120 @@ export class VentasPage implements OnInit {
     });
   }
 
+  private mostrarOpcionesPostVenta(venta: Venta) {
+    // Opcional: alerta con opciones de imprimir/compartir
+    this.alertCtrl
+      .create({
+        header: 'Venta completada',
+        message: `Venta N° ${venta.code} registrada con éxito. ¿Qué deseas hacer?`,
+        buttons: [
+          {
+            text: 'Imprimir',
+            handler: () => this.imprimirTicket(venta),
+          },
+          {
+            text: 'Compartir',
+            handler: () => this.compartirVenta(venta),
+          },
+          {
+            text: 'Cerrar',
+            role: 'cancel',
+          },
+        ],
+      })
+      .then((alert) => alert.present());
+  }
+
+  private validarCliente(): boolean {
+    if (!this.clienteNombre.trim()) {
+      this.mostrarError('Cliente requerido', 'Ingresa el nombre del cliente');
+      return false;
+    }
+    return true;
+  }
+
   limpiarCarrito() {
     this.cart.set([]);
     this.clienteNombre = '';
   }
 
-  imprimirTicket(venta: any) {
-    // Aquí puedes implementar impresión o mostrar resumen
-    console.log('Ticket de venta:', venta);
-    // Podrías abrir un modal con el detalle o redirigir a una página de comprobante
+  imprimirTicket(venta: Venta) {
+    // Implementación simple: abrir ventana de impresión con contenido formateado
+    const contenido = this.generarHTMLTicket(venta);
+    const ventana = window.open('', '_blank');
+    ventana?.document.write(contenido);
+    ventana?.print();
+    ventana?.close();
+  }
+
+  compartirVenta(venta: Venta) {
+    // Simular compartir (puedes usar Web Share API si está disponible)
+    const texto = `Venta ${venta.code} - Total: S/ ${venta.total} - Cliente: ${venta.customerName}`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'Detalle de venta',
+        text: texto,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(texto);
+      this.mostrarExito('Detalle copiado al portapapeles');
+    }
+  }
+
+  private generarHTMLTicket(venta: Venta): string {
+    const itemsHtml = venta.items
+      .map(
+        (item) => `
+      <tr>
+        <td>${item.product.name}</td>
+        <td>${item.quantity}</td>
+        <td>S/ ${item.unitPrice.toFixed(2)}</td>
+        <td>S/ ${item.lineTotal.toFixed(2)}</td>
+      </tr>
+    `,
+      )
+      .join('');
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Ticket de Venta ${venta.code}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { color: #0a1a5c; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+          .total { font-size: 1.2em; font-weight: bold; text-align: right; }
+        </style>
+      </head>
+      <body>
+        <h1>Ferretería July</h1>
+        <p><strong>Venta N°:</strong> ${venta.code}</p>
+        <p><strong>Fecha:</strong> ${new Date(venta.createdAt).toLocaleString()}</p>
+        <p><strong>Vendedor:</strong> ${venta.seller.fullName}</p>
+        <p><strong>Cliente:</strong> ${venta.customerName || 'Consumidor final'}</p>
+        <table>
+          <thead>
+            <tr><th>Producto</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th></tr>
+          </thead>
+          <tbody>${itemsHtml}</tbody>
+        </table>
+        <div class="total">Subtotal: S/ ${venta.subtotal.toFixed(2)}</div>
+        <div class="total">IGV (18%): S/ ${venta.igv.toFixed(2)}</div>
+        <div class="total">Total: S/ ${venta.total.toFixed(2)}</div>
+        <hr />
+        <p>¡Gracias por su compra!</p>
+      </body>
+      </html>
+    `;
+  }
+
+  // Cancelar desde el modal
+  cancelarVenta() {
+    this.resumenModal.dismiss();
+    this.mostrarExito('Venta cancelada');
   }
 
   private async mostrarError(titulo: string, mensaje?: string) {

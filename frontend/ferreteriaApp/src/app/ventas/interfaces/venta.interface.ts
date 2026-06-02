@@ -5,6 +5,7 @@ export interface ProductoParaVenta {
   nombre: string;
   precio: number;
   stock: number;
+  imageUrl?: string; // ✅ añadido
 }
 
 // Ítem del carrito (extiende ProductoParaVenta con cantidad)
@@ -14,7 +15,7 @@ export interface CartItem extends ProductoParaVenta {
 
 // Request para crear una venta (lo que espera el backend)
 export interface CreateVentaRequest {
-  clienteNombre?: string;
+  clienteNombre: string; // ✅ ahora requerido
   items: {
     productoId: number;
     cantidad: number;
@@ -32,6 +33,7 @@ export interface VentaItem {
     id: number;
     name: string;
     sku: string;
+    imageUrl?: string;
   };
 }
 
