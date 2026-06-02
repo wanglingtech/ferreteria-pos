@@ -76,17 +76,17 @@ import {
 })
 export class UsuariosPage implements OnInit {
   @ViewChild('createModal') createModal!: IonModal;
-  @ViewChild('editModal') editModal!: IonModal; // ✅ nuevo modal de edición
+  @ViewChild('editModal') editModal!: IonModal;
   @ViewChild('actionSheet') actionSheet!: IonActionSheet;
 
   protected search = '';
   protected usuarios: Usuario[] = [];
   protected createUserForm: FormGroup;
-  protected editUserForm: FormGroup; // ✅ formulario para editar
+  protected editUserForm: FormGroup;
   protected isLoading = false;
   protected selectedUser: Usuario | null = null;
   protected showActionSheet = false;
-  protected editingUserId: number | null = null; // ✅ id del usuario en edición
+  protected editingUserId: number | null = null;
 
   constructor(
     private readonly usuariosApiService: UsuariosApiService,
@@ -114,13 +114,12 @@ export class UsuariosPage implements OnInit {
       role: ['SELLER', Validators.required],
     });
 
-    // ✅ formulario para editar (sin password obligatorio)
     this.editUserForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       fullName: ['', [Validators.required, Validators.minLength(2)]],
       role: ['SELLER', Validators.required],
-      password: ['', [Validators.minLength(6)]], // opcional
+      password: ['', [Validators.minLength(6)]],
     });
   }
 
@@ -206,44 +205,59 @@ export class UsuariosPage implements OnInit {
 
   protected closeActionSheet(): void {
     this.showActionSheet = false;
-    this.selectedUser = null;
+    // No limpiamos selectedUser aquí porque aún lo necesitamos si se dispara alguna acción
+    // Se limpiará después de cada acción
   }
 
-  // =================== CAMBIAR ESTADO (ACTIVAR/DESACTIVAR) ===================
+  // =================== CAMBIAR ESTADO (ACTIVAR/DESACTIVAR) – CORREGIDO ===================
   protected async toggleUserStatus(): Promise<void> {
     if (!this.selectedUser) return;
+
+    // Cerrar el action sheet antes de mostrar la alerta
     this.showActionSheet = false;
 
     const nuevoEstado = !this.selectedUser.isActive;
     const accion = nuevoEstado ? 'activar' : 'desactivar';
+    const usuarioId = this.selectedUser.id;
+    const usuarioNombre = this.selectedUser.fullName;
 
     const alert = await this.alertController.create({
       header: `${accion.charAt(0).toUpperCase() + accion.slice(1)} usuario`,
-      message: `¿Estás seguro de que deseas ${accion} a ${this.selectedUser.fullName}?`,
+      message: `¿Estás seguro de que deseas ${accion} a ${usuarioNombre}?`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
           text: accion.charAt(0).toUpperCase() + accion.slice(1),
           role: 'confirm',
           handler: () => {
+            // Importante: volver a obtener el usuario actualizado por si cambió mientras se mostraba la alerta
+            const currentUser = this.usuarios.find((u) => u.id === usuarioId);
+            if (!currentUser) {
+              this.mostrarError('Error', 'El usuario ya no existe');
+              return;
+            }
+
             this.isLoading = true;
             this.usuariosApiService
-              .cambiarEstado(this.selectedUser!.id, { isActive: nuevoEstado })
+              .cambiarEstado(usuarioId, { isActive: nuevoEstado })
               .subscribe({
                 next: (usuarioActualizado) => {
                   this.isLoading = false;
                   const index = this.usuarios.findIndex(
                     (u) => u.id === usuarioActualizado.id,
                   );
-                  if (index !== -1) this.usuarios[index] = usuarioActualizado;
+                  if (index !== -1) {
+                    this.usuarios[index] = usuarioActualizado;
+                  }
                   this.mostrarExito(`Usuario ${accion}do exitosamente`);
                   this.selectedUser = null;
                 },
                 error: (error) => {
                   this.isLoading = false;
+                  console.error('Error en cambiarEstado:', error);
                   this.mostrarError(
                     `Error al ${accion} usuario`,
-                    error?.error?.message,
+                    error?.error?.message || error.message,
                   );
                 },
               });
@@ -252,6 +266,12 @@ export class UsuariosPage implements OnInit {
       ],
     });
     await alert.present();
+    // Limpiar selectedUser después de que la alerta se cierre (opcional)
+    alert.onDidDismiss().then(() => {
+      if (this.selectedUser?.id === usuarioId) {
+        // No lo limpiamos porque puede que se haya usado en otra acción
+      }
+    });
   }
 
   // =================== EDITAR USUARIO ===================
@@ -259,13 +279,12 @@ export class UsuariosPage implements OnInit {
     if (!this.selectedUser) return;
     this.showActionSheet = false;
 
-    // Precargar datos en el formulario de edición
     this.editUserForm.patchValue({
       username: this.selectedUser.username,
       email: this.selectedUser.email,
       fullName: this.selectedUser.fullName,
       role: this.selectedUser.role,
-      password: '', // limpiamos el campo password
+      password: '',
     });
     this.editingUserId = this.selectedUser.id;
     this.editModal.present();
@@ -285,7 +304,6 @@ export class UsuariosPage implements OnInit {
 
     this.isLoading = true;
     const payload: UpdateUsuarioRequest = this.editUserForm.value;
-    // Si el password está vacío, lo eliminamos del objeto para no enviarlo
     if (!payload.password) delete payload.password;
 
     this.usuariosApiService.actualizar(this.editingUserId, payload).subscribe({
@@ -306,40 +324,51 @@ export class UsuariosPage implements OnInit {
     });
   }
 
-  // =================== ELIMINAR (DESACTIVAR) ===================
+  // =================== ELIMINAR (DESACTIVAR) – CORREGIDO ===================
   protected async eliminarUsuario(): Promise<void> {
     if (!this.selectedUser) return;
     this.showActionSheet = false;
 
+    const usuarioId = this.selectedUser.id;
+    const usuarioNombre = this.selectedUser.fullName;
+
     const alert = await this.alertController.create({
       header: 'Eliminar usuario',
-      message: `¿Estás seguro de que deseas eliminar a ${this.selectedUser.fullName}? Se desactivará su cuenta.`,
+      message: `¿Estás seguro de que deseas eliminar a ${usuarioNombre}? Se desactivará su cuenta.`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
+            // Verificar que el usuario sigue existiendo
+            const currentUser = this.usuarios.find((u) => u.id === usuarioId);
+            if (!currentUser) {
+              this.mostrarError('Error', 'El usuario ya no existe');
+              return;
+            }
+
             this.isLoading = true;
             this.usuariosApiService
-              .cambiarEstado(this.selectedUser!.id, { isActive: false })
+              .cambiarEstado(usuarioId, { isActive: false })
               .subscribe({
                 next: (usuarioEliminado) => {
                   this.isLoading = false;
                   const index = this.usuarios.findIndex(
                     (u) => u.id === usuarioEliminado.id,
                   );
-                  if (index !== -1) this.usuarios[index] = usuarioEliminado;
-                  this.mostrarExito(
-                    'Usuario eliminado (desactivado) exitosamente',
-                  );
+                  if (index !== -1) {
+                    this.usuarios[index] = usuarioEliminado;
+                  }
+                  this.mostrarExito('Usuario desactivado exitosamente');
                   this.selectedUser = null;
                 },
                 error: (error) => {
                   this.isLoading = false;
+                  console.error('Error al eliminar:', error);
                   this.mostrarError(
                     'Error al eliminar usuario',
-                    error?.error?.message,
+                    error?.error?.message || error.message,
                   );
                 },
               });
@@ -359,7 +388,10 @@ export class UsuariosPage implements OnInit {
         icon: this.selectedUser.isActive
           ? 'lock-closed-outline'
           : 'lock-open-outline',
-        handler: () => this.toggleUserStatus(),
+        handler: () => {
+          // Llamamos directamente al método asíncrono
+          this.toggleUserStatus();
+        },
       },
       {
         text: 'Editar',
@@ -381,7 +413,7 @@ export class UsuariosPage implements OnInit {
     const toast = await this.toastController.create({
       header: titulo,
       message: mensaje || 'Ha ocurrido un error',
-      duration: 3000,
+      duration: 4000,
       position: 'top',
       color: 'danger',
       buttons: [{ text: 'Cerrar', role: 'cancel' }],

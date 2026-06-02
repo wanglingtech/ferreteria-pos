@@ -37,7 +37,6 @@ export class UsuariosApiService {
       .pipe(map((response) => response.data));
   }
 
-  // ✅ NUEVO: Actualizar usuario
   actualizar(id: number, payload: UpdateUsuarioRequest): Observable<Usuario> {
     return this.http
       .put<ApiResponse<Usuario>>(`${this.usuariosBaseUrl}/${id}`, payload)

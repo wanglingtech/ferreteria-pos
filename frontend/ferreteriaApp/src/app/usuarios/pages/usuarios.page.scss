@@ -553,7 +553,16 @@
 ===================================================== */
 
 .menu-btn {
-  --color: #0a1a5c;
+  --color: #ffffff;
+  background: #0a1a5c;
+  border: 1px solid #edf2fb;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 /* =====================================================
@@ -726,7 +735,13 @@
 }
 
 .modal-header {
-  --background: linear-gradient(135deg, #071447 0%, #0a1a5c 35%, #17317f 72%, #2754d8 100%);
+  --background: linear-gradient(
+    135deg,
+    #071447 0%,
+    #0a1a5c 35%,
+    #17317f 72%,
+    #2754d8 100%
+  );
   --border-bottom: none;
 }
 
