@@ -423,3 +423,54 @@
     flex-direction: column;
   }
 }
+
+/* Botón de categorías */
+.category-btn {
+  width: 52px;
+  height: 52px;
+  --background: #4f46e5;
+  --border-radius: 14px;
+}
+
+/* Modal de categorías */
+.category-modal .category-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.category-form {
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+}
+
+.category-list {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.category-item:last-child {
+  border-bottom: none;
+}
+
+.category-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.empty-state-categories {
+  text-align: center;
+  padding: 32px;
+  color: #94a3b8;
+}

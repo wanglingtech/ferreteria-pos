@@ -42,6 +42,7 @@ import {
   trashOutline,
   saveOutline,
   checkmarkCircleOutline,
+  pricetagsOutline, // ✅ nuevo ícono para categorías
 } from 'ionicons/icons';
 
 import { ProductosApiService } from '../services/productos-api.service';
@@ -85,6 +86,7 @@ import { AuthSessionService } from '../../core/services/auth-session.service';
 export class ProductosPage implements OnInit {
   @ViewChild('productModal') productModal!: IonModal;
   @ViewChild('filtersModal') filtersModal!: IonModal;
+  @ViewChild('categoryModal') categoryModal!: IonModal; // ✅ nuevo
 
   // Señales para reactividad
   search = signal('');
@@ -107,8 +109,12 @@ export class ProductosPage implements OnInit {
     status: null as 'active' | 'inactive' | null,
   };
 
-  // Formulario reactivo
+  // Formulario reactivo para productos
   productForm: FormGroup;
+
+  // ✅ Formulario y estado para categorías
+  categoryForm: FormGroup;
+  editingCategoryId: number | null = null;
 
   // Inyección de servicios
   private productosApi = inject(ProductosApiService);
@@ -129,6 +135,7 @@ export class ProductosPage implements OnInit {
       trashOutline,
       saveOutline,
       checkmarkCircleOutline,
+      pricetagsOutline, // ✅ agregado
     });
 
     this.productForm = this.fb.group({
@@ -140,6 +147,11 @@ export class ProductosPage implements OnInit {
       stockMinimo: [0, [Validators.required, Validators.min(0)]],
       categoriaId: [null],
       imagenUrl: [''],
+    });
+
+    // ✅ Inicializar formulario de categorías
+    this.categoryForm = this.fb.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
     });
   }
 
@@ -155,17 +167,13 @@ export class ProductosPage implements OnInit {
   cargarProductos() {
     this.isLoading.set(true);
 
-    // Construir filtros combinando segmento y filtros avanzados
     let isActive: boolean | undefined;
     if (this.selectedFilter() === 'active') isActive = true;
     else if (this.selectedFilter() === 'inactive') isActive = false;
 
-    // Si hay filtro de estado en avanzados, sobreescribe
     if (this.filtrosAvanzados.status === 'active') isActive = true;
     else if (this.filtrosAvanzados.status === 'inactive') isActive = false;
 
-    // Aquí deberías ampliar tu servicio para aceptar más filtros
-    // Por ahora enviamos solo los básicos
     this.productosApi
       .listar({
         search: this.filtrosAvanzados.search || this.search(),
@@ -174,7 +182,6 @@ export class ProductosPage implements OnInit {
       })
       .subscribe({
         next: (data) => {
-          // Aplicar filtros adicionales en cliente (precio, stock mínimo)
           let filtered = data;
           if (this.filtrosAvanzados.minPrice !== null) {
             filtered = filtered.filter(
@@ -225,7 +232,6 @@ export class ProductosPage implements OnInit {
       | undefined;
     const newFilter = value || 'all';
     this.selectedFilter.set(newFilter);
-    // Limpiar filtro de estado en avanzados para no duplicar
     if (newFilter !== 'all') this.filtrosAvanzados.status = null;
     this.cargarProductos();
   }
@@ -240,7 +246,6 @@ export class ProductosPage implements OnInit {
 
   applyFilters() {
     this.closeFiltersModal();
-    // Reiniciar el segmento a "todos" porque aplicamos filtro personalizado
     this.selectedFilter.set('all');
     this.cargarProductos();
   }
@@ -260,7 +265,7 @@ export class ProductosPage implements OnInit {
     this.closeFiltersModal();
   }
 
-  // =================== CRUD ===================
+  // =================== CRUD PRODUCTOS ===================
   addProduct() {
     if (!this.isAdmin()) {
       this.mostrarError(
@@ -401,7 +406,6 @@ export class ProductosPage implements OnInit {
     await alert.present();
   }
 
-  // ✅ NUEVO: Activar producto (cambiar isActive a true)
   async activateProduct(producto: Producto) {
     if (!this.isAdmin()) return;
     const alert = await this.alertCtrl.create({
@@ -447,6 +451,81 @@ export class ProductosPage implements OnInit {
       : '';
   }
 
+  // =================== CRUD CATEGORÍAS ===================
+  openCategoryModal() {
+    this.resetCategoryForm();
+    this.categoryModal.present();
+  }
+
+  closeCategoryModal() {
+    this.categoryModal.dismiss();
+  }
+
+  resetCategoryForm() {
+    this.categoryForm.reset({ nombre: '' });
+    this.editingCategoryId = null;
+  }
+
+  editCategory(cat: Categoria) {
+    this.editingCategoryId = cat.id;
+    this.categoryForm.patchValue({ nombre: cat.name });
+    // No es necesario volver a abrir el modal, ya está abierto
+  }
+
+  saveCategory() {
+    if (this.categoryForm.invalid) return;
+    const nombre = this.categoryForm.value.nombre;
+
+    if (this.editingCategoryId) {
+      // Actualizar
+      this.categoriasApi
+        .actualizar(this.editingCategoryId, { nombre })
+        .subscribe({
+          next: () => {
+            this.recargarCategorias();
+            this.resetCategoryForm();
+            this.mostrarExito('Categoría actualizada');
+          },
+          error: (err) => this.mostrarError('Error', err?.error?.message),
+        });
+    } else {
+      // Crear
+      this.categoriasApi.crear({ nombre }).subscribe({
+        next: () => {
+          this.recargarCategorias();
+          this.resetCategoryForm();
+          this.mostrarExito('Categoría creada');
+        },
+        error: (err) => this.mostrarError('Error', err?.error?.message),
+      });
+    }
+  }
+
+  async deleteCategory(cat: Categoria) {
+    const alert = await this.alertCtrl.create({
+      header: 'Eliminar categoría',
+      message: `¿Eliminar "${cat.name}"? Los productos quedarán sin categoría.`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => {
+            this.categoriasApi.eliminar(cat.id).subscribe({
+              next: () => this.recargarCategorias(),
+              error: (err) => this.mostrarError('Error', err?.error?.message),
+            });
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  recargarCategorias() {
+    this.cargarCategorias(); // Recarga la lista y automáticamente actualiza el selector en productos
+  }
+
   // =================== KPIs ===================
   get totalProductos(): number {
     return this.productos().length;
@@ -472,6 +551,7 @@ export class ProductosPage implements OnInit {
     });
     await toast.present();
   }
+
   private async mostrarExito(mensaje: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,
@@ -481,6 +561,7 @@ export class ProductosPage implements OnInit {
     });
     await toast.present();
   }
+
   closeModal() {
     this.productModal.dismiss();
   }
