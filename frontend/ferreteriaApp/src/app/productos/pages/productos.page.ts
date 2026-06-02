@@ -21,9 +21,6 @@ import {
   searchOutline,
 } from 'ionicons/icons';
 
-/**
- * CONTRATO REAL (alineado a backend Prisma)
- */
 interface Producto {
   id: number;
   sku: string;
@@ -72,10 +69,6 @@ export class ProductosPage {
     this.loadProducts();
   }
 
-  /**
-   * 🔥 BACKEND REAL
-   * GET /productos?search=&status=
-   */
   loadProducts(): void {
     const params: any = {
       search: this.search(),
@@ -84,7 +77,7 @@ export class ProductosPage {
 
     this.http.get<Producto[]>(this.API_URL, { params }).subscribe({
       next: (data) => this.productos.set(data),
-      error: (err) => console.error('Error cargando productos', err),
+      error: (err) => console.error(err),
     });
   }
 
@@ -100,19 +93,32 @@ export class ProductosPage {
   }
 
   openFilters(): void {
-    console.log('Abrir filtros avanzados');
+    console.log('filters');
   }
 
   addProduct(): void {
-    console.log('Ir a formulario crear producto');
+    console.log('add product');
   }
 
   editProduct(producto: Producto): void {
-    console.log('Editar producto', producto.id);
+    console.log('edit', producto.id);
   }
 
   getStockClass(stock: number): string {
     return stock <= 5 ? 'warning' : '';
+  }
+
+  /* KPIS REACTIVOS */
+  get totalProductos(): number {
+    return this.productos().length;
+  }
+
+  get activos(): number {
+    return this.productos().filter((p) => p.activo).length;
+  }
+
+  get bajoStock(): number {
+    return this.productos().filter((p) => p.stock <= 5).length;
   }
 
   get filteredProducts(): Producto[] {

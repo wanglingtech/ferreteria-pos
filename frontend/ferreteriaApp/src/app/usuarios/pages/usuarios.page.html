@@ -5,7 +5,7 @@
     ===================================================== -->
     <section class="hero-header">
       <div class="hero-content">
-        <div class="hero-badge">Gestión de usuarios</div>
+        <div class="hero-badge">👤 Gestión de usuarios</div>
 
         <h1>Usuarios</h1>
 
@@ -61,7 +61,10 @@
       <!-- =====================================================
            INDICADOR DE CARGA
       ===================================================== -->
-      <div class="loading-state" *ngIf="isLoading && filteredUsers.length === 0">
+      <div
+        class="loading-state"
+        *ngIf="isLoading && filteredUsers.length === 0"
+      >
         <ion-spinner name="crescent" color="primary"></ion-spinner>
         <p>Cargando usuarios...</p>
       </div>
@@ -123,16 +126,17 @@
   <!-- =====================================================
        MODAL CREAR USUARIO
   ===================================================== -->
-  <ion-modal #createModal [breakpoints]="[0, 0.5, 0.75, 1]" [initialBreakpoint]="0.75" class="modal-create-user">
+  <ion-modal
+    #createModal
+    [breakpoints]="[0, 0.5, 0.75, 1]"
+    [initialBreakpoint]="0.75"
+    class="modal-create-user"
+  >
     <ng-template>
       <ion-header class="modal-header">
         <ion-toolbar class="modal-toolbar">
           <ion-title>Nuevo Usuario</ion-title>
-          <ion-button
-            slot="end"
-            fill="clear"
-            (click)="closeModal()"
-          >
+          <ion-button slot="end" fill="clear" (click)="closeModal()">
             <ion-icon slot="icon-only" name="close-outline"></ion-icon>
           </ion-button>
         </ion-toolbar>
@@ -234,17 +238,15 @@
               <ion-label position="floating">Rol de usuario</ion-label>
               <ion-select formControlName="role">
                 <ion-select-option value="SELLER">Vendedor</ion-select-option>
-                <ion-select-option value="ADMIN">Administrador</ion-select-option>
+                <ion-select-option value="ADMIN"
+                  >Administrador</ion-select-option
+                >
               </ion-select>
             </ion-item>
 
             <!-- BOTONES -->
             <div class="form-actions">
-              <ion-button
-                expand="block"
-                fill="outline"
-                (click)="closeModal()"
-              >
+              <ion-button expand="block" fill="outline" (click)="closeModal()">
                 Cancelar
               </ion-button>
               <ion-button
@@ -252,7 +254,11 @@
                 [disabled]="!createUserForm.valid || isLoading"
                 type="submit"
               >
-                <ion-spinner name="crescent" *ngIf="isLoading" slot="start"></ion-spinner>
+                <ion-spinner
+                  name="crescent"
+                  *ngIf="isLoading"
+                  slot="start"
+                ></ion-spinner>
                 {{ isLoading ? 'Creando...' : 'Crear Usuario' }}
               </ion-button>
             </div>
@@ -273,4 +279,3 @@
     (didDismiss)="closeActionSheet()"
   ></ion-action-sheet>
 </ion-content>
-
