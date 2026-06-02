@@ -1,14 +1,16 @@
-const { prisma } = require('../../config/database');
+const { prisma } = require("../../config/database");
 
 async function findAll(filters = {}) {
   const where = {
-    ...(typeof filters.isActive === 'boolean' ? { isActive: filters.isActive } : {}),
+    ...(typeof filters.isActive === "boolean"
+      ? { isActive: filters.isActive }
+      : {}),
     ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
     ...(filters.search
       ? {
           OR: [
-            { name: { contains: filters.search, mode: 'insensitive' } },
-            { sku: { contains: filters.search, mode: 'insensitive' } },
+            { name: { contains: filters.search, mode: "insensitive" } },
+            { sku: { contains: filters.search, mode: "insensitive" } },
           ],
         }
       : {}),
@@ -25,7 +27,7 @@ async function findAll(filters = {}) {
       },
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
   });
 }
@@ -65,12 +67,17 @@ async function update(id, data) {
     data: {
       ...(data.sku ? { sku: data.sku } : {}),
       ...(data.nombre ? { name: data.nombre } : {}),
-      ...(data.descripcion !== undefined ? { description: data.descripcion } : {}),
+      ...(data.descripcion !== undefined
+        ? { description: data.descripcion }
+        : {}),
       ...(data.imagenUrl !== undefined ? { imageUrl: data.imagenUrl } : {}),
       ...(data.precio !== undefined ? { price: data.precio } : {}),
       ...(data.stock !== undefined ? { stock: data.stock } : {}),
       ...(data.stockMinimo !== undefined ? { minStock: data.stockMinimo } : {}),
-      ...(data.categoriaId !== undefined ? { categoryId: data.categoriaId } : {}),
+      ...(data.categoriaId !== undefined
+        ? { categoryId: data.categoriaId }
+        : {}),
+      ...(data.isActive !== undefined ? { isActive: data.isActive } : {}), // ✅ agregar
     },
   });
 }

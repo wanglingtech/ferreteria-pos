@@ -414,7 +414,7 @@ export class ProductosPage implements OnInit {
           handler: () => {
             this.isLoading.set(true);
             this.productosApi
-              .actualizar(producto.id, { isActive: true } as any)
+              .actualizar(producto.id, { isActive: true })
               .subscribe({
                 next: (productoActivado) => {
                   this.isLoading.set(false);

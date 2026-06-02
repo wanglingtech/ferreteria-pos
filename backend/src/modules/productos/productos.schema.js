@@ -1,4 +1,4 @@
-const { z } = require('zod');
+const { z } = require("zod");
 
 const createProductoSchema = z.object({
   sku: z.string().min(2),
@@ -13,7 +13,10 @@ const createProductoSchema = z.object({
   imagenUrl: z.string().url().optional(),
 });
 
-const updateProductoSchema = createProductoSchema.partial();
+// ✅ Agregar isActive opcional
+const updateProductoSchema = createProductoSchema.partial().extend({
+  isActive: z.boolean().optional(),
+});
 
 module.exports = {
   createProductoSchema,
