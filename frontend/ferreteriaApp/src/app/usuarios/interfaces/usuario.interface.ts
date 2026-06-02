@@ -19,3 +19,12 @@ export interface CreateUsuarioRequest {
 export interface UpdateStatusRequest {
   isActive: boolean;
 }
+
+// ✅ NUEVO: Para editar usuario
+export interface UpdateUsuarioRequest {
+  username: string;
+  email: string;
+  fullName: string;
+  role: 'ADMIN' | 'SELLER';
+  password?: string; // opcional
+}
