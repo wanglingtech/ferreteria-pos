@@ -205,15 +205,17 @@ export class UsuariosPage implements OnInit {
 
   protected closeActionSheet(): void {
     this.showActionSheet = false;
-    // No limpiamos selectedUser aquí porque aún lo necesitamos si se dispara alguna acción
-    // Se limpiará después de cada acción
+    // No limpiamos selectedUser inmediatamente porque las acciones pueden necesitarlo
   }
 
-  // =================== CAMBIAR ESTADO (ACTIVAR/DESACTIVAR) – CORREGIDO ===================
+  // =================== CAMBIAR ESTADO (ACTIVAR/DESACTIVAR) ===================
   protected async toggleUserStatus(): Promise<void> {
-    if (!this.selectedUser) return;
+    if (!this.selectedUser) {
+      console.warn('No hay usuario seleccionado');
+      return;
+    }
 
-    // Cerrar el action sheet antes de mostrar la alerta
+    // Cerrar el action sheet
     this.showActionSheet = false;
 
     const nuevoEstado = !this.selectedUser.isActive;
@@ -230,18 +232,13 @@ export class UsuariosPage implements OnInit {
           text: accion.charAt(0).toUpperCase() + accion.slice(1),
           role: 'confirm',
           handler: () => {
-            // Importante: volver a obtener el usuario actualizado por si cambió mientras se mostraba la alerta
-            const currentUser = this.usuarios.find((u) => u.id === usuarioId);
-            if (!currentUser) {
-              this.mostrarError('Error', 'El usuario ya no existe');
-              return;
-            }
-
+            console.log(`Ejecutando ${accion} para usuario ${usuarioId}`);
             this.isLoading = true;
             this.usuariosApiService
               .cambiarEstado(usuarioId, { isActive: nuevoEstado })
               .subscribe({
                 next: (usuarioActualizado) => {
+                  console.log('Respuesta recibida:', usuarioActualizado);
                   this.isLoading = false;
                   const index = this.usuarios.findIndex(
                     (u) => u.id === usuarioActualizado.id,
@@ -253,8 +250,8 @@ export class UsuariosPage implements OnInit {
                   this.selectedUser = null;
                 },
                 error: (error) => {
-                  this.isLoading = false;
                   console.error('Error en cambiarEstado:', error);
+                  this.isLoading = false;
                   this.mostrarError(
                     `Error al ${accion} usuario`,
                     error?.error?.message || error.message,
@@ -266,12 +263,6 @@ export class UsuariosPage implements OnInit {
       ],
     });
     await alert.present();
-    // Limpiar selectedUser después de que la alerta se cierre (opcional)
-    alert.onDidDismiss().then(() => {
-      if (this.selectedUser?.id === usuarioId) {
-        // No lo limpiamos porque puede que se haya usado en otra acción
-      }
-    });
   }
 
   // =================== EDITAR USUARIO ===================
@@ -324,9 +315,12 @@ export class UsuariosPage implements OnInit {
     });
   }
 
-  // =================== ELIMINAR (DESACTIVAR) – CORREGIDO ===================
+  // =================== ELIMINAR (DESACTIVAR) ===================
   protected async eliminarUsuario(): Promise<void> {
-    if (!this.selectedUser) return;
+    if (!this.selectedUser) {
+      console.warn('No hay usuario seleccionado para eliminar');
+      return;
+    }
     this.showActionSheet = false;
 
     const usuarioId = this.selectedUser.id;
@@ -341,18 +335,13 @@ export class UsuariosPage implements OnInit {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
-            // Verificar que el usuario sigue existiendo
-            const currentUser = this.usuarios.find((u) => u.id === usuarioId);
-            if (!currentUser) {
-              this.mostrarError('Error', 'El usuario ya no existe');
-              return;
-            }
-
+            console.log(`Eliminando (desactivando) usuario ${usuarioId}`);
             this.isLoading = true;
             this.usuariosApiService
               .cambiarEstado(usuarioId, { isActive: false })
               .subscribe({
                 next: (usuarioEliminado) => {
+                  console.log('Usuario desactivado:', usuarioEliminado);
                   this.isLoading = false;
                   const index = this.usuarios.findIndex(
                     (u) => u.id === usuarioEliminado.id,
@@ -364,8 +353,8 @@ export class UsuariosPage implements OnInit {
                   this.selectedUser = null;
                 },
                 error: (error) => {
-                  this.isLoading = false;
                   console.error('Error al eliminar:', error);
+                  this.isLoading = false;
                   this.mostrarError(
                     'Error al eliminar usuario',
                     error?.error?.message || error.message,
@@ -389,7 +378,6 @@ export class UsuariosPage implements OnInit {
           ? 'lock-closed-outline'
           : 'lock-open-outline',
         handler: () => {
-          // Llamamos directamente al método asíncrono
           this.toggleUserStatus();
         },
       },
