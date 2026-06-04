@@ -1,6 +1,7 @@
 /* =====================================================
    PRODUCTOS PAGE - ESTILOS COMPLETOS
    Optimizado para escritorio, tablet y móvil
+   Incluye mejoras de legibilidad en móviles
 ===================================================== */
 
 /* -------------------- CONTAINER PRINCIPAL -------------------- */
@@ -184,6 +185,7 @@
 .price {
   font-weight: 800;
   color: #0a1a5c;
+  font-size: 17px;
 }
 .stock-badge {
   font-size: 12px;
@@ -297,13 +299,23 @@
     object-fit: cover;
   }
   .product-info h3 {
-    font-size: 1.2rem;
+    font-size: 1.3rem; /* más grande */
+    margin-bottom: 4px;
   }
   .sku {
-    font-size: 11px;
+    font-size: 12px; /* un poco más grande */
+    margin: 6px 0;
   }
   .meta-row {
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 12px;
+    margin: 10px 0;
+  }
+  .price,
+  .stock-badge,
+  .status {
+    font-size: 15px; /* mejor legibilidad */
+    padding: 4px 12px;
   }
   .actions {
     position: absolute;
@@ -311,28 +323,31 @@
     right: 12px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 40px;
-    padding: 4px 8px;
+    padding: 6px 10px;
     backdrop-filter: blur(4px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   .actions ion-button {
-    --padding-start: 6px;
-    --padding-end: 6px;
+    --padding-start: 8px;
+    --padding-end: 8px;
     margin: 0;
-    height: 34px;
+    height: 36px;
+    --icon-font-size: 20px;
   }
   .category {
-    margin-top: 8px;
+    font-size: 13px;
+    margin-top: 10px;
+    color: #374151;
   }
 }
 
 /* -------------------- RESPONSIVE: MÓVILES PEQUEÑOS (max-width: 480px) -------------------- */
 @media (max-width: 480px) {
   .hero-left h1 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
   .hero-left p {
-    font-size: 12px;
+    font-size: 11px;
   }
   .kpi {
     min-width: auto;
@@ -346,27 +361,33 @@
     height: 150px;
   }
   .product-info h3 {
-    font-size: 1rem;
+    font-size: 1.1rem;
+  }
+  .sku {
+    font-size: 10px;
   }
   .meta-row {
-    gap: 6px;
+    gap: 8px;
   }
-  .stock-badge,
   .price,
+  .stock-badge,
   .status {
-    font-size: 10px;
-    padding: 2px 6px;
+    font-size: 15px;
+    padding: 3px 8px;
   }
   .actions {
     top: 8px;
     right: 8px;
-    padding: 2px 6px;
+    padding: 4px 8px;
   }
   .actions ion-button {
-    --padding-start: 4px;
-    --padding-end: 4px;
-    height: 28px;
+    --padding-start: 6px;
+    --padding-end: 6px;
+    height: 32px;
     --icon-font-size: 18px;
+  }
+  .category {
+    font-size: 11px;
   }
 }
 

@@ -87,13 +87,14 @@
               >
                 Stock: {{ producto.stock }}
               </div>
-              <div class="price">S/ {{ producto.price | number:'1.2-2' }}</div>
+
               <div
                 class="status"
                 [ngClass]="{'active-status': producto.isActive, 'inactive-status': !producto.isActive}"
               >
                 {{ producto.isActive ? 'Activo' : 'Inactivo' }}
               </div>
+              <div class="price">S/ {{ producto.price | number:'1.2-2' }}</div>
             </div>
             <div class="category" *ngIf="producto.category">
               Categoría: {{ producto.category.name }}
