@@ -42,7 +42,7 @@ import {
   trashOutline,
   saveOutline,
   checkmarkCircleOutline,
-  pricetagsOutline, // ✅ nuevo ícono para categorías
+  pricetagsOutline,
 } from 'ionicons/icons';
 
 import { ProductosApiService } from '../services/productos-api.service';
@@ -86,9 +86,8 @@ import { AuthSessionService } from '../../core/services/auth-session.service';
 export class ProductosPage implements OnInit {
   @ViewChild('productModal') productModal!: IonModal;
   @ViewChild('filtersModal') filtersModal!: IonModal;
-  @ViewChild('categoryModal') categoryModal!: IonModal; // ✅ nuevo
+  @ViewChild('categoryModal') categoryModal!: IonModal;
 
-  // Señales para reactividad
   search = signal('');
   selectedFilter = signal<'all' | 'active' | 'inactive'>('all');
   productos = signal<Producto[]>([]);
@@ -99,7 +98,6 @@ export class ProductosPage implements OnInit {
   imagenPreview = signal<string | null>(null);
   isAdmin = signal(false);
 
-  // Filtros avanzados
   filtrosAvanzados = {
     search: '',
     categoryId: null as number | null,
@@ -109,14 +107,10 @@ export class ProductosPage implements OnInit {
     status: null as 'active' | 'inactive' | null,
   };
 
-  // Formulario reactivo para productos
   productForm: FormGroup;
-
-  // ✅ Formulario y estado para categorías
   categoryForm: FormGroup;
   editingCategoryId: number | null = null;
 
-  // Inyección de servicios
   private productosApi = inject(ProductosApiService);
   private categoriasApi = inject(CategoriasApiService);
   private authSession = inject(AuthSessionService);
@@ -135,7 +129,7 @@ export class ProductosPage implements OnInit {
       trashOutline,
       saveOutline,
       checkmarkCircleOutline,
-      pricetagsOutline, // ✅ agregado
+      pricetagsOutline,
     });
 
     this.productForm = this.fb.group({
@@ -149,7 +143,6 @@ export class ProductosPage implements OnInit {
       imagenUrl: [''],
     });
 
-    // ✅ Inicializar formulario de categorías
     this.categoryForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
     });
@@ -158,19 +151,15 @@ export class ProductosPage implements OnInit {
   ngOnInit() {
     const user = this.authSession.getCurrentUser();
     this.isAdmin.set(user?.role === 'ADMIN');
-
     this.cargarProductos();
     this.cargarCategorias();
   }
 
-  // =================== CARGAR DATOS ===================
   cargarProductos() {
     this.isLoading.set(true);
-
     let isActive: boolean | undefined;
     if (this.selectedFilter() === 'active') isActive = true;
     else if (this.selectedFilter() === 'inactive') isActive = false;
-
     if (this.filtrosAvanzados.status === 'active') isActive = true;
     else if (this.filtrosAvanzados.status === 'inactive') isActive = false;
 
@@ -183,21 +172,18 @@ export class ProductosPage implements OnInit {
       .subscribe({
         next: (data) => {
           let filtered = data;
-          if (this.filtrosAvanzados.minPrice !== null) {
+          if (this.filtrosAvanzados.minPrice !== null)
             filtered = filtered.filter(
               (p) => p.price >= this.filtrosAvanzados.minPrice!,
             );
-          }
-          if (this.filtrosAvanzados.maxPrice !== null) {
+          if (this.filtrosAvanzados.maxPrice !== null)
             filtered = filtered.filter(
               (p) => p.price <= this.filtrosAvanzados.maxPrice!,
             );
-          }
-          if (this.filtrosAvanzados.minStock !== null) {
+          if (this.filtrosAvanzados.minStock !== null)
             filtered = filtered.filter(
               (p) => p.stock >= this.filtrosAvanzados.minStock!,
             );
-          }
           this.productos.set(filtered);
           this.isLoading.set(false);
         },
@@ -216,7 +202,6 @@ export class ProductosPage implements OnInit {
     });
   }
 
-  // =================== FILTROS ===================
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.search.set(value);
@@ -265,7 +250,6 @@ export class ProductosPage implements OnInit {
     this.closeFiltersModal();
   }
 
-  // =================== CRUD PRODUCTOS ===================
   addProduct() {
     if (!this.isAdmin()) {
       this.mostrarError(
@@ -322,7 +306,6 @@ export class ProductosPage implements OnInit {
       );
       return;
     }
-
     this.isLoading.set(true);
     const formValue = this.productForm.value;
 
@@ -451,6 +434,11 @@ export class ProductosPage implements OnInit {
       : '';
   }
 
+  // =================== UTILIDADES ===================
+  onImagenUrlChange(url: string | null | undefined) {
+    this.imagenPreview.set(url ?? '');
+  }
+
   // =================== CRUD CATEGORÍAS ===================
   openCategoryModal() {
     this.resetCategoryForm();
@@ -469,15 +457,12 @@ export class ProductosPage implements OnInit {
   editCategory(cat: Categoria) {
     this.editingCategoryId = cat.id;
     this.categoryForm.patchValue({ nombre: cat.name });
-    // No es necesario volver a abrir el modal, ya está abierto
   }
 
   saveCategory() {
     if (this.categoryForm.invalid) return;
     const nombre = this.categoryForm.value.nombre;
-
     if (this.editingCategoryId) {
-      // Actualizar
       this.categoriasApi
         .actualizar(this.editingCategoryId, { nombre })
         .subscribe({
@@ -489,7 +474,6 @@ export class ProductosPage implements OnInit {
           error: (err) => this.mostrarError('Error', err?.error?.message),
         });
     } else {
-      // Crear
       this.categoriasApi.crear({ nombre }).subscribe({
         next: () => {
           this.recargarCategorias();
@@ -523,10 +507,9 @@ export class ProductosPage implements OnInit {
   }
 
   recargarCategorias() {
-    this.cargarCategorias(); // Recarga la lista y automáticamente actualiza el selector en productos
+    this.cargarCategorias();
   }
 
-  // =================== KPIs ===================
   get totalProductos(): number {
     return this.productos().length;
   }
@@ -540,7 +523,6 @@ export class ProductosPage implements OnInit {
     return this.productos();
   }
 
-  // =================== NOTIFICACIONES ===================
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
       header: titulo,

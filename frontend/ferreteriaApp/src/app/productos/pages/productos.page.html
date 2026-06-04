@@ -144,11 +144,12 @@
     </section>
   </div>
 
-  <!-- MODAL PARA CREAR/EDITAR PRODUCTO -->
+  <!-- ================= MODAL CREAR/EDITAR PRODUCTO ================= -->
   <ion-modal
     #productModal
-    [breakpoints]="[0, 0.6, 0.9]"
+    [breakpoints]="[0, 0.5, 0.9, 1]"
     [initialBreakpoint]="0.9"
+    [canDismiss]="true"
     class="product-modal"
   >
     <ng-template>
@@ -162,128 +163,166 @@
           </ion-button>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="modal-content">
-        <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
-          <!-- SKU (solo lectura si edición) -->
-          <ion-item class="form-item">
-            <ion-label position="floating">SKU *</ion-label>
-            <ion-input
-              formControlName="sku"
-              [readonly]="isEditing()"
-              placeholder="Código único"
-            ></ion-input>
-          </ion-item>
-
-          <!-- Nombre -->
-          <ion-item class="form-item">
-            <ion-label position="floating">Nombre *</ion-label>
-            <ion-input
-              formControlName="nombre"
-              placeholder="Nombre del producto"
-            ></ion-input>
-          </ion-item>
-
-          <!-- Descripción -->
-          <ion-item class="form-item">
-            <ion-label position="floating">Descripción</ion-label>
-            <ion-textarea formControlName="descripcion" rows="3"></ion-textarea>
-          </ion-item>
-
-          <!-- Precio -->
-          <ion-item class="form-item">
-            <ion-label position="floating">Precio (S/) *</ion-label>
-            <ion-input
-              type="number"
-              formControlName="precio"
-              step="0.01"
-            ></ion-input>
-          </ion-item>
-
-          <!-- Stock y stock mínimo -->
-          <div class="row-two-cols">
-            <ion-item class="form-item">
-              <ion-label position="floating">Stock actual *</ion-label>
+      <ion-content class="modal-content" scroll-y="true">
+        <div class="modal-form-container">
+          <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
+            <!-- SKU -->
+            <ion-item class="form-item" lines="full">
+              <ion-label position="floating">SKU *</ion-label>
               <ion-input
-                type="number"
-                formControlName="stock"
-                step="1"
+                formControlName="sku"
+                [readonly]="isEditing()"
+                placeholder="Código único"
               ></ion-input>
             </ion-item>
-            <ion-item class="form-item">
-              <ion-label position="floating">Stock mínimo *</ion-label>
+            <ion-text
+              color="danger"
+              *ngIf="productForm.get('sku')?.invalid && productForm.get('sku')?.touched"
+            >
+              <p class="error-message">
+                SKU es requerido (mínimo 2 caracteres)
+              </p>
+            </ion-text>
+
+            <!-- Nombre -->
+            <ion-item class="form-item" lines="full">
+              <ion-label position="floating">Nombre *</ion-label>
               <ion-input
-                type="number"
-                formControlName="stockMinimo"
-                step="1"
+                formControlName="nombre"
+                placeholder="Nombre del producto"
               ></ion-input>
             </ion-item>
-          </div>
-
-          <!-- Categoría -->
-          <ion-item class="form-item">
-            <ion-label position="floating">Categoría</ion-label>
-            <ion-select formControlName="categoriaId" interface="popover">
-              <ion-select-option [value]="null"
-                >Sin categoría</ion-select-option
-              >
-              <ion-select-option
-                *ngFor="let cat of categorias()"
-                [value]="cat.id"
-                >{{ cat.name }}</ion-select-option
-              >
-            </ion-select>
-          </ion-item>
-
-          <!-- URL de imagen -->
-          <ion-item class="form-item">
-            <ion-label position="floating">URL de imagen</ion-label>
-            <ion-input
-              formControlName="imagenUrl"
-              placeholder="https://..."
-            ></ion-input>
-          </ion-item>
-
-          <!-- Vista previa de imagen -->
-          <div
-            class="image-preview"
-            *ngIf="productForm.get('imagenUrl')?.value"
-          >
-            <p>Vista previa:</p>
-            <img
-              [src]="productForm.get('imagenUrl')?.value"
-              alt="preview"
-              (error)="productForm.get('imagenUrl')?.setErrors({invalidUrl:true})"
-            />
-          </div>
-
-          <div class="form-actions">
-            <ion-button expand="block" fill="outline" (click)="closeModal()"
-              >Cancelar</ion-button
+            <ion-text
+              color="danger"
+              *ngIf="productForm.get('nombre')?.invalid && productForm.get('nombre')?.touched"
             >
-            <ion-button
-              expand="block"
-              type="submit"
-              [disabled]="productForm.invalid || isLoading()"
+              <p class="error-message">
+                Nombre es requerido (mínimo 2 caracteres)
+              </p>
+            </ion-text>
+
+            <!-- Descripción -->
+            <ion-item class="form-item" lines="full">
+              <ion-label position="floating">Descripción</ion-label>
+              <ion-textarea
+                formControlName="descripcion"
+                rows="3"
+                placeholder="Descripción opcional"
+              ></ion-textarea>
+            </ion-item>
+
+            <!-- Precio -->
+            <ion-item class="form-item" lines="full">
+              <ion-label position="floating">Precio (S/) *</ion-label>
+              <ion-input
+                type="number"
+                formControlName="precio"
+                step="0.01"
+              ></ion-input>
+            </ion-item>
+            <ion-text
+              color="danger"
+              *ngIf="productForm.get('precio')?.invalid && productForm.get('precio')?.touched"
             >
-              <ion-spinner
-                name="crescent"
-                *ngIf="isLoading()"
-                slot="start"
-              ></ion-spinner>
-              {{ isLoading() ? 'Guardando...' : (isEditing() ? 'Actualizar' :
-              'Crear') }}
-            </ion-button>
-          </div>
-        </form>
+              <p class="error-message">Precio debe ser mayor a 0</p>
+            </ion-text>
+
+            <!-- Stock y stock mínimo (dos columnas) -->
+            <div class="row-two-cols">
+              <ion-item class="form-item" lines="full">
+                <ion-label position="floating">Stock actual *</ion-label>
+                <ion-input
+                  type="number"
+                  formControlName="stock"
+                  step="1"
+                ></ion-input>
+              </ion-item>
+              <ion-item class="form-item" lines="full">
+                <ion-label position="floating">Stock mínimo *</ion-label>
+                <ion-input
+                  type="number"
+                  formControlName="stockMinimo"
+                  step="1"
+                ></ion-input>
+              </ion-item>
+            </div>
+            <ion-text color="danger" *ngIf="productForm.get('stock')?.invalid">
+              <p class="error-message">Stock debe ser 0 o más</p>
+            </ion-text>
+
+            <!-- Categoría -->
+            <ion-item class="form-item" lines="full">
+              <ion-label position="floating">Categoría</ion-label>
+              <ion-select
+                formControlName="categoriaId"
+                interface="popover"
+                placeholder="Seleccionar categoría"
+              >
+                <ion-select-option [value]="null"
+                  >Sin categoría</ion-select-option
+                >
+                <ion-select-option
+                  *ngFor="let cat of categorias()"
+                  [value]="cat.id"
+                  >{{ cat.name }}</ion-select-option
+                >
+              </ion-select>
+            </ion-item>
+
+            <!-- URL de imagen -->
+            <ion-item class="form-item" lines="full">
+              <ion-label position="floating">URL de imagen</ion-label>
+              <ion-input
+                formControlName="imagenUrl"
+                placeholder="https://..."
+                (ionInput)="onImagenUrlChange($event.detail.value)"
+              ></ion-input>
+            </ion-item>
+
+            <!-- Vista previa -->
+            <div
+              class="image-preview"
+              *ngIf="productForm.get('imagenUrl')?.value"
+            >
+              <p>Vista previa:</p>
+              <img
+                [src]="productForm.get('imagenUrl')?.value"
+                alt="preview"
+                (error)="productForm.get('imagenUrl')?.setErrors({invalidUrl:true})"
+              />
+            </div>
+
+            <!-- Botones de acción siempre al final -->
+            <div class="form-actions">
+              <ion-button expand="block" fill="outline" (click)="closeModal()"
+                >Cancelar</ion-button
+              >
+              <ion-button
+                expand="block"
+                type="submit"
+                [disabled]="productForm.invalid || isLoading()"
+              >
+                <ion-spinner
+                  name="crescent"
+                  *ngIf="isLoading()"
+                  slot="start"
+                ></ion-spinner>
+                {{ isLoading() ? 'Guardando...' : (isEditing() ? 'Actualizar' :
+                'Crear') }}
+              </ion-button>
+            </div>
+          </form>
+        </div>
       </ion-content>
     </ng-template>
   </ion-modal>
 
-  <!-- MODAL PARA FILTROS AVANZADOS -->
+  <!-- ================= MODAL FILTROS AVANZADOS ================= -->
   <ion-modal
     #filtersModal
-    [breakpoints]="[0, 0.5, 0.8]"
+    [breakpoints]="[0, 0.5, 0.8, 1]"
     [initialBreakpoint]="0.8"
+    [canDismiss]="true"
     class="filters-modal"
   >
     <ng-template>
@@ -295,9 +334,8 @@
           </ion-button>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="modal-content">
+      <ion-content class="modal-content" scroll-y="true">
         <div class="filters-container">
-          <!-- Búsqueda (ya existe pero la repetimos para comodidad) -->
           <div class="filter-group">
             <ion-label>Buscar por nombre o SKU</ion-label>
             <ion-input
@@ -306,8 +344,6 @@
               clearInput
             ></ion-input>
           </div>
-
-          <!-- Categoría -->
           <div class="filter-group">
             <ion-label>Categoría</ion-label>
             <ion-select
@@ -324,12 +360,10 @@
               >
             </ion-select>
           </div>
-
-          <!-- Rango de precios -->
           <div class="filter-group">
             <ion-label>Rango de precio (S/)</ion-label>
             <div class="price-range">
-              <ion-item class="form-item">
+              <ion-item class="form-item" lines="full">
                 <ion-label position="stacked">Desde</ion-label>
                 <ion-input
                   type="number"
@@ -337,7 +371,7 @@
                   placeholder="0"
                 ></ion-input>
               </ion-item>
-              <ion-item class="form-item">
+              <ion-item class="form-item" lines="full">
                 <ion-label position="stacked">Hasta</ion-label>
                 <ion-input
                   type="number"
@@ -347,8 +381,6 @@
               </ion-item>
             </div>
           </div>
-
-          <!-- Stock mínimo -->
           <div class="filter-group">
             <ion-label>Stock mínimo</ion-label>
             <ion-input
@@ -357,8 +389,6 @@
               placeholder="0"
             ></ion-input>
           </div>
-
-          <!-- Estado (activo/inactivo) -->
           <div class="filter-group">
             <ion-label>Estado</ion-label>
             <ion-select
@@ -371,24 +401,25 @@
               <ion-select-option value="inactive">Inactivos</ion-select-option>
             </ion-select>
           </div>
-
           <div class="filter-actions">
-            <ion-button fill="outline" expand="block" (click)="resetFilters()">
-              Limpiar
-            </ion-button>
-            <ion-button expand="block" (click)="applyFilters()">
-              Aplicar filtros
-            </ion-button>
+            <ion-button fill="outline" expand="block" (click)="resetFilters()"
+              >Limpiar</ion-button
+            >
+            <ion-button expand="block" (click)="applyFilters()"
+              >Aplicar filtros</ion-button
+            >
           </div>
         </div>
       </ion-content>
     </ng-template>
   </ion-modal>
-  <!-- MODAL PARA GESTIÓN DE CATEGORÍAS -->
+
+  <!-- ================= MODAL GESTIÓN DE CATEGORÍAS ================= -->
   <ion-modal
     #categoryModal
-    [breakpoints]="[0, 0.7, 0.9]"
-    [initialBreakpoint]="0.7"
+    [breakpoints]="[0, 0.5, 0.8, 1]"
+    [initialBreakpoint]="0.8"
+    [canDismiss]="true"
     class="category-modal"
   >
     <ng-template>
@@ -400,15 +431,15 @@
           </ion-button>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="modal-content">
+      <ion-content class="modal-content" scroll-y="true">
         <div class="category-container">
-          <!-- Formulario para crear/editar -->
+          <!-- Formulario -->
           <form
             [formGroup]="categoryForm"
             (ngSubmit)="saveCategory()"
             class="category-form"
           >
-            <ion-item class="form-item">
+            <ion-item class="form-item" lines="full">
               <ion-label position="floating">Nombre de categoría</ion-label>
               <ion-input
                 formControlName="nombre"
@@ -432,7 +463,7 @@
             </div>
           </form>
 
-          <!-- Lista de categorías existentes -->
+          <!-- Lista de categorías -->
           <div class="category-list">
             <div class="category-item" *ngFor="let cat of categorias()">
               <span>{{ cat.name }}</span>
