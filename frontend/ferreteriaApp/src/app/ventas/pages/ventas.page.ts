@@ -9,10 +9,6 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonText,
   ToastController,
   AlertController,
 } from '@ionic/angular/standalone';
@@ -36,6 +32,12 @@ import {
   CreateVentaRequest,
   Venta,
 } from '../interfaces/venta.interface';
+import { PdfGeneratorService } from '../services/pdf-generator.service';
+
+// Librerías necesarias para el QR y PDF (ya instaladas)
+import QRCode from 'qrcode';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-ventas-page',
@@ -52,10 +54,7 @@ import {
     IonHeader,
     IonToolbar,
     IonTitle,
-    IonItem,
-    IonLabel,
-    IonInput,
-    IonText,
+    // Eliminados IonItem, IonLabel, IonInput, IonText (no se usan en el HTML)
   ],
 })
 export class VentasPage implements OnInit {
@@ -68,13 +67,14 @@ export class VentasPage implements OnInit {
   cart = signal<CartItem[]>([]);
   isLoading = signal(false);
   isAdmin = signal(false);
-  ventaConfirmada: Venta | null = null; // para mostrar en el modal
+  ventaConfirmada: Venta | null = null;
 
   private productosApi = inject(ProductosApiService);
   private ventasApi = inject(VentasApiService);
   private authSession = inject(AuthSessionService);
   private toastCtrl = inject(ToastController);
   private alertCtrl = inject(AlertController);
+  private pdfGenerator = inject(PdfGeneratorService);
 
   constructor() {
     addIcons({
@@ -177,33 +177,27 @@ export class VentasPage implements OnInit {
       0,
     );
   }
-
   get igv(): number {
     return Number((this.subtotal * 0.18).toFixed(2));
   }
-
   get total(): number {
     return Number((this.subtotal + this.igv).toFixed(2));
   }
 
-  // Guardar: abre resumen para confirmar
   async guardarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
       this.mostrarError('Carrito vacío', 'Agrega productos antes de continuar');
       return;
     }
-    // Mostrar modal de resumen (aún sin confirmar)
     this.ventaConfirmada = null;
     this.resumenModal.present();
   }
 
-  // Cobrar: mismo flujo pero con enfoque de pago (podríamos cambiar título del botón)
   async cobrarVenta() {
-    await this.guardarVenta(); // misma lógica, pero el modal indicará "Cobrar"
+    await this.guardarVenta();
   }
 
-  // Confirmar la venta (desde el modal)
   async confirmarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
@@ -226,9 +220,6 @@ export class VentasPage implements OnInit {
         this.ventaConfirmada = venta;
         this.mostrarExito('Venta registrada exitosamente');
         this.limpiarCarrito();
-        // Aquí podrías cerrar el modal y mostrar otro de éxito, pero ya tenemos la ventaConfirmada
-        // Podemos mantener el modal abierto y cambiar su contenido para mostrar el ticket.
-        // Por simplicidad, cerramos y mostramos un toast con opción de imprimir.
         this.resumenModal.dismiss();
         this.mostrarOpcionesPostVenta(venta);
       },
@@ -240,24 +231,14 @@ export class VentasPage implements OnInit {
   }
 
   private mostrarOpcionesPostVenta(venta: Venta) {
-    // Opcional: alerta con opciones de imprimir/compartir
     this.alertCtrl
       .create({
         header: 'Venta completada',
         message: `Venta N° ${venta.code} registrada con éxito. ¿Qué deseas hacer?`,
         buttons: [
-          {
-            text: 'Imprimir',
-            handler: () => this.imprimirTicket(venta),
-          },
-          {
-            text: 'Compartir',
-            handler: () => this.compartirVenta(venta),
-          },
-          {
-            text: 'Cerrar',
-            role: 'cancel',
-          },
+          { text: 'Imprimir', handler: () => this.imprimirTicket(venta) },
+          { text: 'Compartir', handler: () => this.compartirVenta(venta) },
+          { text: 'Cerrar', role: 'cancel' },
         ],
       })
       .then((alert) => alert.present());
@@ -276,85 +257,120 @@ export class VentasPage implements OnInit {
     this.clienteNombre = '';
   }
 
+  // =================== PDF Y COMPARTIR ===================
   imprimirTicket(venta: Venta) {
-    // Implementación simple: abrir ventana de impresión con contenido formateado
-    const contenido = this.generarHTMLTicket(venta);
-    const ventana = window.open('', '_blank');
-    ventana?.document.write(contenido);
-    ventana?.print();
-    ventana?.close();
+    this.ventaConfirmada = venta;
+    // Datos para el QR (puedes cambiar la URL)
+    const qrData = `${window.location.origin}/ventas/detalle/${venta.id}`;
+    setTimeout(() => {
+      this.pdfGenerator.generateTicketPdf(
+        'ticket-content',
+        `ticket-${venta.code}.pdf`,
+        qrData,
+      );
+    }, 200);
   }
 
-  compartirVenta(venta: Venta) {
-    // Simular compartir (puedes usar Web Share API si está disponible)
-    const texto = `Venta ${venta.code} - Total: S/ ${venta.total} - Cliente: ${venta.customerName}`;
-    if (navigator.share) {
-      navigator.share({
-        title: 'Detalle de venta',
-        text: texto,
-        url: window.location.href,
-      });
+  async compartirVenta(venta: Venta) {
+    this.ventaConfirmada = venta;
+    const qrData = `${window.location.origin}/ventas/detalle/${venta.id}`;
+    const pdfBlob = await this.generarPdfBlob(venta, qrData);
+
+    if (!pdfBlob) {
+      this.mostrarError('Error', 'No se pudo generar el PDF para compartir');
+      return;
+    }
+
+    const file = new File([pdfBlob], `factura-${venta.code}.pdf`, {
+      type: 'application/pdf',
+    });
+
+    // Verificar si el navegador permite compartir archivos
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: `Factura ${venta.code}`,
+          text: `Total: S/ ${venta.total} - Cliente: ${venta.customerName}`,
+          files: [file],
+        });
+        this.mostrarExito('Factura compartida exitosamente');
+      } catch (err: any) {
+        console.error('Error al compartir:', err);
+        // Mostrar mensaje de error más amigable
+        const errorMsg =
+          err?.message || 'El usuario canceló o hubo un problema';
+        this.mostrarError('No se pudo compartir', errorMsg);
+      }
     } else {
-      navigator.clipboard.writeText(texto);
-      this.mostrarExito('Detalle copiado al portapapeles');
+      // Fallback: copiar enlace y sugerir descarga
+      navigator.clipboard.writeText(qrData);
+      this.mostrarExito(
+        'Enlace copiado al portapapeles. Usa "Imprimir" para descargar el PDF.',
+      );
     }
   }
 
-  private generarHTMLTicket(venta: Venta): string {
-    const itemsHtml = venta.items
-      .map(
-        (item) => `
-      <tr>
-        <td>${item.product.name}</td>
-        <td>${item.quantity}</td>
-        <td>S/ ${item.unitPrice.toFixed(2)}</td>
-        <td>S/ ${item.lineTotal.toFixed(2)}</td>
-      </tr>
-    `,
-      )
-      .join('');
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Ticket de Venta ${venta.code}</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h1 { color: #0a1a5c; }
-          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f2f2f2; }
-          .total { font-size: 1.2em; font-weight: bold; text-align: right; }
-        </style>
-      </head>
-      <body>
-        <h1>Ferretería July</h1>
-        <p><strong>Venta N°:</strong> ${venta.code}</p>
-        <p><strong>Fecha:</strong> ${new Date(venta.createdAt).toLocaleString()}</p>
-        <p><strong>Vendedor:</strong> ${venta.seller.fullName}</p>
-        <p><strong>Cliente:</strong> ${venta.customerName || 'Consumidor final'}</p>
-        <table>
-          <thead>
-            <tr><th>Producto</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th></tr>
-          </thead>
-          <tbody>${itemsHtml}</tbody>
-        </table>
-        <div class="total">Subtotal: S/ ${venta.subtotal.toFixed(2)}</div>
-        <div class="total">IGV (18%): S/ ${venta.igv.toFixed(2)}</div>
-        <div class="total">Total: S/ ${venta.total.toFixed(2)}</div>
-        <hr />
-        <p>¡Gracias por su compra!</p>
-      </body>
-      </html>
-    `;
+  // Genera un blob del PDF a partir del elemento oculto ticket-content
+  private async generarPdfBlob(
+    venta: Venta,
+    qrData: string,
+  ): Promise<Blob | null> {
+    this.ventaConfirmada = venta;
+    const element = document.getElementById('ticket-content');
+    if (!element) return null;
+
+    // Clonar para no interferir con la vista
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.style.display = 'block';
+    clone.style.position = 'absolute';
+    clone.style.left = '-9999px';
+    clone.style.top = '-9999px';
+    document.body.appendChild(clone);
+
+    try {
+      // Generar QR y agregarlo al clon
+      const qrCanvas = document.createElement('canvas');
+      await QRCode.toCanvas(qrCanvas, qrData, { width: 150, margin: 2 });
+      const qrImg = document.createElement('img');
+      qrImg.src = qrCanvas.toDataURL();
+      qrImg.style.width = '100px';
+      qrImg.style.marginTop = '15px';
+      qrImg.style.display = 'block';
+      qrImg.style.marginLeft = 'auto';
+      clone.appendChild(qrImg);
+
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true,
+      });
+      const imgData = canvas.toDataURL('image/png');
+      // Formato ticket (80mm de ancho)
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [80, canvas.height * (80 / canvas.width)],
+      });
+      const imgWidth = 80;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      const blob = pdf.output('blob');
+      return blob;
+    } catch (error) {
+      console.error('Error generando blob PDF:', error);
+      return null;
+    } finally {
+      document.body.removeChild(clone);
+    }
   }
 
-  // Cancelar desde el modal
   cancelarVenta() {
     this.resumenModal.dismiss();
     this.mostrarExito('Venta cancelada');
   }
 
+  // =================== NOTIFICACIONES ===================
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
       header: titulo,

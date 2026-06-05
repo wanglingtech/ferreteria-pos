@@ -371,3 +371,16 @@
   color: #dc2626;
   font-size: 14px;
 }
+
+/* Mejoras para el modal de resumen */
+.resumen-modal .modal-content {
+  --padding-bottom: 20px;
+}
+
+.resumen-modal .tabla-productos {
+  overflow-x: auto;
+}
+
+.resumen-modal table {
+  min-width: 500px;
+}
