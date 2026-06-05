@@ -42,7 +42,6 @@ import {
   ],
 })
 export class InventarioPage implements OnInit {
-  // Señales para reactividad
   resumen = signal<ResumenInventario | null>(null);
   productosCriticos = signal<ProductoCritico[]>([]);
   filteredProductos = signal<ProductoCritico[]>([]);
@@ -53,11 +52,7 @@ export class InventarioPage implements OnInit {
   private toastCtrl = inject(ToastController);
 
   constructor() {
-    addIcons({
-      searchOutline,
-      alertCircleOutline,
-      checkmarkCircleOutline,
-    });
+    addIcons({ searchOutline, alertCircleOutline, checkmarkCircleOutline });
   }
 
   ngOnInit() {
@@ -88,17 +83,16 @@ export class InventarioPage implements OnInit {
     });
   }
 
-  // Búsqueda local o por API (usamos API para que el filtro sea en backend)
+  // Búsqueda en tiempo real
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
-    this.cargarProductosCriticos(); // refetch con filtro
+    this.cargarProductosCriticos(); // Recarga con el filtro
   }
 
-  // Obtener clase de gravedad según stock
   getSeverityClass(producto: ProductoCritico): string {
     if (producto.stock <= 0) return 'critical';
-    if (producto.stock <= producto.minStock / 2) return 'high';
+    if (producto.stock <= (producto.minStock || 5) / 2) return 'high';
     return 'medium';
   }
 

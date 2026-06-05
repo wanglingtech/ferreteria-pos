@@ -22,7 +22,7 @@
       </div>
       <div class="kpi-card kpi-danger">
         <span>Sin stock</span>
-        <strong>{{ resumen()?.productosSinStock ?? 2 }}</strong>
+        <strong>{{ resumen()?.productosSinStock ?? 0 }}</strong>
       </div>
       <div class="kpi-card kpi-success">
         <span>Valor inventario</span>
@@ -65,12 +65,21 @@
         <ion-list>
           @for (producto of filteredProductos(); track producto.id) {
           <ion-item class="alert-item" [class.critical]="producto.stock <= 0">
-            <div class="product-info" slot="start">
+            <!-- Imagen del producto -->
+            <div class="product-image" slot="start">
+              <img
+                [src]="producto.imageUrl || 'assets/default-product.png'"
+                [alt]="producto.name"
+              />
+            </div>
+            <div class="product-info">
               <h3>{{ producto.name }}</h3>
               <p class="sku">SKU: {{ producto.sku }}</p>
               <div class="stock-detail">
                 <span class="stock-value">Stock: {{ producto.stock }}</span>
-                <span class="min-stock">Mínimo: {{ producto.minStock }}</span>
+                <span class="min-stock"
+                  >Mínimo: {{ producto.minStock || 5 }}</span
+                >
               </div>
               @if (producto.category) {
               <p class="category">Categoría: {{ producto.category.name }}</p>

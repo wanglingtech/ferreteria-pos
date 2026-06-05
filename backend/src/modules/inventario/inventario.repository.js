@@ -1,7 +1,7 @@
 const { prisma } = require("../../config/database");
 
 /**
- * Obtiene resumen de inventario: total productos activos, stock bajo, sin stock y valorización
+ * Obtiene resumen de inventario con KPIs corregidos
  */
 async function getResumenInventario() {
   const products = await prisma.product.findMany({
@@ -16,9 +16,15 @@ async function getResumenInventario() {
 
   const totalProductos = products.length;
   const productosSinStock = products.filter((p) => p.stock <= 0).length;
-  const productosStockBajo = products.filter(
-    (p) => p.stock > 0 && p.stock <= p.minStock,
-  ).length;
+
+  // ✅ CORRECCIÓN: stock bajo = stock > 0 Y stock <= minStock (si minStock > 0)
+  // Si minStock es 0, consideramos stock bajo cuando stock > 0 y stock <= 5 (valor por defecto razonable)
+  const productosStockBajo = products.filter((p) => {
+    if (p.stock <= 0) return false;
+    const limite = p.minStock > 0 ? p.minStock : 5; // umbral por defecto 5
+    return p.stock <= limite;
+  }).length;
+
   const valorizacionTotal = products.reduce(
     (acc, p) => acc + Number(p.price) * p.stock,
     0,
@@ -33,23 +39,31 @@ async function getResumenInventario() {
 }
 
 /**
- * Obtiene lista de productos críticos (stock <= minStock) con datos completos para mostrar alertas
+ * Obtiene productos críticos (stock <= minStock o stock <= 5 si minStock=0)
+ * Incluye imagen del producto
  */
 async function getProductosCriticos(searchTerm = "") {
+  // Condición: stock > 0 y stock <= minStock (o <=5 si minStock=0)
+  // También incluimos sin stock (stock <= 0) como críticos
   const where = {
     isActive: true,
-    stock: { lte: prisma.product.fields.minStock }, // stock <= minStock
+    OR: [
+      { stock: { lte: 0 } }, // sin stock
+      {
+        stock: { gt: 0 },
+        AND: [{ stock: { lte: prisma.product.fields.minStock } }],
+      },
+    ],
   };
 
-  if (searchTerm && searchTerm.trim()) {
-    where.OR = [
-      { name: { contains: searchTerm, mode: "insensitive" } },
-      { sku: { contains: searchTerm, mode: "insensitive" } },
-    ];
-  }
+  // Si el campo minStock es 0 en muchos productos, usamos un valor por defecto en la consulta SQL?
+  // Como no podemos usar lógica condicional fácilmente, filtramos en JS después.
+  // Pero para rendimiento, traemos todos los productos activos y luego filtramos.
+  // Ajuste: traemos todos los productos activos (sin filtrar por stock) y aplicamos filtro en JS.
+  // Así aseguramos que se respete el umbral por defecto de 5.
 
-  return prisma.product.findMany({
-    where,
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
     select: {
       id: true,
       name: true,
@@ -61,6 +75,25 @@ async function getProductosCriticos(searchTerm = "") {
     },
     orderBy: [{ stock: "asc" }, { name: "asc" }],
   });
+
+  // Filtrar productos críticos según lógica
+  let filtered = products.filter((p) => {
+    if (p.stock <= 0) return true; // sin stock siempre crítico
+    const limite = p.minStock > 0 ? p.minStock : 5;
+    return p.stock <= limite;
+  });
+
+  // Aplicar búsqueda si hay término
+  if (searchTerm && searchTerm.trim()) {
+    const term = searchTerm.trim().toLowerCase();
+    filtered = filtered.filter(
+      (p) =>
+        p.name.toLowerCase().includes(term) ||
+        p.sku.toLowerCase().includes(term),
+    );
+  }
+
+  return filtered;
 }
 
 module.exports = {
