@@ -35,6 +35,7 @@
       </div>
     </section>
 
+    <!-- SEGMENT -->
     <section class="segment-section">
       <ion-segment [(ngModel)]="activeView" mode="md">
         <ion-segment-button value="overview"
@@ -49,6 +50,7 @@
       </ion-segment>
     </section>
 
+    <!-- VISTA RESUMEN -->
     @if (activeView === 'overview' && dashboardData) {
     <section class="section-block">
       <div class="section-header">
@@ -90,7 +92,9 @@
         </div>
       </div>
     </section>
+
     <div class="two-columns">
+      <!-- Últimas ventas -->
       <section class="section-block">
         <div class="section-header">
           <h3>Últimas ventas</h3>
@@ -100,9 +104,9 @@
           @for (sale of dashboardData.recentActivity; track sale.id) {
           <div class="activity-item">
             <div class="activity-info">
-              <strong>{{ sale.code }}</strong
-              ><span>{{ sale.seller.fullName }}</span
-              ><small>{{ formatDate(sale.createdAt) }}</small>
+              <strong>{{ sale.code }}</strong>
+              <span>{{ sale.seller.fullName }}</span>
+              <small>{{ formatDate(sale.createdAt) }}</small>
             </div>
             <div class="activity-amount">{{ formatCurrency(sale.total) }}</div>
           </div>
@@ -111,16 +115,25 @@
           }
         </div>
       </section>
+
+      <!-- Alertas de stock CON IMAGEN -->
       <section class="section-block">
         <div class="section-header">
           <h3>Alertas de stock</h3>
           <span>Productos por debajo del mínimo</span>
         </div>
         <div class="alert-list">
-          @for (prod of dashboardData.lowStockAlerts; track prod.id) {
+          @for (prod of dashboardData!.lowStockAlerts; track prod.id) {
           <div class="alert-item">
+            <div class="alert-image">
+              <img
+                [src]="prod.imageUrl || 'assets/default-product.png'"
+                [alt]="prod.name"
+              />
+            </div>
             <div class="alert-info">
-              <strong>{{ prod.name }}</strong><span>SKU: {{ prod.sku }}</span>
+              <strong>{{ prod.name }}</strong>
+              <span>SKU: {{ prod.sku }}</span>
             </div>
             <div class="alert-stock">
               Stock: {{ prod.stock }} / Mín: {{ prod.minStock || 5 }}
@@ -132,7 +145,10 @@
         </div>
       </section>
     </div>
-    } @if (activeView === 'analytics' && dashboardData) {
+    }
+
+    <!-- VISTA ANALYTICS (gráficos) -->
+    @if (activeView === 'analytics' && dashboardData) {
     <section class="section-block charts-section">
       <div class="section-header">
         <h3>Análisis de ventas</h3>
@@ -176,14 +192,17 @@
             <canvas
               baseChart
               [data]="doughnutChartData"
-              [options]="chartOptions"
+              [options]="doughnutOptions"
               type="doughnut"
             ></canvas>
           </div>
         </div>
       </div>
     </section>
-    } @if (activeView === 'modules') {
+    }
+
+    <!-- VISTA MÓDULOS (accesos rápidos) -->
+    @if (activeView === 'modules') {
     <section class="section-block">
       <div class="section-header">
         <h3>Módulos Empresariales</h3>

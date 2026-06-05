@@ -8,7 +8,6 @@ function getDayRange() {
   return { start, end };
 }
 
-// KPIs principales
 async function getKpis() {
   const { start, end } = getDayRange();
   const [salesToday, totalOrders, products, stockSnapshot] = await Promise.all([
@@ -40,7 +39,6 @@ async function getKpis() {
   };
 }
 
-// Ventas por día de los últimos 7 días (para gráfico de líneas)
 async function getSalesLast7Days() {
   const today = new Date();
   const startDate = new Date(today);
@@ -51,7 +49,6 @@ async function getSalesLast7Days() {
     where: { createdAt: { gte: startDate } },
     _sum: { total: true },
   });
-  // Agrupar por día (yyyy-mm-dd)
   const grouped = {};
   for (let i = 0; i < 7; i++) {
     const d = new Date(startDate);
@@ -66,7 +63,6 @@ async function getSalesLast7Days() {
   return Object.entries(grouped).map(([date, total]) => ({ date, total }));
 }
 
-// Productos más vendidos (últimos 30 días)
 async function getTopProducts(limit = 5) {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -88,7 +84,6 @@ async function getTopProducts(limit = 5) {
   });
 }
 
-// Actividad reciente (últimas 5 ventas)
 async function getRecentActivity() {
   return prisma.sale.findMany({
     take: 5,
@@ -103,11 +98,18 @@ async function getRecentActivity() {
   });
 }
 
-// Productos con stock bajo (para alertas)
+// ✅ Incluye imageUrl
 async function getLowStockAlerts(limit = 5) {
   const products = await prisma.product.findMany({
     where: { isActive: true },
-    select: { id: true, name: true, sku: true, stock: true, minStock: true },
+    select: {
+      id: true,
+      name: true,
+      sku: true,
+      stock: true,
+      minStock: true,
+      imageUrl: true,
+    },
     orderBy: { stock: "asc" },
     take: limit,
   });

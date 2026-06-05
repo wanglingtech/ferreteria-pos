@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  AfterViewInit,
+  ViewChildren,
+  QueryList,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
@@ -57,7 +65,9 @@ Chart.register(...registerables);
     BaseChartDirective,
   ],
 })
-export class DashboardPage implements OnInit, OnDestroy {
+export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
+
   private authSession = inject(AuthSessionService);
   get user() {
     return this.authSession.getCurrentUser();
@@ -73,14 +83,26 @@ export class DashboardPage implements OnInit, OnDestroy {
   barChartData: any = { labels: [], datasets: [] };
   doughnutChartData: any = { labels: [], datasets: [] };
 
-  // ✅ CORREGIDO: usar 'as const' para forzar tipos literales
   chartOptions = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
+    aspectRatio: 1.5,
     plugins: {
-      legend: {
-        position: 'top' as const,
-      },
+      legend: { position: 'top' as const, labels: { font: { size: 10 } } },
+      tooltip: { mode: 'index' as const, intersect: false },
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+      x: { grid: { display: false } },
+    },
+  };
+
+  doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    aspectRatio: 1.2,
+    plugins: {
+      legend: { position: 'top' as const, labels: { font: { size: 10 } } },
     },
   };
 
@@ -113,6 +135,12 @@ export class DashboardPage implements OnInit, OnDestroy {
     this.refreshInterval = setInterval(() => this.cargarDashboard(true), 30000);
   }
 
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.charts.forEach((chart) => chart?.chart?.resize());
+    }, 300);
+  }
+
   ngOnDestroy() {
     if (this.refreshInterval) clearInterval(this.refreshInterval);
   }
@@ -124,6 +152,9 @@ export class DashboardPage implements OnInit, OnDestroy {
       this.dashboardData = data;
       this.lastUpdate = new Date();
       this.actualizarGraficos();
+      setTimeout(() => {
+        this.charts.forEach((chart) => chart?.chart?.resize());
+      }, 100);
     } catch (error) {
       console.error('Error cargando dashboard:', error);
       if (!silent) {
@@ -153,18 +184,25 @@ export class DashboardPage implements OnInit, OnDestroy {
           backgroundColor: 'rgba(10,26,92,0.1)',
           tension: 0.3,
           fill: true,
+          pointBackgroundColor: '#0a1a5c',
+          pointBorderColor: '#fff',
+          pointRadius: 3,
+          pointHoverRadius: 5,
         },
       ],
     };
     const top = this.dashboardData.topProducts;
     this.barChartData = {
-      labels: top.map((p) => p.name),
+      labels: top.map((p) =>
+        p.name.length > 15 ? p.name.slice(0, 12) + '…' : p.name,
+      ),
       datasets: [
         {
           label: 'Unidades vendidas',
           data: top.map((p) => p.quantity),
           backgroundColor: '#3b82f6',
-          borderRadius: 8,
+          borderRadius: 6,
+          barPercentage: 0.7,
         },
       ],
     };
@@ -178,6 +216,7 @@ export class DashboardPage implements OnInit, OnDestroy {
           data: [totalProd - bajo, bajo],
           backgroundColor: ['#10b981', '#f59e0b'],
           hoverOffset: 4,
+          borderWidth: 0,
         },
       ],
     };

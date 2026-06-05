@@ -30,6 +30,7 @@ export interface LowStockProduct {
   sku: string;
   stock: number;
   minStock: number;
+  imageUrl: string; // ✅ añadido
 }
 
 export interface DashboardData {

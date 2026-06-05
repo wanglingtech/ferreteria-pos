@@ -1,8 +1,5 @@
 /* =====================================================
    DASHBOARD - ESTILOS RESPONSIVOS MODERNOS
-   - Mobile first, breakpoints fluidos
-   - Transiciones suaves
-   - Fix gráficos responsive
 ===================================================== */
 
 :host {
@@ -153,6 +150,14 @@
   backdrop-filter: blur(4px);
 }
 
+/* -------------------- SEGMENT -------------------- */
+.segment-section {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 2rem;
+  padding: 0.25rem;
+  backdrop-filter: blur(8px);
+}
+
 /* -------------------- SECCIONES -------------------- */
 .section-block {
   background: rgba(255, 255, 255, 0.85);
@@ -194,8 +199,8 @@
 /* -------------------- KPI GRID -------------------- */
 .kpi-grid {
   display: grid;
-  grid-template-columns: 1fr;
   gap: 1rem;
+  grid-template-columns: 1fr;
 }
 @media (min-width: 480px) {
   .kpi-grid {
@@ -290,6 +295,7 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
 .activity-list,
 .alert-list {
   display: flex;
@@ -337,13 +343,32 @@
   color: #0a1a5c;
   font-size: 0.9rem;
 }
+
+/* Alertas con imagen */
 .alert-item {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+.alert-image {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+.alert-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.alert-info {
+  flex: 1;
 }
 .alert-info strong {
+  display: block;
   font-size: 0.9rem;
   color: #1e293b;
 }
@@ -359,6 +384,20 @@
   background: #fee2e2;
   padding: 0.2rem 0.6rem;
   border-radius: 30px;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .alert-item {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .alert-image {
+    width: 40px;
+    height: 40px;
+  }
+  .alert-stock {
+    margin-left: auto;
+  }
 }
 .empty-placeholder {
   text-align: center;
@@ -367,7 +406,7 @@
   font-size: 0.85rem;
 }
 
-/* -------------------- GRÁFICOS (FIX para móviles) -------------------- */
+/* -------------------- GRÁFICOS -------------------- */
 .charts-grid {
   display: grid;
   gap: 1.5rem;
@@ -389,8 +428,8 @@
   border: 1px solid #e5edff;
   box-shadow: 0 6px 14px rgba(10, 26, 92, 0.05);
   transition: var(--transition-default);
-  width: 100%;
-  overflow-x: auto; /* backup scroll */
+  display: flex;
+  flex-direction: column;
 }
 .chart-card:hover {
   transform: translateY(-4px);
@@ -400,7 +439,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 .chart-header h4 {
   margin: 0;
@@ -415,36 +454,25 @@
 }
 .chart-container {
   width: 100%;
-  height: auto;
-  min-height: 220px;
+  min-height: 200px;
   position: relative;
-  display: flex;
-  justify-content: center;
-}
-canvas {
-  max-width: 100% !important;
-  height: auto !important;
-  display: block;
 }
 @media (max-width: 768px) {
   .chart-container {
     min-height: 180px;
   }
 }
-@media (max-width: 480px) {
-  .chart-card {
-    padding: 0.75rem;
-  }
-  .chart-container {
-    min-height: 160px;
-  }
+canvas {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
 }
 
 /* -------------------- QUICK ACTIONS -------------------- */
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
 @media (min-width: 640px) {
   .quick-grid {
@@ -519,6 +547,7 @@ canvas {
   background: linear-gradient(135deg, #16a34a, #22c55e);
 }
 
+/* -------------------- RESPONSIVE EXTRA -------------------- */
 @media (max-width: 480px) {
   .hero-content {
     padding: 1.25rem;
