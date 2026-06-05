@@ -1,6 +1,6 @@
 <ion-content class="inventario-content">
   <div class="inventario-shell">
-    <!-- HERO HEADER -->
+    <!-- SECCIÓN HERO (encabezado) -->
     <div class="hero-header">
       <div class="hero-badge">📦 Módulo de Inventario</div>
       <h1>Inventario</h1>
@@ -10,21 +10,29 @@
       </p>
     </div>
 
-    <!-- KPIs -->
+    <!-- INDICADORES KPI (con iconos) -->
     <div class="kpi-grid">
+      <!-- Total productos -->
       <div class="kpi-card kpi-total">
+        <ion-icon name="cube-outline" class="kpi-icon"></ion-icon>
         <span>Total productos</span>
         <strong>{{ resumen()?.totalProductos ?? 0 }}</strong>
       </div>
+      <!-- Stock bajo (crítico pero con stock positivo) -->
       <div class="kpi-card kpi-warning">
+        <ion-icon name="warning-outline" class="kpi-icon"></ion-icon>
         <span>Stock bajo</span>
         <strong>{{ resumen()?.productosStockBajo ?? 0 }}</strong>
       </div>
+      <!-- Sin stock -->
       <div class="kpi-card kpi-danger">
+        <ion-icon name="close-circle-outline" class="kpi-icon"></ion-icon>
         <span>Sin stock</span>
         <strong>{{ resumen()?.productosSinStock ?? 0 }}</strong>
       </div>
+      <!-- Valorización del inventario -->
       <div class="kpi-card kpi-success">
+        <ion-icon name="cash-outline" class="kpi-icon"></ion-icon>
         <span>Valor inventario</span>
         <strong
           >S/ {{ (resumen()?.valorizacionTotal ?? 0) | number:'1.2-2' }}</strong
@@ -32,10 +40,11 @@
       </div>
     </div>
 
-    <!-- ALERTAS + BÚSQUEDA -->
+    <!-- TARJETA DE ALERTAS CON BÚSQUEDA -->
     <div class="filters-card">
       <div class="card-header">
         <div class="card-title">⚠️ Alertas de reabastecimiento</div>
+        <!-- Buscador en tiempo real -->
         <div class="search-box">
           <ion-icon name="search-outline"></ion-icon>
           <input
@@ -51,17 +60,20 @@
       </p>
 
       <div class="table-wrapper">
+        <!-- Estado de carga -->
         @if (isLoading()) {
         <div class="loading-state">
           <ion-spinner name="crescent"></ion-spinner>
           <p>Cargando productos críticos...</p>
         </div>
         } @else if (filteredProductos().length === 0) {
+        <!-- Estado vacío -->
         <div class="empty-state">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
           <p>¡No hay productos críticos! El inventario está saludable.</p>
         </div>
         } @else {
+        <!-- Lista de productos críticos -->
         <ion-list>
           @for (producto of filteredProductos(); track producto.id) {
           <ion-item class="alert-item" [class.critical]="producto.stock <= 0">
@@ -72,6 +84,7 @@
                 [alt]="producto.name"
               />
             </div>
+            <!-- Información textual -->
             <div class="product-info">
               <h3>{{ producto.name }}</h3>
               <p class="sku">SKU: {{ producto.sku }}</p>
@@ -85,6 +98,7 @@
               <p class="category">Categoría: {{ producto.category.name }}</p>
               }
             </div>
+            <!-- Badge de severidad -->
             <ion-badge
               slot="end"
               [color]="producto.stock <= 0 ? 'danger' : 'warning'"

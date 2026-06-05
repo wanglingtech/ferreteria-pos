@@ -14,8 +14,10 @@ import {
 import { addIcons } from 'ionicons';
 import {
   searchOutline,
-  alertCircleOutline,
-  checkmarkCircleOutline,
+  cubeOutline,
+  warningOutline,
+  closeCircleOutline,
+  cashOutline,
 } from 'ionicons/icons';
 
 import { InventarioApiService } from '../services/inventario-api.service';
@@ -42,24 +44,35 @@ import {
   ],
 })
 export class InventarioPage implements OnInit {
-  resumen = signal<ResumenInventario | null>(null);
-  productosCriticos = signal<ProductoCritico[]>([]);
-  filteredProductos = signal<ProductoCritico[]>([]);
-  isLoading = signal(false);
-  searchTerm = signal('');
+  // Señales para manejar estado reactivo
+  resumen = signal<ResumenInventario | null>(null); // KPIs
+  productosCriticos = signal<ProductoCritico[]>([]); // Lista original (críticos)
+  filteredProductos = signal<ProductoCritico[]>([]); // Lista filtrada por búsqueda
+  isLoading = signal(false); // Control de carga
+  searchTerm = signal(''); // Término de búsqueda actual
 
   private inventarioApi = inject(InventarioApiService);
   private toastCtrl = inject(ToastController);
 
   constructor() {
-    addIcons({ searchOutline, alertCircleOutline, checkmarkCircleOutline });
+    // Registrar los iconos utilizados en la plantilla
+    addIcons({
+      searchOutline,
+      cubeOutline,
+      warningOutline,
+      closeCircleOutline,
+      cashOutline,
+    });
   }
 
   ngOnInit() {
-    this.cargarResumen();
-    this.cargarProductosCriticos();
+    this.cargarResumen(); // Obtener KPIs al iniciar
+    this.cargarProductosCriticos(); // Obtener lista de productos críticos
   }
 
+  /**
+   * Obtiene los indicadores resumen del inventario (total, stock bajo, sin stock, valorización)
+   */
   cargarResumen() {
     this.inventarioApi.obtenerResumen().subscribe({
       next: (data) => this.resumen.set(data),
@@ -68,12 +81,16 @@ export class InventarioPage implements OnInit {
     });
   }
 
+  /**
+   * Obtiene los productos críticos (stock bajo o sin stock) y aplica el término de búsqueda actual.
+   * El backend ya filtra por el término, por lo que la lista resultante es la ya filtrada.
+   */
   cargarProductosCriticos() {
     this.isLoading.set(true);
     this.inventarioApi.obtenerProductosCriticos(this.searchTerm()).subscribe({
       next: (data) => {
         this.productosCriticos.set(data);
-        this.filteredProductos.set(data);
+        this.filteredProductos.set(data); // Ambos coinciden porque el backend ya filtró
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -83,19 +100,29 @@ export class InventarioPage implements OnInit {
     });
   }
 
-  // Búsqueda en tiempo real
+  /**
+   * Se dispara cada vez que el usuario escribe en el buscador.
+   * Actualiza el término de búsqueda y recarga la lista.
+   */
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
-    this.cargarProductosCriticos(); // Recarga con el filtro
+    this.cargarProductosCriticos(); // Llamada al backend con el nuevo término
   }
 
+  /**
+   * Determina la clase de gravedad para cada producto (útil para estilos adicionales)
+   */
   getSeverityClass(producto: ProductoCritico): string {
     if (producto.stock <= 0) return 'critical';
-    if (producto.stock <= (producto.minStock || 5) / 2) return 'high';
+    const limite = producto.minStock > 0 ? producto.minStock : 5;
+    if (producto.stock <= limite / 2) return 'high';
     return 'medium';
   }
 
+  /**
+   * Muestra un toast de error al usuario.
+   */
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
       header: titulo,
