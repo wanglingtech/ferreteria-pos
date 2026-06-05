@@ -1,205 +1,235 @@
 <ion-content [fullscreen]="true" class="dashboard-content">
   <div class="dashboard-shell">
     <!-- HERO -->
-
     <section class="hero-section">
       <div class="hero-overlay"></div>
-
       <div class="hero-content">
         <div class="hero-badge">
           <ion-icon name="business-outline"></ion-icon>
           Sistema Corporativo
         </div>
-
         <h2>Bienvenido{{ user ? ', ' + user.fullName : '' }}</h2>
-
         <p>
           Administra operaciones, monitorea indicadores y controla los módulos
           estratégicos desde un único entorno empresarial.
         </p>
-
         <div class="hero-actions">
-          <ion-button class="hero-btn"> Ver actividad </ion-button>
-
-          <ion-button fill="outline" class="hero-btn-outline">
+          <ion-button class="hero-btn" (click)="refresh($event)">
+            <ion-icon slot="start" name="refresh-outline"></ion-icon>
+            Actualizar
+          </ion-button>
+          <ion-button
+            fill="outline"
+            class="hero-btn-outline"
+            (click)="navigateTo('reportes')"
+          >
             Ver reportes
           </ion-button>
         </div>
+        @if (lastUpdate) {
+        <div class="last-update">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Última actualización: {{ lastUpdate | date:'HH:mm:ss' }}</span>
+        </div>
+        }
       </div>
     </section>
 
-    <!-- SEGMENT -->
-
     <section class="segment-section">
       <ion-segment [(ngModel)]="activeView" mode="md">
-        <ion-segment-button value="overview">
-          <ion-label>Resumen</ion-label>
-        </ion-segment-button>
-
-        <ion-segment-button value="analytics">
-          <ion-label>Analytics</ion-label>
-        </ion-segment-button>
-
-        <ion-segment-button value="modules">
-          <ion-label>Módulos</ion-label>
-        </ion-segment-button>
+        <ion-segment-button value="overview"
+          ><ion-label>Resumen</ion-label></ion-segment-button
+        >
+        <ion-segment-button value="analytics"
+          ><ion-label>Analytics</ion-label></ion-segment-button
+        >
+        <ion-segment-button value="modules"
+          ><ion-label>Módulos</ion-label></ion-segment-button
+        >
       </ion-segment>
     </section>
 
-    <!-- KPI -->
-
+    @if (activeView === 'overview' && dashboardData) {
     <section class="section-block">
       <div class="section-header">
         <h3>Indicadores Principales</h3>
         <span>Resumen ejecutivo</span>
       </div>
-
       <div class="kpi-grid">
         <div class="kpi-card sales">
-          <div class="kpi-icon">
-            <ion-icon name="cash-outline"></ion-icon>
-          </div>
-
+          <div class="kpi-icon"><ion-icon name="cash-outline"></ion-icon></div>
           <div class="kpi-info">
             <span>Ventas del día</span>
-            <h4>Sin datos</h4>
+            <h4>{{ formatCurrency(dashboardData.kpis.ventasDia) }}</h4>
           </div>
         </div>
-
         <div class="kpi-card orders">
           <div class="kpi-icon">
             <ion-icon name="receipt-outline"></ion-icon>
           </div>
-
           <div class="kpi-info">
-            <span>Órdenes</span>
-            <h4>Sin datos</h4>
+            <span>Órdenes hoy</span>
+            <h4>{{ dashboardData.kpis.ordenesDia }}</h4>
           </div>
         </div>
-
         <div class="kpi-card products">
-          <div class="kpi-icon">
-            <ion-icon name="cube-outline"></ion-icon>
-          </div>
-
+          <div class="kpi-icon"><ion-icon name="cube-outline"></ion-icon></div>
           <div class="kpi-info">
-            <span>Productos</span>
-            <h4>Sin datos</h4>
+            <span>Productos activos</span>
+            <h4>{{ dashboardData.kpis.productosTotales }}</h4>
           </div>
         </div>
-
         <div class="kpi-card stock">
           <div class="kpi-icon">
             <ion-icon name="alert-circle-outline"></ion-icon>
           </div>
-
           <div class="kpi-info">
-            <span>Stock Bajo</span>
-            <h4>Sin datos</h4>
+            <span>Stock bajo</span>
+            <h4>{{ dashboardData.kpis.productosStockBajo }}</h4>
           </div>
         </div>
       </div>
     </section>
-
-    <!-- CHARTS -->
-
-    <section class="section-block">
+    <div class="two-columns">
+      <section class="section-block">
+        <div class="section-header">
+          <h3>Últimas ventas</h3>
+          <span>Actividad reciente</span>
+        </div>
+        <div class="activity-list">
+          @for (sale of dashboardData.recentActivity; track sale.id) {
+          <div class="activity-item">
+            <div class="activity-info">
+              <strong>{{ sale.code }}</strong
+              ><span>{{ sale.seller.fullName }}</span
+              ><small>{{ formatDate(sale.createdAt) }}</small>
+            </div>
+            <div class="activity-amount">{{ formatCurrency(sale.total) }}</div>
+          </div>
+          } @empty {
+          <div class="empty-placeholder">No hay ventas recientes</div>
+          }
+        </div>
+      </section>
+      <section class="section-block">
+        <div class="section-header">
+          <h3>Alertas de stock</h3>
+          <span>Productos por debajo del mínimo</span>
+        </div>
+        <div class="alert-list">
+          @for (prod of dashboardData.lowStockAlerts; track prod.id) {
+          <div class="alert-item">
+            <div class="alert-info">
+              <strong>{{ prod.name }}</strong><span>SKU: {{ prod.sku }}</span>
+            </div>
+            <div class="alert-stock">
+              Stock: {{ prod.stock }} / Mín: {{ prod.minStock || 5 }}
+            </div>
+          </div>
+          } @empty {
+          <div class="empty-placeholder">No hay productos con stock bajo</div>
+          }
+        </div>
+      </section>
+    </div>
+    } @if (activeView === 'analytics' && dashboardData) {
+    <section class="section-block charts-section">
       <div class="section-header">
-        <h3>Analytics</h3>
-        <span>Visualización estratégica</span>
+        <h3>Análisis de ventas</h3>
+        <span>Gráficos en tiempo real</span>
       </div>
-
       <div class="charts-grid">
         <div class="chart-card">
           <div class="chart-header">
-            <h4>Ventas Mensuales</h4>
+            <h4>Ventas últimos 7 días</h4>
             <ion-icon name="stats-chart-outline"></ion-icon>
           </div>
-
-          <div class="chart-placeholder chart-sales">Próximamente Chart.js</div>
+          <div class="chart-container">
+            <canvas
+              baseChart
+              [data]="lineChartData"
+              [options]="chartOptions"
+              type="line"
+            ></canvas>
+          </div>
         </div>
-
         <div class="chart-card">
           <div class="chart-header">
-            <h4>Productos Vendidos</h4>
+            <h4>Top productos más vendidos</h4>
+            <ion-icon name="bar-chart-outline"></ion-icon>
+          </div>
+          <div class="chart-container">
+            <canvas
+              baseChart
+              [data]="barChartData"
+              [options]="chartOptions"
+              type="bar"
+            ></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4>Salud del inventario</h4>
             <ion-icon name="pie-chart-outline"></ion-icon>
           </div>
-
-          <div class="chart-placeholder chart-products">
-            Próximamente Chart.js
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-header">
-            <h4>Rendimiento</h4>
-            <ion-icon name="analytics-outline"></ion-icon>
-          </div>
-
-          <div class="chart-placeholder chart-performance">
-            Próximamente Chart.js
+          <div class="chart-container">
+            <canvas
+              baseChart
+              [data]="doughnutChartData"
+              [options]="chartOptions"
+              type="doughnut"
+            ></canvas>
           </div>
         </div>
       </div>
     </section>
-
-    <!-- QUICK ACTIONS -->
-
+    } @if (activeView === 'modules') {
     <section class="section-block">
       <div class="section-header">
         <h3>Módulos Empresariales</h3>
         <span>Accesos rápidos</span>
       </div>
-
       <div class="quick-grid">
-        <div class="quick-card inventory-card">
+        <div
+          class="quick-card inventory-card"
+          (click)="navigateTo('inventario')"
+        >
           <div class="quick-icon">
             <ion-icon name="layers-outline"></ion-icon>
           </div>
           <h4>Inventario</h4>
           <p>Control de stock y almacenes</p>
         </div>
-
-        <div class="quick-card sales-card">
+        <div class="quick-card sales-card" (click)="navigateTo('ventas')">
           <div class="quick-icon">
             <ion-icon name="cart-outline"></ion-icon>
           </div>
           <h4>Ventas</h4>
           <p>Operaciones comerciales</p>
         </div>
-
-        <div class="quick-card clients-card">
+        <div class="quick-card clients-card" (click)="navigateTo('usuarios')">
           <div class="quick-icon">
             <ion-icon name="people-outline"></ion-icon>
           </div>
-          <h4>Clientes</h4>
-          <p>Gestión de clientes</p>
+          <h4>Usuarios</h4>
+          <p>Gestión de personal</p>
         </div>
-
-        <div class="quick-card reports-card">
+        <div class="quick-card reports-card" (click)="navigateTo('reportes')">
           <div class="quick-icon">
             <ion-icon name="bar-chart-outline"></ion-icon>
           </div>
           <h4>Reportes</h4>
           <p>Indicadores empresariales</p>
         </div>
-
-        <div class="quick-card products-card">
+        <div class="quick-card products-card" (click)="navigateTo('productos')">
           <div class="quick-icon">
             <ion-icon name="cube-outline"></ion-icon>
           </div>
           <h4>Productos</h4>
           <p>Gestión del catálogo</p>
         </div>
-
-        <div class="quick-card settings-card">
-          <div class="quick-icon">
-            <ion-icon name="settings-outline"></ion-icon>
-          </div>
-          <h4>Configuración</h4>
-          <p>Preferencias del sistema</p>
-        </div>
       </div>
     </section>
+    }
   </div>
 </ion-content>
