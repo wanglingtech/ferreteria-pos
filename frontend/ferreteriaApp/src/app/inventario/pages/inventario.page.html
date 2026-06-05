@@ -1,12 +1,9 @@
 <ion-content class="inventario-content">
-  <!-- WRAPPER PRINCIPAL -->
   <div class="inventario-shell">
     <!-- HERO HEADER -->
     <div class="hero-header">
       <div class="hero-badge">📦 Módulo de Inventario</div>
-
       <h1>Inventario</h1>
-
       <p>
         Supervisión en tiempo real del almacén, valorización total y alertas de
         reabastecimiento.
@@ -17,50 +14,78 @@
     <div class="kpi-grid">
       <div class="kpi-card kpi-total">
         <span>Total productos</span>
-        <strong>{{ resumen?.totalProductos ?? 0 }}</strong>
+        <strong>{{ resumen()?.totalProductos ?? 0 }}</strong>
       </div>
-
       <div class="kpi-card kpi-warning">
         <span>Stock bajo</span>
-        <strong>{{ resumen?.productosStockBajo ?? 0 }}</strong>
+        <strong>{{ resumen()?.productosStockBajo ?? 0 }}</strong>
       </div>
-
       <div class="kpi-card kpi-danger">
         <span>Sin stock</span>
-        <strong>{{ resumen?.productosSinStock ?? 0 }}</strong>
+        <strong>{{ resumen()?.productosSinStock ?? 2 }}</strong>
       </div>
-
       <div class="kpi-card kpi-success">
         <span>Valor inventario</span>
         <strong
-          >S/ {{ resumen?.valorizacionTotal ?? 0 | number:'1.2-2' }}</strong
+          >S/ {{ (resumen()?.valorizacionTotal ?? 0) | number:'1.2-2' }}</strong
         >
       </div>
     </div>
 
-    <!-- ALERTAS -->
+    <!-- ALERTAS + BÚSQUEDA -->
     <div class="filters-card">
-      <div class="card-title">⚠️ Alertas de reabastecimiento</div>
-
+      <div class="card-header">
+        <div class="card-title">⚠️ Alertas de reabastecimiento</div>
+        <div class="search-box">
+          <ion-icon name="search-outline"></ion-icon>
+          <input
+            type="text"
+            placeholder="Buscar producto por nombre o SKU..."
+            [ngModel]="searchTerm()"
+            (ngModelChange)="onSearch($event)"
+          />
+        </div>
+      </div>
       <p class="subtitle">
         Productos que requieren atención inmediata para evitar quiebres de stock
       </p>
 
       <div class="table-wrapper">
-        <ion-list *ngIf="lowStockProducts.length > 0; else empty">
-          <ion-item *ngFor="let item of lowStockProducts">
-            <ion-label>
-              <h3>{{ item.name }}</h3>
-              <p>Stock: {{ item.stock }} · Mínimo: {{ item.minStock }}</p>
-            </ion-label>
-
-            <ion-badge color="danger">Crítico</ion-badge>
+        @if (isLoading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>Cargando productos críticos...</p>
+        </div>
+        } @else if (filteredProductos().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <p>¡No hay productos críticos! El inventario está saludable.</p>
+        </div>
+        } @else {
+        <ion-list>
+          @for (producto of filteredProductos(); track producto.id) {
+          <ion-item class="alert-item" [class.critical]="producto.stock <= 0">
+            <div class="product-info" slot="start">
+              <h3>{{ producto.name }}</h3>
+              <p class="sku">SKU: {{ producto.sku }}</p>
+              <div class="stock-detail">
+                <span class="stock-value">Stock: {{ producto.stock }}</span>
+                <span class="min-stock">Mínimo: {{ producto.minStock }}</span>
+              </div>
+              @if (producto.category) {
+              <p class="category">Categoría: {{ producto.category.name }}</p>
+              }
+            </div>
+            <ion-badge
+              slot="end"
+              [color]="producto.stock <= 0 ? 'danger' : 'warning'"
+            >
+              {{ producto.stock <= 0 ? 'Sin stock' : 'Crítico' }}
+            </ion-badge>
           </ion-item>
+          }
         </ion-list>
-
-        <ng-template #empty>
-          <div class="empty-state">No hay productos en estado crítico</div>
-        </ng-template>
+        }
       </div>
     </div>
   </div>

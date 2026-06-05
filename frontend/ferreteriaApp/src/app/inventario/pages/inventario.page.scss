@@ -1,34 +1,31 @@
+/* =========================
+   CONTENEDOR PRINCIPAL
+========================= */
 .inventario-content {
   --background: #f4f7fc;
 }
 
-/* =========================
-   CONTAINER
-========================= */
 .inventario-shell {
   max-width: 1400px;
   margin: 0 auto;
-
   padding-top: 95px;
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 /* =========================
-   HERO HEADER (IGUAL TU ESTILO REPORTES)
+   HERO HEADER
 ========================= */
 .hero-header {
   position: relative;
   overflow: hidden;
-
-  margin-bottom: 24px;
   padding: 30px;
-
   border-radius: 28px;
-
   color: white;
-
   background:
     radial-gradient(
       circle at top right,
@@ -36,74 +33,52 @@
       transparent 40%
     ),
     linear-gradient(135deg, #071447 0%, #0a1a5c 40%, #17317f 80%);
-
-  box-shadow:
-    0 20px 45px rgba(10, 26, 92, 0.25),
-    0 8px 20px rgba(10, 26, 92, 0.12);
+  box-shadow: 0 20px 45px rgba(10, 26, 92, 0.25);
 }
-
 .hero-header h1 {
   margin: 0;
   font-size: 2.2rem;
   font-weight: 800;
 }
-
 .hero-header p {
   margin-top: 10px;
   color: rgba(255, 255, 255, 0.85);
   max-width: 700px;
-  line-height: 1.6;
+  line-height: 1.5;
 }
-
 .hero-badge {
   display: inline-flex;
   gap: 8px;
-
   padding: 8px 14px;
   border-radius: 999px;
-
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.1);
-
   font-size: 13px;
   font-weight: 700;
-
   margin-bottom: 14px;
 }
 
 /* =========================
-   KPI GRID (ERP STYLE)
+   KPIs (tarjetas)
 ========================= */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 18px;
-
-  margin-bottom: 24px;
 }
-
 .kpi-card {
-  position: relative;
-  overflow: hidden;
-
   border-radius: 24px;
   padding: 24px;
-
   color: white;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
-
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-
   transition: transform 0.2s ease;
 }
-
 .kpi-card:hover {
   transform: translateY(-4px);
 }
-
 .kpi-card span {
   font-size: 13px;
   opacity: 0.85;
@@ -111,77 +86,194 @@
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-
 .kpi-card strong {
   font-size: 2rem;
   font-weight: 800;
 }
-
-/* COLORES KPI */
 .kpi-total {
   background: linear-gradient(135deg, #071447, #0a1a5c, #2754d8);
 }
-
 .kpi-warning {
   background: linear-gradient(135deg, #f59e0b, #fbbf24);
 }
-
 .kpi-danger {
   background: linear-gradient(135deg, #ef4444, #f87171);
 }
-
 .kpi-success {
   background: linear-gradient(135deg, #16a34a, #22c55e);
 }
 
 /* =========================
-   FILTER / ALERT CARD
+   TARJETA DE ALERTAS
 ========================= */
 .filters-card {
   background: white;
-
   border-radius: 24px;
   border: 1px solid #dce8fa;
-
   padding: 24px;
-
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
 }
-
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
 .card-title {
   font-size: 18px;
   font-weight: 800;
   color: #0a1a5c;
-
-  margin-bottom: 6px;
 }
-
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #dce8fa;
+  border-radius: 40px;
+  padding: 6px 16px;
+  min-width: 240px;
+}
+.search-box ion-icon {
+  color: #6b7a90;
+  font-size: 18px;
+}
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+}
 .subtitle {
   font-size: 13px;
   color: #4d6485;
-
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 /* =========================
-   LISTA
+   LISTA DE PRODUCTOS CRÍTICOS
 ========================= */
-ion-item h3 {
+ion-list {
+  background: transparent;
+}
+.alert-item {
+  --background: #fff;
+  --border-radius: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #eef2ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s;
+}
+.alert-item.critical {
+  border-left: 5px solid #ef4444;
+}
+.product-info {
+  flex: 1;
+  padding: 8px 0;
+}
+.product-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
   font-weight: 700;
   color: #0f172a;
 }
-
-ion-item p {
+.sku {
+  font-size: 12px;
   color: #64748b;
-  font-size: 0.8rem;
+  margin: 2px 0;
+}
+.stock-detail {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.stock-value {
+  font-weight: 600;
+  color: #334155;
+}
+.min-stock {
+  color: #6b7280;
+}
+.category {
+  font-size: 12px;
+  color: #4b5563;
+  margin-top: 4px;
+}
+ion-badge {
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 40px;
+  font-size: 12px;
+}
+
+/* Estados vacío y carga */
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+}
+.empty-state ion-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+.loading-state ion-spinner {
+  --color: #0a1a5c;
+  margin-bottom: 10px;
 }
 
 /* =========================
-   EMPTY STATE
+   RESPONSIVE
 ========================= */
-.empty-state {
-  text-align: center;
-  padding: 20px;
+@media (max-width: 768px) {
+  .hero-header {
+    padding: 20px;
+  }
+  .hero-header h1 {
+    font-size: 1.6rem;
+  }
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .kpi-card {
+    padding: 16px;
+  }
+  .kpi-card strong {
+    font-size: 1.5rem;
+  }
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-box {
+    width: 100%;
+  }
+  .alert-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  ion-badge {
+    margin-top: 8px;
+    align-self: flex-start;
+  }
+}
 
-  color: #94a3b8;
+@media (max-width: 480px) {
+  .hero-header h1 {
+    font-size: 1.3rem;
+  }
+  .kpi-card span {
+    font-size: 11px;
+  }
+  .kpi-card strong {
+    font-size: 1.2rem;
+  }
+  .product-info h3 {
+    font-size: 0.9rem;
+  }
 }

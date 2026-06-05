@@ -1,5 +1,8 @@
-const { prisma } = require('../../config/database');
+const { prisma } = require("../../config/database");
 
+/**
+ * Obtiene resumen de inventario: total productos activos, stock bajo, sin stock y valorización
+ */
 async function getResumenInventario() {
   const products = await prisma.product.findMany({
     where: { isActive: true },
@@ -12,13 +15,12 @@ async function getResumenInventario() {
   });
 
   const totalProductos = products.length;
-  const productosSinStock = products.filter((product) => product.stock <= 0).length;
+  const productosSinStock = products.filter((p) => p.stock <= 0).length;
   const productosStockBajo = products.filter(
-    (product) => product.stock > 0 && product.stock <= product.minStock,
+    (p) => p.stock > 0 && p.stock <= p.minStock,
   ).length;
-
   const valorizacionTotal = products.reduce(
-    (acc, product) => acc + Number(product.price) * product.stock,
+    (acc, p) => acc + Number(p.price) * p.stock,
     0,
   );
 
@@ -30,6 +32,38 @@ async function getResumenInventario() {
   };
 }
 
+/**
+ * Obtiene lista de productos críticos (stock <= minStock) con datos completos para mostrar alertas
+ */
+async function getProductosCriticos(searchTerm = "") {
+  const where = {
+    isActive: true,
+    stock: { lte: prisma.product.fields.minStock }, // stock <= minStock
+  };
+
+  if (searchTerm && searchTerm.trim()) {
+    where.OR = [
+      { name: { contains: searchTerm, mode: "insensitive" } },
+      { sku: { contains: searchTerm, mode: "insensitive" } },
+    ];
+  }
+
+  return prisma.product.findMany({
+    where,
+    select: {
+      id: true,
+      name: true,
+      sku: true,
+      stock: true,
+      minStock: true,
+      imageUrl: true,
+      category: { select: { name: true } },
+    },
+    orderBy: [{ stock: "asc" }, { name: "asc" }],
+  });
+}
+
 module.exports = {
   getResumenInventario,
+  getProductosCriticos,
 };

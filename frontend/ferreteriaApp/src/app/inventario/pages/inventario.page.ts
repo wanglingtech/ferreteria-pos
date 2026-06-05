@@ -1,20 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
+import { Component, OnInit, signal, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import {
-  IonCard,
-  IonCardContent,
   IonContent,
-  IonSearchbar,
   IonList,
   IonItem,
   IonLabel,
   IonBadge,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
+  IonIcon,
+  IonSpinner,
+  ToastController,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import {
+  searchOutline,
+  alertCircleOutline,
+  checkmarkCircleOutline,
+} from 'ionicons/icons';
+
+import { InventarioApiService } from '../services/inventario-api.service';
+import {
+  ResumenInventario,
+  ProductoCritico,
+} from '../interfaces/inventario.interface';
 
 @Component({
   selector: 'app-inventario-page',
@@ -23,35 +31,85 @@ import {
   styleUrls: ['./inventario.page.scss'],
   imports: [
     CommonModule,
+    FormsModule,
     IonContent,
-    IonCard,
-    IonCardContent,
-    IonSearchbar,
     IonList,
     IonItem,
     IonLabel,
     IonBadge,
-
-    // 🔴 ESTO FALTABA
-    IonHeader,
-    IonToolbar,
-    IonTitle,
+    IonIcon,
+    IonSpinner,
   ],
 })
 export class InventarioPage implements OnInit {
-  resumen: any = null;
-  lowStockProducts: any[] = [];
+  // Señales para reactividad
+  resumen = signal<ResumenInventario | null>(null);
+  productosCriticos = signal<ProductoCritico[]>([]);
+  filteredProductos = signal<ProductoCritico[]>([]);
+  isLoading = signal(false);
+  searchTerm = signal('');
 
-  constructor(private http: HttpClient) {}
+  private inventarioApi = inject(InventarioApiService);
+  private toastCtrl = inject(ToastController);
 
-  ngOnInit() {
-    this.loadResumen();
+  constructor() {
+    addIcons({
+      searchOutline,
+      alertCircleOutline,
+      checkmarkCircleOutline,
+    });
   }
 
-  loadResumen() {
-    this.http.get('http://localhost:3000/inventario/resumen').subscribe({
-      next: (data) => (this.resumen = data),
-      error: (err) => console.error(err),
+  ngOnInit() {
+    this.cargarResumen();
+    this.cargarProductosCriticos();
+  }
+
+  cargarResumen() {
+    this.inventarioApi.obtenerResumen().subscribe({
+      next: (data) => this.resumen.set(data),
+      error: (err) =>
+        this.mostrarError('Error cargando resumen', err?.error?.message),
     });
+  }
+
+  cargarProductosCriticos() {
+    this.isLoading.set(true);
+    this.inventarioApi.obtenerProductosCriticos(this.searchTerm()).subscribe({
+      next: (data) => {
+        this.productosCriticos.set(data);
+        this.filteredProductos.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.mostrarError('Error cargando alertas', err?.error?.message);
+      },
+    });
+  }
+
+  // Búsqueda local o por API (usamos API para que el filtro sea en backend)
+  onSearch(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(value);
+    this.cargarProductosCriticos(); // refetch con filtro
+  }
+
+  // Obtener clase de gravedad según stock
+  getSeverityClass(producto: ProductoCritico): string {
+    if (producto.stock <= 0) return 'critical';
+    if (producto.stock <= producto.minStock / 2) return 'high';
+    return 'medium';
+  }
+
+  private async mostrarError(titulo: string, mensaje?: string) {
+    const toast = await this.toastCtrl.create({
+      header: titulo,
+      message: mensaje || 'Ocurrió un error',
+      duration: 4000,
+      position: 'top',
+      color: 'danger',
+    });
+    await toast.present();
   }
 }
