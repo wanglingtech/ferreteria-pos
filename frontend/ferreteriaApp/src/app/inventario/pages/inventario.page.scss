@@ -274,33 +274,44 @@ ion-badge {
     margin-bottom: 8px;
   }
 
-  /* KPIS: SCROLL HORIZONTAL */
+  /* KPIs: diseño de "píldoras" horizontales que se envuelven */
   .kpi-grid {
     display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 12px;
-    padding-bottom: 8px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
   }
   .kpi-card {
-    flex: 0 0 140px; /* Ancho fijo para cada tarjeta */
-    scroll-snap-align: start;
-    padding: 14px;
+    flex: 1 1 calc(50% - 10px); /* dos columnas, con espacio */
+    min-width: 140px;
+    padding: 14px 12px;
+    border-radius: 20px;
   }
   .kpi-card .kpi-icon {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     top: 10px;
     right: 10px;
   }
   .kpi-card span {
     font-size: 10px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .kpi-card strong {
     font-size: 1.2rem;
   }
+
+  /* Alternativa: si quieres una sola columna vertical (más ancha), descomenta esto y comenta el bloque anterior */
+  /*
+  .kpi-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .kpi-card {
+    width: 100%;
+    padding: 16px;
+  }
+  */
 
   /* TARJETA DE ALERTAS */
   .filters-card {
@@ -325,7 +336,7 @@ ion-badge {
     margin-bottom: 16px;
   }
 
-  /* LISTA DE PRODUCTOS CRÍTICOS (en línea) */
+  /* LISTA DE PRODUCTOS CRÍTICOS */
   .alert-item {
     flex-direction: row;
     align-items: center;
@@ -363,7 +374,6 @@ ion-badge {
     align-self: center;
   }
 }
-
 /* =====================================================
    MÓVILES MUY PEQUEÑOS (max-width: 480px)
    - KPIs aún más compactos
@@ -373,12 +383,14 @@ ion-badge {
   .hero-header h1 {
     font-size: 1.2rem;
   }
+  .kpi-grid {
+    gap: 10px;
+  }
   .kpi-card {
-    flex: 0 0 120px;
-    padding: 10px;
+    padding: 12px;
   }
   .kpi-card .kpi-icon {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     top: 8px;
     right: 8px;
   }
@@ -403,9 +415,4 @@ ion-badge {
   .stock-detail {
     gap: 8px;
   }
-}
-
-/* Opcional: oculta el scrollbar en los KPIs para mejor estética (solo WebKit) */
-.kpi-grid::-webkit-scrollbar {
-  display: none;
 }
