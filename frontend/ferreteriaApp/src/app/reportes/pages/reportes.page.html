@@ -101,56 +101,79 @@
       </button>
     </section>
 
-    <!-- GRÁFICO DE VENTAS POR DÍA (visible en pestañas resumen/ventas) -->
-    <section
+    <!-- GRÁFICO DE VENTAS POR DÍA -->
+    <div
       class="chart-card"
       *ngIf="activeTab === 'resumen' || activeTab === 'ventas'"
     >
       <div class="card-title">
-        <ion-icon name="bar-chart-outline"></ion-icon>
-        Ventas por día
+        <ion-icon name="stats-chart-outline"></ion-icon>
+        Evolución de ventas
       </div>
       <div class="chart-container">
         <canvas #salesChartCanvas></canvas>
       </div>
-    </section>
+    </div>
 
-    <!-- TABLA TOP PRODUCTOS (visible en productos) -->
-    <section class="table-card" *ngIf="activeTab === 'productos' && reporte">
+    <!-- GRÁFICO DE TOP PRODUCTOS (barras) -->
+    <div class="chart-card" *ngIf="activeTab === 'productos' && reporte">
+      <div class="card-title">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        Productos más vendidos (unidades)
+      </div>
+      <div class="chart-container">
+        <canvas #topProductsChartCanvas></canvas>
+      </div>
+    </div>
+
+    <!-- TABLA TOP PRODUCTOS (con scroll horizontal) -->
+    <div class="table-card" *ngIf="activeTab === 'productos' && reporte">
       <div class="card-title">
         <ion-icon name="trending-up-outline"></ion-icon>
-        Productos Más Vendidos
+        Detalle de productos más vendidos
       </div>
       <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>SKU</th>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Total Vendido</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of reporte.topProductos">
-              <td>{{ item.sku }}</td>
-              <td>{{ item.nombre }}</td>
-              <td>{{ item.cantidadVendida }}</td>
-              <td>{{ formatCurrency(item.totalVendido) }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Total Vendido</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of reporte.topProductos">
+                <td>{{ item.sku }}</td>
+                <td>{{ item.nombre }}</td>
+                <td>{{ item.cantidadVendida }}</td>
+                <td>{{ formatCurrency(item.totalVendido) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </section>
+    </div>
 
     <!-- EXPORTAR -->
-    <section class="export-card" *ngIf="activeTab === 'exportar'">
-      <h3>Exportar Reportes</h3>
-      <p>Genera reportes CSV (Excel) para compartir información empresarial.</p>
+    <div class="export-card" *ngIf="activeTab === 'exportar'">
+      <div class="export-header">
+        <img
+          src="assets/logo/logo_ferreteria.png"
+          alt="Logo"
+          class="export-logo"
+        />
+        <h3>Ferretería July</h3>
+      </div>
+      <p>
+        Genera reportes en formato CSV (compatible con Excel) para compartir
+        información empresarial.
+      </p>
       <ion-button class="export-btn" (click)="exportReport()">
         <ion-icon slot="start" name="download-outline"></ion-icon>
         Exportar a CSV
       </ion-button>
-    </section>
+    </div>
   </div>
 </ion-content>
