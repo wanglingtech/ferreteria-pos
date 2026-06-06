@@ -99,36 +99,33 @@
       </button>
     </section>
 
-    <!-- GRÁFICO DE VENTAS POR DÍA (visible en Resumen y Ventas) -->
+    <!-- GRÁFICO DE VENTAS POR DÍA -->
     <div
       class="chart-card"
       *ngIf="activeTab === 'resumen' || activeTab === 'ventas'"
     >
       <div class="card-title">
-        <ion-icon name="stats-chart-outline"></ion-icon>
-        Evolución de ventas
+        <ion-icon name="stats-chart-outline"></ion-icon> Evolución de ventas
       </div>
-      <div class="chart-container">
-        <canvas #salesChartCanvas></canvas>
-      </div>
+      <div class="chart-container"><canvas #salesChartCanvas></canvas></div>
     </div>
 
-    <!-- GRÁFICO DE TOP PRODUCTOS (barras) solo en pestaña Productos -->
+    <!-- GRÁFICO DE TOP PRODUCTOS -->
     <div class="chart-card" *ngIf="activeTab === 'productos' && reporte">
       <div class="card-title">
-        <ion-icon name="bar-chart-outline"></ion-icon>
-        Productos más vendidos (unidades)
+        <ion-icon name="bar-chart-outline"></ion-icon> Productos más vendidos
+        (unidades)
       </div>
       <div class="chart-container">
         <canvas #topProductsChartCanvas></canvas>
       </div>
     </div>
 
-    <!-- TABLA TOP PRODUCTOS (con scroll horizontal) -->
+    <!-- TABLA TOP PRODUCTOS -->
     <div class="table-card" *ngIf="activeTab === 'productos' && reporte">
       <div class="card-title">
-        <ion-icon name="trending-up-outline"></ion-icon>
-        Detalle de productos más vendidos
+        <ion-icon name="trending-up-outline"></ion-icon> Detalle de productos
+        más vendidos
       </div>
       <div class="table-wrapper">
         <div class="table-scroll">
@@ -154,7 +151,7 @@
       </div>
     </div>
 
-    <!-- EXPORTAR -->
+    <!-- EXPORTAR (CSV + PDF) -->
     <div class="export-card" *ngIf="activeTab === 'exportar'">
       <div class="export-header">
         <img
@@ -165,13 +162,19 @@
         <h3>Ferretería July</h3>
       </div>
       <p>
-        Genera reportes en formato CSV (compatible con Excel) para compartir
-        información empresarial.
+        Genera reportes en formato CSV (compatible con Excel) o PDF para
+        compartir información empresarial.
       </p>
-      <ion-button class="export-btn" (click)="exportReport()">
-        <ion-icon slot="start" name="download-outline"></ion-icon>
-        Exportar a CSV
-      </ion-button>
+      <div class="export-buttons">
+        <ion-button class="export-btn" (click)="exportToCSV()">
+          <ion-icon slot="start" name="download-outline"></ion-icon>
+          Exportar a CSV
+        </ion-button>
+        <ion-button class="export-btn pdf-btn" (click)="exportToPDF()">
+          <ion-icon slot="start" name="print-outline"></ion-icon>
+          Exportar a PDF
+        </ion-button>
+      </div>
     </div>
   </div>
 </ion-content>

@@ -30,10 +30,12 @@ import {
   receiptOutline,
   cashOutline,
   pieChartOutline,
+  printOutline,
 } from 'ionicons/icons';
 import { Chart, registerables } from 'chart.js';
 import { firstValueFrom } from 'rxjs';
 import { ReportesApiService } from '../services/reportes-api.service';
+import { ReportesExportService } from '../services/reportes-export.service';
 import { ReporteGeneral, VentaPorDia } from '../interfaces/reportes.interface';
 
 Chart.register(...registerables);
@@ -68,6 +70,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
   isLoading = false;
 
   private reportesApi = inject(ReportesApiService);
+  private exportService = inject(ReportesExportService);
   private toastCtrl = inject(ToastController);
 
   constructor() {
@@ -85,6 +88,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
       receiptOutline,
       cashOutline,
       pieChartOutline,
+      printOutline,
     });
   }
 
@@ -135,10 +139,9 @@ export class ReportesPage implements OnInit, AfterViewInit {
     let data: number[] = [];
 
     if (this.ventasPorDia && this.ventasPorDia.length) {
-      labels = this.ventasPorDia.map((v) => v.date.slice(5)); // "MM-DD"
+      labels = this.ventasPorDia.map((v) => v.date.slice(5));
       data = this.ventasPorDia.map((v) => v.total);
     } else {
-      // Datos vacíos – mostrar mensaje o placeholder
       labels = ['Sin datos'];
       data = [0];
     }
@@ -151,7 +154,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
           {
             label: 'Ventas (S/.)',
             data,
-            borderColor: '#f97316', // naranja brillante para buena visibilidad
+            borderColor: '#f97316',
             backgroundColor: 'rgba(249,115,22,0.1)',
             borderWidth: 3,
             tension: 0.3,
@@ -193,7 +196,6 @@ export class ReportesPage implements OnInit, AfterViewInit {
 
     const top = this.reporte.topProductos.slice(0, 5);
     if (!top.length) {
-      // No hay productos
       this.topProductsChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -255,54 +257,42 @@ export class ReportesPage implements OnInit, AfterViewInit {
     });
   }
 
-  exportReport() {
+  exportToCSV() {
     if (!this.reporte) return;
-    const separator = ';';
-    const rows = [
-      ['Métrica', 'Valor'],
-      ['Ventas Totales', this.formatCurrencySimple(this.reporte.ventasTotales)],
-      ['Subtotal', this.formatCurrencySimple(this.reporte.subtotalTotal)],
-      ['IGV', this.formatCurrencySimple(this.reporte.igvTotal)],
-      ['Total Órdenes', this.reporte.totalOrdenes.toString()],
-      [
-        'Ticket Promedio',
-        this.formatCurrencySimple(this.reporte.ticketPromedio),
-      ],
-      ['Clientes Atendidos', this.reporte.clientesAtendidos.toString()],
-      [],
-      ['Top Productos'],
-      ['SKU', 'Nombre', 'Cantidad', 'Total Vendido'],
-    ];
-    this.reporte.topProductos.forEach((p) => {
-      rows.push([
-        p.sku,
-        p.nombre,
-        p.cantidadVendida.toString(),
-        this.formatCurrencySimple(p.totalVendido),
-      ]);
-    });
-    const csvContent = rows.map((row) => row.join(separator)).join('\n');
-    const blob = new Blob(['\uFEFF' + csvContent], {
-      type: 'text/csv;charset=utf-8;',
-    });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.setAttribute('download', `reporte_${this.from}_${this.to}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    this.mostrarExito('Reporte exportado a CSV');
+    try {
+      this.exportService.exportToCSV(
+        this.reporte,
+        this.ventasPorDia,
+        this.from,
+        this.to,
+      );
+      this.mostrarExito('Reporte exportado a CSV');
+    } catch (error) {
+      this.mostrarError('Error al exportar a CSV');
+    }
   }
 
-  formatCurrencySimple(value: number): string {
-    return `S/ ${value.toFixed(2)}`;
+  exportToPDF() {
+    if (!this.reporte) return;
+    try {
+      this.exportService.exportToPDF(
+        this.reporte,
+        this.ventasPorDia,
+        this.from,
+        this.to,
+        'assets/logo/logo_ferreteria.png',
+      );
+      this.mostrarExito('Reporte exportado a PDF');
+    } catch (error: any) {
+      this.mostrarError(
+        error.message ||
+          'Error al generar PDF. Verifica que las ventanas emergentes estén permitidas.',
+      );
+    }
   }
 
   changeTab(tab: string) {
     this.activeTab = tab;
-    // Forzar redibujado de los gráficos si la nueva pestaña los necesita
     if (tab === 'resumen' || tab === 'ventas') {
       setTimeout(() => this.renderSalesChart(), 100);
     } else if (tab === 'productos') {
@@ -321,7 +311,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
   private async mostrarError(mensaje: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,
-      duration: 3000,
+      duration: 4000,
       color: 'danger',
       position: 'top',
     });

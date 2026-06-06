@@ -296,6 +296,28 @@ tbody tr:hover {
   object-fit: contain;
   border-radius: 12px;
 }
+.export-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+}
+.export-btn {
+  flex: 1;
+  min-width: 180px;
+}
+.pdf-btn {
+  --background: #ef4444;
+  --color: white;
+}
+@media (max-width: 480px) {
+  .export-buttons {
+    flex-direction: column;
+  }
+  .export-btn {
+    width: 100%;
+  }
+}
 
 /* =====================================================
    RESPONSIVE
