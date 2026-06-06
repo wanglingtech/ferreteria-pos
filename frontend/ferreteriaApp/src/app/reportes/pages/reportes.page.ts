@@ -37,6 +37,7 @@ import { firstValueFrom } from 'rxjs';
 import { ReportesApiService } from '../services/reportes-api.service';
 import { ReportesExportService } from '../services/reportes-export.service';
 import { ReporteGeneral, VentaPorDia } from '../interfaces/reportes.interface';
+import { AuthSessionService } from '../../core/services/auth-session.service';
 
 Chart.register(...registerables);
 
@@ -71,7 +72,14 @@ export class ReportesPage implements OnInit, AfterViewInit {
 
   private reportesApi = inject(ReportesApiService);
   private exportService = inject(ReportesExportService);
+  private authSession = inject(AuthSessionService);
   private toastCtrl = inject(ToastController);
+
+  // Obtener nombre del usuario actual
+  get currentUserName(): string {
+    const user = this.authSession.getCurrentUser();
+    return user?.fullName || user?.username || 'Usuario';
+  }
 
   constructor() {
     addIcons({
@@ -265,6 +273,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
         this.ventasPorDia,
         this.from,
         this.to,
+        this.currentUserName,
       );
       this.mostrarExito('Reporte exportado a CSV');
     } catch (error) {
@@ -281,6 +290,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
         this.from,
         this.to,
         'assets/logo/logo_ferreteria.png',
+        this.currentUserName,
       );
       this.mostrarExito('Reporte exportado a PDF');
     } catch (error: any) {
