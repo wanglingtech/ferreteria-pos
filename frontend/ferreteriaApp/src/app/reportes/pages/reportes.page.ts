@@ -289,7 +289,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
         this.ventasPorDia,
         this.from,
         this.to,
-        'assets/logo/logo_ferreteria.png',
+        '/assets/logo/logo_ferreteria.png',
         this.currentUserName,
       );
       this.mostrarExito('Reporte exportado a PDF');
