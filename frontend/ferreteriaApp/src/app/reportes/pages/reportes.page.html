@@ -42,34 +42,32 @@
     <!-- KPIs -->
     <div class="kpi-grid" *ngIf="reporte">
       <div class="kpi-card kpi-sales">
-        <span>Ventas Totales</span>
-        <strong>{{ formatCurrency(reporte.ventasTotales) }}</strong>
-        <ion-icon name="cash-outline"></ion-icon>
+        <span>Ventas Totales</span
+        ><strong>{{ formatCurrency(reporte.ventasTotales) }}</strong
+        ><ion-icon name="cash-outline"></ion-icon>
       </div>
       <div class="kpi-card kpi-orders">
-        <span>Total Órdenes</span>
-        <strong>{{ reporte.totalOrdenes }}</strong>
-        <ion-icon name="receipt-outline"></ion-icon>
+        <span>Total Órdenes</span><strong>{{ reporte.totalOrdenes }}</strong
+        ><ion-icon name="receipt-outline"></ion-icon>
       </div>
       <div class="kpi-card kpi-ticket">
-        <span>Ticket Promedio</span>
-        <strong>{{ formatCurrency(reporte.ticketPromedio) }}</strong>
-        <ion-icon name="wallet-outline"></ion-icon>
+        <span>Ticket Promedio</span
+        ><strong>{{ formatCurrency(reporte.ticketPromedio) }}</strong
+        ><ion-icon name="wallet-outline"></ion-icon>
       </div>
       <div class="kpi-card kpi-customers">
-        <span>Clientes Atendidos</span>
-        <strong>{{ reporte.clientesAtendidos }}</strong>
-        <ion-icon name="people-outline"></ion-icon>
+        <span>Clientes Atendidos</span
+        ><strong>{{ reporte.clientesAtendidos }}</strong
+        ><ion-icon name="people-outline"></ion-icon>
       </div>
       <div class="kpi-card kpi-subtotal">
-        <span>Subtotal</span>
-        <strong>{{ formatCurrency(reporte.subtotalTotal) }}</strong>
-        <ion-icon name="calculator-outline"></ion-icon>
+        <span>Subtotal</span
+        ><strong>{{ formatCurrency(reporte.subtotalTotal) }}</strong
+        ><ion-icon name="calculator-outline"></ion-icon>
       </div>
       <div class="kpi-card kpi-igv">
-        <span>IGV</span>
-        <strong>{{ formatCurrency(reporte.igvTotal) }}</strong>
-        <ion-icon name="document-text-outline"></ion-icon>
+        <span>IGV</span><strong>{{ formatCurrency(reporte.igvTotal) }}</strong
+        ><ion-icon name="document-text-outline"></ion-icon>
       </div>
     </div>
 
@@ -101,7 +99,7 @@
       </button>
     </section>
 
-    <!-- GRÁFICO DE VENTAS POR DÍA -->
+    <!-- GRÁFICO DE VENTAS POR DÍA (visible en Resumen y Ventas) -->
     <div
       class="chart-card"
       *ngIf="activeTab === 'resumen' || activeTab === 'ventas'"
@@ -115,7 +113,7 @@
       </div>
     </div>
 
-    <!-- GRÁFICO DE TOP PRODUCTOS (barras) -->
+    <!-- GRÁFICO DE TOP PRODUCTOS (barras) solo en pestaña Productos -->
     <div class="chart-card" *ngIf="activeTab === 'productos' && reporte">
       <div class="card-title">
         <ion-icon name="bar-chart-outline"></ion-icon>

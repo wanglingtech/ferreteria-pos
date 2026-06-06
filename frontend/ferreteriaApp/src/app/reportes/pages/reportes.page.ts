@@ -31,7 +31,6 @@ import {
   cashOutline,
   pieChartOutline,
 } from 'ionicons/icons';
-
 import { Chart, registerables } from 'chart.js';
 import { firstValueFrom } from 'rxjs';
 import { ReportesApiService } from '../services/reportes-api.service';
@@ -132,8 +131,17 @@ export class ReportesPage implements OnInit, AfterViewInit {
     const ctx = this.salesChartCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
 
-    const labels = this.ventasPorDia.map((v) => v.date.slice(5));
-    const data = this.ventasPorDia.map((v) => v.total);
+    let labels: string[] = [];
+    let data: number[] = [];
+
+    if (this.ventasPorDia && this.ventasPorDia.length) {
+      labels = this.ventasPorDia.map((v) => v.date.slice(5)); // "MM-DD"
+      data = this.ventasPorDia.map((v) => v.total);
+    } else {
+      // Datos vacíos – mostrar mensaje o placeholder
+      labels = ['Sin datos'];
+      data = [0];
+    }
 
     this.salesChart = new Chart(ctx, {
       type: 'line',
@@ -143,12 +151,13 @@ export class ReportesPage implements OnInit, AfterViewInit {
           {
             label: 'Ventas (S/.)',
             data,
-            borderColor: '#0a1a5c',
-            backgroundColor: 'rgba(10,26,92,0.1)',
+            borderColor: '#f97316', // naranja brillante para buena visibilidad
+            backgroundColor: 'rgba(249,115,22,0.1)',
+            borderWidth: 3,
             tension: 0.3,
             fill: true,
-            pointBackgroundColor: '#0a1a5c',
-            pointBorderColor: '#fff',
+            pointBackgroundColor: '#f97316',
+            pointBorderColor: '#ffffff',
             pointRadius: 4,
             pointHoverRadius: 6,
           },
@@ -183,6 +192,29 @@ export class ReportesPage implements OnInit, AfterViewInit {
     if (!ctx) return;
 
     const top = this.reporte.topProductos.slice(0, 5);
+    if (!top.length) {
+      // No hay productos
+      this.topProductsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Sin datos'],
+          datasets: [
+            {
+              label: 'Unidades vendidas',
+              data: [0],
+              backgroundColor: '#cbd5e1',
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+        },
+      });
+      return;
+    }
+
     const labels = top.map((p) =>
       p.nombre.length > 15 ? p.nombre.slice(0, 12) + '…' : p.nombre,
     );
@@ -225,7 +257,6 @@ export class ReportesPage implements OnInit, AfterViewInit {
 
   exportReport() {
     if (!this.reporte) return;
-    // Usamos separador punto y coma y codificación UTF-8 con BOM
     const separator = ';';
     const rows = [
       ['Métrica', 'Valor'],
@@ -251,7 +282,6 @@ export class ReportesPage implements OnInit, AfterViewInit {
       ]);
     });
     const csvContent = rows.map((row) => row.join(separator)).join('\n');
-    // Agregar BOM para UTF-8
     const blob = new Blob(['\uFEFF' + csvContent], {
       type: 'text/csv;charset=utf-8;',
     });
@@ -272,9 +302,11 @@ export class ReportesPage implements OnInit, AfterViewInit {
 
   changeTab(tab: string) {
     this.activeTab = tab;
-    // Redibujar gráficos si se cambia a pestaña que los contiene
+    // Forzar redibujado de los gráficos si la nueva pestaña los necesita
     if (tab === 'resumen' || tab === 'ventas') {
-      setTimeout(() => this.renderCharts(), 100);
+      setTimeout(() => this.renderSalesChart(), 100);
+    } else if (tab === 'productos') {
+      setTimeout(() => this.renderTopProductsChart(), 100);
     }
   }
 
@@ -295,7 +327,6 @@ export class ReportesPage implements OnInit, AfterViewInit {
     });
     toast.present();
   }
-
   private async mostrarExito(mensaje: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,

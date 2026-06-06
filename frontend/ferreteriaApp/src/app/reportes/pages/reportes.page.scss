@@ -7,7 +7,6 @@
 .reportes-content {
   --background: #f4f7fc;
 }
-
 .reportes-shell {
   max-width: 1400px;
   margin: 0 auto;
@@ -175,7 +174,6 @@
   font-size: 58px;
   opacity: 0.18;
 }
-/* Colores KPI */
 .kpi-sales {
   background: linear-gradient(135deg, #071447, #0a1a5c, #2754d8);
 }
@@ -219,27 +217,28 @@
   box-shadow: 0 10px 25px rgba(10, 26, 92, 0.2);
 }
 
-/* -------------------- GRÁFICO -------------------- */
+/* -------------------- GRÁFICOS (con fondo blanco y colores vivos) -------------------- */
 .chart-card {
   margin-bottom: 22px;
   padding: 24px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #071447, #0a1a5c, #17317f);
-  color: white;
-  box-shadow: 0 18px 35px rgba(10, 26, 92, 0.18);
+  background: white; /* fondo blanco para contraste */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5edff;
 }
 .chart-card .card-title {
-  color: white;
+  color: #0a1a5c;
+  margin-bottom: 16px;
 }
 .chart-container {
   width: 100%;
   height: 400px;
   position: relative;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 canvas {
   max-width: 100%;
-  height: auto;
+  height: auto !important;
   display: block;
 }
 
@@ -251,7 +250,7 @@ canvas {
 }
 table {
   width: 100%;
-  min-width: 600px; /* Evita que se comprima demasiado en móviles, fuerza scroll */
+  min-width: 600px; /* fuerza scroll horizontal en móviles */
   border-collapse: collapse;
 }
 thead {
@@ -276,9 +275,6 @@ tbody tr:hover {
   background: linear-gradient(135deg, #0a1a5c, #17379f);
   color: white;
 }
-.export-card h3 {
-  margin-top: 0;
-}
 .export-card p {
   color: rgba(255, 255, 255, 0.85);
 }
@@ -288,9 +284,21 @@ tbody tr:hover {
   --color: #0a1a5c;
   --border-radius: 16px;
 }
+.export-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.export-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 12px;
+}
 
 /* =====================================================
-   RESPONSIVE: TABLETS (max-width: 1024px)
+   RESPONSIVE
 ===================================================== */
 @media (max-width: 1024px) {
   .reportes-shell {
@@ -298,7 +306,7 @@ tbody tr:hover {
     padding-right: 16px;
   }
   .kpi-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablets */
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
   .chart-container {
@@ -309,10 +317,6 @@ tbody tr:hover {
     padding: 12px;
   }
 }
-
-/* =====================================================
-   RESPONSIVE: MÓVILES GRANDES (max-width: 768px)
-===================================================== */
 @media (max-width: 768px) {
   .hero-header {
     padding: 22px;
@@ -322,9 +326,6 @@ tbody tr:hover {
   }
   .kpi-card strong {
     font-size: 1.6rem;
-  }
-  .kpi-card span {
-    font-size: 11px;
   }
   .kpi-card ion-icon {
     font-size: 48px;
@@ -339,7 +340,7 @@ tbody tr:hover {
     height: 280px;
   }
   table {
-    min-width: 550px; /* scroll horizontal */
+    min-width: 550px;
   }
   th,
   td {
@@ -347,10 +348,6 @@ tbody tr:hover {
     font-size: 0.85rem;
   }
 }
-
-/* =====================================================
-   RESPONSIVE: MÓVILES PEQUEÑOS (max-width: 480px)
-===================================================== */
 @media (max-width: 480px) {
   .reportes-shell {
     padding-top: 85px;
@@ -367,7 +364,7 @@ tbody tr:hover {
     padding: 6px 12px;
   }
   .kpi-grid {
-    grid-template-columns: 1fr; /* una columna en móviles pequeños */
+    grid-template-columns: 1fr;
     gap: 12px;
   }
   .kpi-card {
@@ -391,7 +388,7 @@ tbody tr:hover {
     height: 220px;
   }
   .table-wrapper {
-    margin: 0 -12px; /* permite que el scroll ocupe todo el ancho */
+    margin: 0 -12px;
     padding: 0 12px;
   }
   th,
@@ -410,10 +407,6 @@ tbody tr:hover {
     font-size: 0.85rem;
   }
 }
-
-/* =====================================================
-   MEJORA PARA EL SCROLL DE TABLA (opcional)
-===================================================== */
 .table-wrapper::-webkit-scrollbar {
   height: 6px;
 }
