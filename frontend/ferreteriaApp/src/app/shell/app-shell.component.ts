@@ -57,7 +57,7 @@ export class AppShellComponent implements OnInit {
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        debounceTime(100) // Esperar a que la ruta se procese completamente
+        debounceTime(100), // Esperar a que la ruta se procese completamente
       )
       .subscribe(() => {
         this.updateTitleFromRoute();
