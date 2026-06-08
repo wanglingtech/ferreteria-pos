@@ -1,6 +1,7 @@
 const usuariosService = require("./usuarios.service");
 const { asyncHandler } = require("../../shared/utils/async-handler");
 const { sendSuccess } = require("../../shared/utils/http-response");
+const notificationsService = require("../notifications/notifications.service"); // ✅
 
 const listar = asyncHandler(async (req, res) => {
   const data = await usuariosService.listarUsuarios();
@@ -9,6 +10,14 @@ const listar = asyncHandler(async (req, res) => {
 
 const crear = asyncHandler(async (req, res) => {
   const data = await usuariosService.crearUsuario(req.body);
+  // ✅ Notificación
+  await notificationsService.crearNotificacion({
+    type: "usuario_creado",
+    title: "Nuevo usuario",
+    message: `Se ha creado el usuario ${data.fullName} (${data.username})`,
+    data: { userId: data.id, username: data.username, fullName: data.fullName },
+    userId: null,
+  });
   return sendSuccess(res, data, "Usuario creado", 201);
 });
 

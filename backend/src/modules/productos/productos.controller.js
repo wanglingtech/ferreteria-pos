@@ -1,6 +1,7 @@
-const productosService = require('./productos.service');
-const { asyncHandler } = require('../../shared/utils/async-handler');
-const { sendSuccess } = require('../../shared/utils/http-response');
+const productosService = require("./productos.service");
+const { asyncHandler } = require("../../shared/utils/async-handler");
+const { sendSuccess } = require("../../shared/utils/http-response");
+const notificationsService = require("../notifications/notifications.service"); // ✅ importar
 
 const listar = asyncHandler(async (req, res) => {
   const filters = {
@@ -8,32 +9,54 @@ const listar = asyncHandler(async (req, res) => {
     categoryId: req.query.categoryId ? Number(req.query.categoryId) : undefined,
     isActive:
       req.query.isActive !== undefined
-        ? req.query.isActive === 'true'
+        ? req.query.isActive === "true"
         : undefined,
   };
 
   const data = await productosService.listarProductos(filters);
-  return sendSuccess(res, data, 'Listado de productos');
+  return sendSuccess(res, data, "Listado de productos");
 });
 
 const obtener = asyncHandler(async (req, res) => {
   const data = await productosService.obtenerProducto(Number(req.params.id));
-  return sendSuccess(res, data, 'Detalle de producto');
+  return sendSuccess(res, data, "Detalle de producto");
 });
 
 const crear = asyncHandler(async (req, res) => {
   const data = await productosService.crearProducto(req.body);
-  return sendSuccess(res, data, 'Producto creado', 201);
+  // ✅ Notificación
+  await notificationsService.crearNotificacion({
+    type: "producto_creado",
+    title: "Nuevo producto",
+    message: `Se ha creado el producto ${data.name} (SKU: ${data.sku})`,
+    data: { productId: data.id, sku: data.sku, nombre: data.name },
+    userId: null, // global
+  });
+  return sendSuccess(res, data, "Producto creado", 201);
 });
 
 const actualizar = asyncHandler(async (req, res) => {
-  const data = await productosService.actualizarProducto(Number(req.params.id), req.body);
-  return sendSuccess(res, data, 'Producto actualizado');
+  const data = await productosService.actualizarProducto(
+    Number(req.params.id),
+    req.body,
+  );
+  return sendSuccess(res, data, "Producto actualizado");
 });
 
 const eliminar = asyncHandler(async (req, res) => {
   const data = await productosService.eliminarProducto(Number(req.params.id));
-  return sendSuccess(res, data, 'Producto eliminado');
+  return sendSuccess(res, data, "Producto eliminado");
+});
+
+const notificationsService = require("../notifications/notifications.service");
+
+// dentro de crear
+const nuevaNotificacion = await notificationsService.crearNotificacion({
+  type: "producto_creado",
+  title: "Nuevo producto",
+  message: `Se ha creado el producto ${data.nombre} (SKU: ${data.sku})`,
+  data: { productId: nuevoProducto.id, sku: data.sku, nombre: data.nombre },
+  userId: null, // global
 });
 
 module.exports = {
@@ -42,4 +65,5 @@ module.exports = {
   crear,
   actualizar,
   eliminar,
+  nuevaNotificacion,
 };

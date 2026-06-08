@@ -26,11 +26,26 @@ model User {
   fullName     String
   role         UserRole @default(SELLER)
   isActive     Boolean  @default(true)
+  imageUrl     String?  // ✅ nueva: foto de perfil
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   sales           Sale[]
   stockMovements  StockMovement[]
+  notifications   Notification[]  // opcional: si quieres notificaciones por usuario
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   // 'producto_creado', 'usuario_creado', 'venta_registrada', 'reporte_exportado'
+  title     String
+  message   String
+  data      Json?    // datos adicionales (productoId, usuarioId, etc.)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    Int?     // opcional: null = notificación global para todos
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 model Category {

@@ -14,7 +14,7 @@ const {
   notFound,
 } = require("./shared/middlewares/error.middleware");
 const categoriasRoutes = require("./modules/categorias/categorias.routes");
-
+const notificationsRoutes = require("./modules/notifications/notifications.routes");
 const app = express();
 
 app.use(cors());
@@ -30,6 +30,7 @@ app.get("/api/v1/health", (req, res) => {
   });
 });
 
+app.use("/api/v1/notificaciones", notificationsRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/productos", productosRoutes);
