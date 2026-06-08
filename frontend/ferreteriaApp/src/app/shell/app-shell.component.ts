@@ -27,7 +27,6 @@ import { AuthSessionService } from '../core/services/auth-session.service';
   styleUrls: ['./app-shell.component.scss'],
   imports: [
     CommonModule,
-    RouterOutlet,
     IonMenu,
     IonContent,
     IonRouterOutlet, // ✅ IMPORTANTE (arregla NG8001)

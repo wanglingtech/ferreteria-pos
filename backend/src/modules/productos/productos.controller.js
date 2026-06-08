@@ -1,7 +1,7 @@
 const productosService = require("./productos.service");
 const { asyncHandler } = require("../../shared/utils/async-handler");
 const { sendSuccess } = require("../../shared/utils/http-response");
-const notificationsService = require("../notifications/notifications.service"); // ✅ importar
+const notificationsService = require("../notifications/notifications.service"); // ✅ única declaración
 
 const listar = asyncHandler(async (req, res) => {
   const filters = {
@@ -12,7 +12,6 @@ const listar = asyncHandler(async (req, res) => {
         ? req.query.isActive === "true"
         : undefined,
   };
-
   const data = await productosService.listarProductos(filters);
   return sendSuccess(res, data, "Listado de productos");
 });
@@ -24,13 +23,13 @@ const obtener = asyncHandler(async (req, res) => {
 
 const crear = asyncHandler(async (req, res) => {
   const data = await productosService.crearProducto(req.body);
-  // ✅ Notificación
+  // Notificación
   await notificationsService.crearNotificacion({
     type: "producto_creado",
     title: "Nuevo producto",
     message: `Se ha creado el producto ${data.name} (SKU: ${data.sku})`,
     data: { productId: data.id, sku: data.sku, nombre: data.name },
-    userId: null, // global
+    userId: null,
   });
   return sendSuccess(res, data, "Producto creado", 201);
 });
@@ -48,22 +47,10 @@ const eliminar = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, "Producto eliminado");
 });
 
-const notificationsService = require("../notifications/notifications.service");
-
-// dentro de crear
-const nuevaNotificacion = await notificationsService.crearNotificacion({
-  type: "producto_creado",
-  title: "Nuevo producto",
-  message: `Se ha creado el producto ${data.nombre} (SKU: ${data.sku})`,
-  data: { productId: nuevoProducto.id, sku: data.sku, nombre: data.nombre },
-  userId: null, // global
-});
-
 module.exports = {
   listar,
   obtener,
   crear,
   actualizar,
   eliminar,
-  nuevaNotificacion,
 };

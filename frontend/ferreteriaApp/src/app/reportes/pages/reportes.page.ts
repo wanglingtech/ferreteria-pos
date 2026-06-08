@@ -38,6 +38,7 @@ import { ReportesApiService } from '../services/reportes-api.service';
 import { ReportesExportService } from '../services/reportes-export.service';
 import { ReporteGeneral, VentaPorDia } from '../interfaces/reportes.interface';
 import { AuthSessionService } from '../../core/services/auth-session.service';
+import { NotificationService } from '../../core/services/notification.service'; // ✅ importar
 
 Chart.register(...registerables);
 
@@ -74,8 +75,8 @@ export class ReportesPage implements OnInit, AfterViewInit {
   private exportService = inject(ReportesExportService);
   private authSession = inject(AuthSessionService);
   private toastCtrl = inject(ToastController);
+  private notificationService = inject(NotificationService); // ✅ agregado
 
-  // Obtener nombre del usuario actual
   get currentUserName(): string {
     const user = this.authSession.getCurrentUser();
     return user?.fullName || user?.username || 'Usuario';
@@ -265,7 +266,8 @@ export class ReportesPage implements OnInit, AfterViewInit {
     });
   }
 
-  exportToCSV() {
+  // Exportar a CSV + notificación
+  async exportToCSV() {
     if (!this.reporte) return;
     try {
       this.exportService.exportToCSV(
@@ -276,12 +278,24 @@ export class ReportesPage implements OnInit, AfterViewInit {
         this.currentUserName,
       );
       this.mostrarExito('Reporte exportado a CSV');
+
+      // 🔔 Notificación al backend
+      await firstValueFrom(
+        this.notificationService.crearNotificacionFrontend({
+          type: 'reporte_exportado',
+          title: 'Reporte exportado',
+          message: `Exportaste un reporte de ventas en formato CSV (${this.from} al ${this.to})`,
+          data: { tipo: 'CSV', desde: this.from, hasta: this.to },
+        }),
+      );
     } catch (error) {
+      console.error('Error en exportación CSV o notificación:', error);
       this.mostrarError('Error al exportar a CSV');
     }
   }
 
-  exportToPDF() {
+  // Exportar a PDF + notificación
+  async exportToPDF() {
     if (!this.reporte) return;
     try {
       this.exportService.exportToPDF(
@@ -293,7 +307,18 @@ export class ReportesPage implements OnInit, AfterViewInit {
         this.currentUserName,
       );
       this.mostrarExito('Reporte exportado a PDF');
+
+      // 🔔 Notificación al backend
+      await firstValueFrom(
+        this.notificationService.crearNotificacionFrontend({
+          type: 'reporte_exportado',
+          title: 'Reporte exportado',
+          message: `Exportaste un reporte de ventas en formato PDF (${this.from} al ${this.to})`,
+          data: { tipo: 'PDF', desde: this.from, hasta: this.to },
+        }),
+      );
     } catch (error: any) {
+      console.error('Error en exportación PDF o notificación:', error);
       this.mostrarError(
         error.message ||
           'Error al generar PDF. Verifica que las ventanas emergentes estén permitidas.',
@@ -327,6 +352,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
     });
     toast.present();
   }
+
   private async mostrarExito(mensaje: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,

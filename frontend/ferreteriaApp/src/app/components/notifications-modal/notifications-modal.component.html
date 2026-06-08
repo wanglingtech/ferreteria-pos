@@ -1,0 +1,72 @@
+<ion-modal
+  [isOpen]="isOpen"
+  (didDismiss)="close()"
+  [initialBreakpoint]="0.9"
+  [breakpoints]="[0, 0.5, 0.9]"
+>
+  <ng-template>
+    <ion-header class="modal-header">
+      <ion-toolbar class="modal-toolbar">
+        <ion-title>Notificaciones</ion-title>
+        <ion-button slot="end" fill="clear" (click)="close()">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="modal-content">
+      <div class="notifications-toolbar">
+        <ion-button fill="clear" (click)="marcarTodasLeidas()">
+          <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+          Marcar todas leídas
+        </ion-button>
+        <ion-button
+          fill="clear"
+          (click)="eliminarSeleccionadas()"
+          [disabled]="selectedIds.size === 0"
+        >
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Eliminar seleccionadas
+        </ion-button>
+        <ion-button fill="clear" color="danger" (click)="eliminarTodas()">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Eliminar todas
+        </ion-button>
+      </div>
+      <ion-list>
+        <ion-item *ngFor="let notif of notifications">
+          <ion-avatar slot="start">
+            <ion-icon name="notifications-outline"></ion-icon>
+          </ion-avatar>
+          <ion-label>
+            <h3>{{ notif.title }}</h3>
+            <p>{{ notif.message }}</p>
+            <p class="time">{{ notif.createdAt | date: "short" }}</p>
+          </ion-label>
+          <div class="notif-actions" slot="end">
+            <ion-button
+              fill="clear"
+              *ngIf="!notif.isRead"
+              (click)="marcarComoLeida(notif)"
+            >
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </ion-button>
+            <ion-button
+              fill="clear"
+              color="danger"
+              (click)="eliminarUna(notif)"
+            >
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+            <ion-checkbox
+              [checked]="selectedIds.has(notif.id)"
+              (ionChange)="toggleSeleccion(notif)"
+            ></ion-checkbox>
+          </div>
+        </ion-item>
+        <ion-item *ngIf="notifications.length === 0">
+          <ion-label class="ion-text-center">No hay notificaciones</ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>
