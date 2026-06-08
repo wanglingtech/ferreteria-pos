@@ -41,6 +41,11 @@ export class AuthSessionService {
     this.currentUserSubject.next(loginData.user);
   }
 
+  updateCurrentUser(updatedUser: AuthUser): void {
+    localStorage.setItem(this.userStorageKey, JSON.stringify(updatedUser));
+    this.currentUserSubject.next(updatedUser);
+  }
+
   clearSession(): void {
     localStorage.removeItem(this.tokenStorageKey);
     localStorage.removeItem(this.userStorageKey);

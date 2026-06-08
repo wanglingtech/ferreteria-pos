@@ -32,5 +32,11 @@ router.put(
   authorizeRoles("ADMIN"),
   usuariosController.actualizar,
 );
+// ✅ NUEVA RUTA: Actualizar propio perfil (cualquier usuario autenticado)
+router.put(
+  "/me/profile",
+  authenticate,
+  usuariosController.actualizarOwnProfile,
+);
 
 module.exports = router;

@@ -195,6 +195,16 @@
 
 .user-chip {
   display: none;
+  --background: rgba(255, 255, 255, 0.08);
+  --border-radius: 999px;
+  --padding-start: 6px;
+  --padding-end: 6px;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+}
+
+.user-chip ion-icon {
+  display: none;
 }
 
 .user-avatar {
@@ -211,6 +221,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 !important;
+}
+
+.user-meta {
+  display: none;
 }
 
 /* =======================================================
@@ -228,15 +243,12 @@
     align-items: center;
     gap: 10px;
 
-    padding: 6px 10px;
-
-    border-radius: 999px;
-
     background: rgba(255, 255, 255, 0.08);
 
     border: 1px solid rgba(255, 255, 255, 0.08);
 
     backdrop-filter: blur(10px);
+    cursor: pointer;
   }
 
   .user-meta {

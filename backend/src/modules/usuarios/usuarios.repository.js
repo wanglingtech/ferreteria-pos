@@ -68,6 +68,7 @@ async function updateUser(id, data) {
       fullName: true,
       role: true,
       isActive: true,
+      imageUrl: true, // ✅ nuevo: incluir URL de imagen
       createdAt: true,
     },
   });

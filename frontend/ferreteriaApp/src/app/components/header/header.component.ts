@@ -73,6 +73,7 @@ export class HeaderComponent {
   notificationsModal!: NotificationsModalComponent;
   @ViewChild(ProfileModalComponent) profileModal!: ProfileModalComponent;
   @ViewChild(SettingsModalComponent) settingsModal!: SettingsModalComponent;
+  @ViewChild(IonPopover) userMenuPopover!: IonPopover;
 
   private authSession = inject(AuthSessionService);
   private router = inject(Router);
@@ -104,15 +105,26 @@ export class HeaderComponent {
     this.notificationsModal.open();
   }
 
+  async openUserMenu(event: any): Promise<void> {
+    await this.userMenuPopover.present(event);
+  }
+
+  async closeUserMenu(): Promise<void> {
+    await this.userMenuPopover.dismiss();
+  }
+
   openProfile(): void {
+    this.closeUserMenu();
     this.profileModal.open();
   }
 
   openSettings(): void {
+    this.closeUserMenu();
     this.settingsModal.open();
   }
 
   async logout(): Promise<void> {
+    this.closeUserMenu();
     const alert = await this.alertCtrl.create({
       header: 'Cerrar sesión',
       message: '¿Estás seguro de que deseas salir?',

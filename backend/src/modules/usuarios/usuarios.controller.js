@@ -38,9 +38,17 @@ const actualizar = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, "Usuario actualizado");
 });
 
+// ✅ NUEVO: Actualizar propio perfil (sin restricciones de rol)
+const actualizarOwnProfile = asyncHandler(async (req, res) => {
+  const userId = req.user.sub; // userId del JWT
+  const data = await usuariosService.actualizarUsuarioProfile(userId, req.body);
+  return sendSuccess(res, data, "Perfil actualizado");
+});
+
 module.exports = {
   listar,
   crear,
   cambiarEstado,
   actualizar,
+  actualizarOwnProfile,
 };

@@ -106,12 +106,12 @@ export class ProfileModalComponent implements OnInit {
       imageUrl: this.profileForm.value.imageUrl || undefined,
     };
     try {
+      // ✅ Usar actualizarMiPerfil() - ruta sin restricciones de ADMIN
       const updated = await firstValueFrom(
-        this.usuariosApi.actualizar(this.currentUser.id, payload),
+        this.usuariosApi.actualizarMiPerfil(payload),
       );
       const updatedUser = { ...this.currentUser, ...updated };
-      localStorage.setItem('fj_user', JSON.stringify(updatedUser));
-      this.authSession['currentUserSubject'].next(updatedUser);
+      this.authSession.updateCurrentUser(updatedUser);
       this.currentUser = updatedUser;
       this.mostrarMensaje('Perfil actualizado', 'success');
       this.close();

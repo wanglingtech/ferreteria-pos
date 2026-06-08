@@ -42,4 +42,11 @@ export class UsuariosApiService {
       .put<ApiResponse<Usuario>>(`${this.usuariosBaseUrl}/${id}`, payload)
       .pipe(map((response) => response.data));
   }
+
+  // ✅ Actualizar propio perfil (sin requerir ser ADMIN)
+  actualizarMiPerfil(payload: UpdateUsuarioRequest): Observable<Usuario> {
+    return this.http
+      .put<ApiResponse<Usuario>>(`${this.usuariosBaseUrl}/me/profile`, payload)
+      .pipe(map((response) => response.data));
+  }
 }

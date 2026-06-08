@@ -19,6 +19,7 @@ const updateUsuarioSchema = z.object({
   fullName: z.string().min(2),
   role: z.enum(["ADMIN", "SELLER"]),
   password: z.string().min(6).optional(), // opcional, si se envía se actualiza
+  imageUrl: z.string().url().optional(), // ✅ nuevo: URL de imagen de perfil
 });
 
 module.exports = {
@@ -26,5 +27,3 @@ module.exports = {
   updateStatusSchema,
   updateUsuarioSchema,
 };
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();

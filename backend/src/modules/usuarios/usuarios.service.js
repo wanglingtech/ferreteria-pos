@@ -83,6 +83,7 @@ async function actualizarUsuario(id, payload) {
       email: parsed.email.toLowerCase(),
       fullName: parsed.fullName,
       role: parsed.role,
+      ...(parsed.imageUrl ? { imageUrl: parsed.imageUrl } : {}), // ✅ nuevo: actualizar imageUrl si se proporciona
     };
 
     // Si se proporciona nueva contraseña, la hasheamos
@@ -103,9 +104,60 @@ async function actualizarUsuario(id, payload) {
   }
 }
 
+// ✅ NUEVO: Actualizar propio perfil (campos limitados: fullName, email, imageUrl)
+async function actualizarUsuarioProfile(id, payload) {
+  try {
+    // Schema más restrictivo: solo campos que un usuario puede cambiar de su propio perfil
+    const updateProfileSchema = require("zod").z.object({
+      fullName: require("zod").z.string().min(2).optional(),
+      email: require("zod").z.string().email().optional(),
+      imageUrl: require("zod").z.string().url().optional(),
+    });
+
+    const parsed = updateProfileSchema.parse(payload);
+
+    // Verificar que el usuario existe
+    const existingUser = await usuariosRepository.findById(id);
+    if (!existingUser) {
+      throw new AppError("Usuario no encontrado", 404);
+    }
+
+    // Si cambia email, verificar unicidad
+    if (parsed.email) {
+      const conflict = await usuariosRepository.findByUsernameOrEmail(
+        existingUser.username, // no cambia username
+        parsed.email,
+        id,
+      );
+      if (conflict) {
+        throw new AppError("Ya existe otro usuario con ese email", 409);
+      }
+    }
+
+    const updateData = {
+      ...(parsed.fullName && { fullName: parsed.fullName }),
+      ...(parsed.email && { email: parsed.email.toLowerCase() }),
+      ...(parsed.imageUrl && { imageUrl: parsed.imageUrl }),
+    };
+
+    return usuariosRepository.updateUser(id, updateData);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const { z } = require("zod");
+      throw new AppError(
+        "Perfil inválido: solo puedes cambiar nombre, email e imagen",
+        400,
+        error.flatten(),
+      );
+    }
+    throw error;
+  }
+}
+
 module.exports = {
   listarUsuarios,
   crearUsuario,
   cambiarEstado,
   actualizarUsuario,
+  actualizarUsuarioProfile,
 };

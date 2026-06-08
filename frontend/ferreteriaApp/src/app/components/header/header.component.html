@@ -28,8 +28,13 @@
           <div class="notification-dot"></div>
         </ion-button>
 
-        <div class="user-chip" id="user-menu-trigger" *ngIf="user">
-          <ion-avatar class="user-avatar">
+        <ion-button
+          fill="clear"
+          class="user-chip"
+          (click)="openUserMenu($event)"
+          *ngIf="user"
+        >
+          <ion-avatar class="user-avatar" slot="start">
             <img *ngIf="user.imageUrl" [src]="user.imageUrl" />
             <span *ngIf="!user.imageUrl">{{ userInitials }}</span>
           </ion-avatar>
@@ -37,28 +42,26 @@
             <span class="user-name">{{ user.fullName }}</span>
             <span class="user-role">{{ user.role }}</span>
           </div>
-        </div>
-        <ion-popover
-          trigger="user-menu-trigger"
-          triggerAction="click"
-          alignment="end"
-        >
-          <ion-content>
-            <ion-list>
-              <ion-item button (click)="openProfile()">
-                <ion-icon slot="start" name="person-outline"></ion-icon>
-                <ion-label>Perfil</ion-label>
-              </ion-item>
-              <ion-item button (click)="openSettings()">
-                <ion-icon slot="start" name="settings-outline"></ion-icon>
-                <ion-label>Configuración</ion-label>
-              </ion-item>
-              <ion-item button (click)="logout()">
-                <ion-icon slot="start" name="log-out-outline"></ion-icon>
-                <ion-label>Cerrar sesión</ion-label>
-              </ion-item>
-            </ion-list>
-          </ion-content>
+        </ion-button>
+        <ion-popover alignment="end">
+          <ng-template>
+            <ion-content>
+              <ion-list>
+                <ion-item button (click)="openProfile()">
+                  <ion-icon slot="start" name="person-outline"></ion-icon>
+                  <ion-label>Perfil</ion-label>
+                </ion-item>
+                <ion-item button (click)="openSettings()">
+                  <ion-icon slot="start" name="settings-outline"></ion-icon>
+                  <ion-label>Configuración</ion-label>
+                </ion-item>
+                <ion-item button (click)="logout()">
+                  <ion-icon slot="start" name="log-out-outline"></ion-icon>
+                  <ion-label>Cerrar sesión</ion-label>
+                </ion-item>
+              </ion-list>
+            </ion-content>
+          </ng-template>
         </ion-popover>
       </div>
     </div>

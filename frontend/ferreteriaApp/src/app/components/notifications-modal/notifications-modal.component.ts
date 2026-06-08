@@ -22,6 +22,10 @@ import {
   trashOutline,
   closeOutline,
   notificationsOutline,
+  cubeOutline,
+  personAddOutline,
+  cartOutline,
+  documentOutline,
 } from 'ionicons/icons';
 import {
   NotificationService,
@@ -65,7 +69,27 @@ export class NotificationsModalComponent implements OnInit {
       trashOutline,
       closeOutline,
       notificationsOutline,
+      cubeOutline,
+      personAddOutline,
+      cartOutline,
+      documentOutline,
     });
+  }
+
+  // ✅ NUEVO: Obtener ícono según tipo de notificación
+  getNotificationIcon(type: string): string {
+    switch (type) {
+      case 'producto_creado':
+        return 'cube-outline';
+      case 'usuario_creado':
+        return 'person-add-outline';
+      case 'venta_registrada':
+        return 'cart-outline';
+      case 'reporte_exportado':
+        return 'document-outline';
+      default:
+        return 'notifications-outline';
+    }
   }
 
   ngOnInit() {
