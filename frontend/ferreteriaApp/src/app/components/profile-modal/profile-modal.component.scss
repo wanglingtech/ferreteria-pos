@@ -1,16 +1,277 @@
+// -------------------------------------------------------------------------
+//  VARIABLES (basadas en tu esquema azul)
+// -------------------------------------------------------------------------
+$modal-bg: #ffffff;
+$modal-header-bg: #ffffff;
+$border-light: #eef2f6;
+$border-medium: #e2e8f0;
+$text-primary: #0f172a;
+$text-secondary: #475569;
+$text-muted: #94a3b8;
+$brand-blue: #055eee;
+$brand-blue-hover: #1a4bcb;
+$brand-blue-soft: rgba(5, 94, 238, 0.08);
+$danger: #ef4444;
+$success: #10b981;
+$transition-default: all 0.2s ease;
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 20px;
+
+// -------------------------------------------------------------------------
+//  MODAL PRINCIPAL
+// -------------------------------------------------------------------------
+ion-modal {
+  --border-radius: $border-radius-lg;
+  --box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+
+  .modal-header {
+    box-shadow: $shadow-sm;
+
+    .modal-toolbar {
+      --background: $modal-header-bg;
+      --border-style: none;
+      --min-height: 56px;
+      --padding-start: 16px;
+      --padding-end: 12px;
+
+      ion-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: $text-primary;
+        letter-spacing: -0.3px;
+      }
+
+      ion-button {
+        --color: $text-secondary;
+        --color-hover: $text-primary;
+        --padding-start: 8px;
+        --padding-end: 8px;
+        margin: 0;
+        height: 40px;
+
+        ion-icon {
+          font-size: 1.4rem;
+        }
+      }
+    }
+  }
+
+  .modal-content {
+    --background: $modal-bg;
+    --padding-bottom: 20px;
+  }
+}
+
+// -------------------------------------------------------------------------
+//  AVATAR
+// -------------------------------------------------------------------------
 .avatar-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
-}
-.profile-avatar {
-  width: 100px;
-  height: 100px;
-  img {
-    object-fit: cover;
+  margin: 24px 0 20px 0;
+  position: relative;
+
+  .profile-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 3px solid $brand-blue;
+    box-shadow: $shadow-md;
+    overflow: hidden;
+    transition: $transition-default;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 20px rgba(5, 94, 238, 0.2);
+    }
+  }
+
+  // Botón de edición opcional (si quieres añadirlo más adelante)
+  .edit-avatar-btn {
+    position: absolute;
+    bottom: 0;
+    right: calc(50% - 55px);
+    background: $brand-blue;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    border: 2px solid white;
+    transition: $transition-default;
+
+    &:hover {
+      background: $brand-blue-hover;
+      transform: scale(1.05);
+    }
   }
 }
+
+// -------------------------------------------------------------------------
+//  FORMULARIOS (ion-item personalizados)
+// -------------------------------------------------------------------------
+ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  --border-color: $border-light;
+  --background: $modal-bg;
+  --background-hover: #fafcff;
+  transition: $transition-default;
+  margin-bottom: 4px;
+
+  ion-label {
+    font-weight: 500;
+    color: $text-secondary;
+    font-size: 0.85rem;
+  }
+
+  ion-input {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --color: $text-primary;
+    font-size: 0.95rem;
+
+    &::placeholder {
+      color: $text-muted;
+      font-size: 0.85rem;
+    }
+  }
+
+  // Enfocar el input cambia el borde inferior
+  ion-input.item-has-focus {
+    --highlight-color-focused: $brand-blue;
+  }
+}
+
+// Estilo especial para el último ion-item (sin borde inferior redundante)
+ion-item:last-of-type {
+  --border-style: none;
+}
+
+// -------------------------------------------------------------------------
+//  BOTÓN DE GUARDAR
+// -------------------------------------------------------------------------
 .form-actions {
-  margin-top: 24px;
-  padding: 0 16px;
+  margin-top: 32px;
+  padding: 0 16px 20px 16px;
+
+  ion-button {
+    --background: $brand-blue;
+    --background-hover: $brand-blue-hover;
+    --border-radius: $border-radius-md;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    margin: 0;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: -0.2px;
+    font-size: 1rem;
+    box-shadow: $shadow-sm;
+    transition: $transition-default;
+
+    ion-icon {
+      font-size: 1.2rem;
+      margin-right: 8px;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-md;
+    }
+
+    &[disabled] {
+      opacity: 0.6;
+      --background: $text-muted;
+    }
+  }
+}
+
+// -------------------------------------------------------------------------
+//  RESPONSIVE: Ajustes en tablet y escritorio
+// -------------------------------------------------------------------------
+@media (min-width: 768px) {
+  .avatar-container {
+    margin: 32px 0 24px;
+
+    .profile-avatar {
+      width: 130px;
+      height: 130px;
+      border-width: 4px;
+    }
+  }
+
+  ion-item {
+    --padding-start: 20px;
+    --padding-end: 20px;
+    margin-bottom: 8px;
+
+    ion-label {
+      font-size: 0.9rem;
+    }
+
+    ion-input {
+      font-size: 1rem;
+    }
+  }
+
+  .form-actions {
+    margin-top: 40px;
+    padding: 0 20px 24px 20px;
+
+    ion-button {
+      --padding-top: 16px;
+      --padding-bottom: 16px;
+      font-size: 1.05rem;
+    }
+  }
+}
+
+// -------------------------------------------------------------------------
+//  ANIMACIONES Y DETALLES
+// -------------------------------------------------------------------------
+ion-modal::part(backdrop) {
+  backdrop-filter: blur(6px);
+  transition: $transition-default;
+}
+
+ion-item {
+  animation: fadeSlideUp 0.25s ease-out;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Mejora la experiencia de los inputs flotantes (posición floating)
+ion-label[position="floating"] {
+  transform: translateY(8px);
+  transition: $transition-default;
+}
+
+ion-item.item-has-value ion-label[position="floating"],
+ion-item.item-has-focus ion-label[position="floating"] {
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: $brand-blue;
 }
