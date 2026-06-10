@@ -1,273 +1,268 @@
 :host {
   display: block;
+
+  // -------------------------------------------------------------------------
+  //  VARIABLES (colores, espaciados, etc.)
+  // -------------------------------------------------------------------------
+  --header-bg-gradient: linear-gradient(
+    135deg,
+    #071447 0%,
+    #0a1a5c 40%,
+    #17317f 100%
+  );
+  --brand-blue: #3b82f6;
+  --brand-blue-light: #60a5fa;
+  --brand-blue-glow: rgba(96, 165, 250, 0.8);
+  --notification-dot: #ff4f6c;
+  --text-white: #ffffff;
+  --text-white-muted: rgba(255, 255, 255, 0.72);
+  --text-white-soft: rgba(255, 255, 255, 0.68);
+  --bg-blur-light: rgba(255, 255, 255, 0.08);
+  --bg-blur-medium: rgba(212, 205, 205, 0.08);
+  --border-radius-md: 14px;
+  --border-radius-full: 999px;
+  --transition-default: all 0.2s ease;
+  --shadow-header:
+    0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-glow: 0 0 18px var(--brand-blue-glow);
 }
 
-/* =======================================================
-   HEADER FIXED
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  HEADER FIJO
+// -------------------------------------------------------------------------
 .dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-
   z-index: 9999;
-
   backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-header);
 
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.04);
+  // -----------------------------------------------------------------------
+  //  TOOLBAR PRINCIPAL
+  // -----------------------------------------------------------------------
+  ion-toolbar {
+    --background: var(--header-bg-gradient);
+    --min-height: 76px;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --border-width: 0;
+    color: var(--text-white);
+
+    @media (min-width: 768px) {
+      --padding-start: 22px;
+      --padding-end: 22px;
+    }
+  }
 }
 
-/* =======================================================
-   TOOLBAR
-======================================================= */
-
-.dashboard-header ion-toolbar {
-  --background: linear-gradient(135deg, #071447 0%, #0a1a5c 40%, #17317f 100%);
-
-  --min-height: 76px;
-
-  --padding-start: 14px;
-  --padding-end: 14px;
-
-  --border-width: 0;
-
-  color: #ffffff;
-}
-
-/* =======================================================
-   CONTAINER
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  CONTENEDOR FLEX
+// -------------------------------------------------------------------------
 .toolbar-container {
   width: 100%;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 12px;
 }
 
-/* =======================================================
-   LEFT
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  SECCIÓN IZQUIERDA
+// -------------------------------------------------------------------------
 .toolbar-left {
   display: flex;
   align-items: center;
   gap: 12px;
-
   min-width: 0;
 }
 
-/* =======================================================
-   BUTTONS
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  BOTONES REDONDOS (iconos)
+// -------------------------------------------------------------------------
 .toolbar-icon-btn {
   --padding-start: 10px;
   --padding-end: 10px;
-
-  --background: rgba(255, 255, 255, 0.08);
-
-  --border-radius: 14px;
-
-  --color: #ffffff;
-
+  --background: var(--bg-blur-light);
+  --border-radius: var(--border-radius-md);
+  --color: var(--text-white);
   width: 44px;
   height: 44px;
-
   backdrop-filter: blur(10px);
+  transition: var(--transition-default);
+
+  ion-icon {
+    font-size: 1.2rem;
+  }
+
+  &:hover {
+    --background: rgba(255, 255, 255, 0.16);
+    transform: scale(0.96);
+  }
+
+  &:focus {
+    outline: 2px solid var(--brand-blue-light);
+    outline-offset: 2px;
+  }
 }
 
-.toolbar-icon-btn ion-icon {
-  font-size: 1.2rem;
-}
-
-/* =======================================================
-   BRAND
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  MARCA / BADGE CON PUNTO AZUL
+// -------------------------------------------------------------------------
 .brand-wrapper {
   display: flex;
   align-items: center;
   gap: 12px;
-
   min-width: 0;
 }
 
 .brand-badge {
   width: 40px;
   height: 40px;
-
-  border-radius: 14px;
-
+  border-radius: var(--border-radius-md);
   background: rgba(255, 255, 255, 0.12);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   flex-shrink: 0;
 }
 
 .brand-dot {
   width: 12px;
   height: 12px;
-
   border-radius: 50%;
-
-  background: #60a5fa;
-
-  box-shadow: 0 0 18px rgba(96, 165, 250, 0.8);
+  background: var(--brand-blue-light);
+  box-shadow: var(--shadow-glow);
 }
 
-/* =======================================================
-   TEXT
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  TEXTOS (título + subtítulo)
+// -------------------------------------------------------------------------
 .toolbar-text {
   min-width: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-white);
+  }
+
+  p {
+    margin: 3px 0 0;
+    font-size: 0.76rem;
+    color: var(--text-white-muted);
+    line-height: 1.2;
+  }
 }
 
-.toolbar-text h1 {
-  margin: 0;
-
-  font-size: 1.1rem;
-  font-weight: 800;
-
-  line-height: 1.1;
-
-  color: #ffffff;
-}
-
-.toolbar-text p {
-  margin: 3px 0 0;
-
-  font-size: 0.76rem;
-
-  color: rgba(255, 255, 255, 0.72);
-
-  line-height: 1.2;
-}
-
-/* =======================================================
-   RIGHT
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  SECCIÓN DERECHA
+// -------------------------------------------------------------------------
 .toolbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* =======================================================
-   NOTIFICATION
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  BOTÓN NOTIFICACIÓN CON INDICADOR
+// -------------------------------------------------------------------------
 .notification-btn {
   position: relative;
+
+  .notification-dot {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--notification-dot);
+    border: 2px solid #0a1a5c; // tono del gradiente intermedio
+  }
 }
 
-.notification-dot {
-  position: absolute;
-
-  top: 10px;
-  right: 10px;
-
-  width: 8px;
-  height: 8px;
-
-  border-radius: 50%;
-
-  background: #ff4f6c;
-
-  border: 2px solid #0a1a5c;
-}
-
-/* =======================================================
-   USER CHIP
-======================================================= */
-
+// -------------------------------------------------------------------------
+//  USER CHIP (solo escritorio)
+// -------------------------------------------------------------------------
 .user-chip {
-  display: none;
-  --background: rgba(255, 255, 255, 0.08);
-  --border-radius: 999px;
-  --padding-start: 6px;
-  --padding-end: 6px;
-  --padding-top: 6px;
-  --padding-bottom: 6px;
-}
+  display: none; // oculto en móvil
+  align-items: center;
+  gap: 20px;
+  padding: 8px 16px;
+  --background: var(--bg-blur-medium);
+  --border-radius: var(--border-radius-full);
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  backdrop-filter: blur(20px);
+  cursor: pointer;
+  transition: var(--transition-default);
 
-.user-chip ion-icon {
-  display: none;
+  // Corrijo el box-shadow erróneo
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+  }
+
+  ion-icon {
+    display: none; // si no se usa, se mantiene
+    padding: 0;
+    font-size: 1.2rem;
+  }
 }
 
 .user-avatar {
   width: 38px;
   height: 38px;
-
-  background: linear-gradient(135deg, #3b82f6, #60a5fa);
-
-  color: #ffffff;
-
+  background: linear-gradient(
+    135deg,
+    var(--brand-blue),
+    var(--brand-blue-light)
+  );
+  color: var(--text-white);
   font-size: 0.78rem;
   font-weight: 800;
-
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 !important;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .user-meta {
-  display: none;
+  display: none; // oculto en móvil
+  flex-direction: column;
+  line-height: 1.1;
 }
 
-/* =======================================================
-   DESKTOP
-======================================================= */
+.user-name {
+  color: var(--text-white);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
 
+.user-role {
+  color: var(--text-white-soft);
+  font-size: 0.68rem;
+}
+
+// -------------------------------------------------------------------------
+//  MEDIA QUERY: ESCRITORIO (≥768px)
+// -------------------------------------------------------------------------
 @media (min-width: 768px) {
-  .dashboard-header ion-toolbar {
-    --padding-start: 22px;
-    --padding-end: 22px;
-  }
-
   .user-chip {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    background: rgba(255, 255, 255, 0.08);
-
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    backdrop-filter: blur(10px);
-    cursor: pointer;
+    display: flex; // se muestra como bloque flexible
   }
 
   .user-meta {
-    display: flex;
-    flex-direction: column;
-
-    line-height: 1.1;
-  }
-
-  .user-name {
-    color: #ffffff;
-
-    font-size: 0.76rem;
-    font-weight: 700;
-  }
-
-  .user-role {
-    color: rgba(255, 255, 255, 0.68);
-
-    font-size: 0.68rem;
+    display: flex; // se ven los textos
   }
 }
