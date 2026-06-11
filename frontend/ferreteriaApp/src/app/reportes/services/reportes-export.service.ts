@@ -307,6 +307,7 @@ export class ReportesExportService {
 
           <!-- Ventas por día (sección con título y tabla juntos) -->
           <div class="section">
+          <br>
             <div class="section-title">📊 Evolución de Ventas por Día</div>
             <table>
               <thead>
@@ -318,6 +319,7 @@ export class ReportesExportService {
 
           <!-- Top productos (sección con título y tabla juntos) -->
           <div class="section">
+           <br>
             <div class="section-title">🏆 Top Productos Más Vendidos</div>
             <table>
               <thead>
