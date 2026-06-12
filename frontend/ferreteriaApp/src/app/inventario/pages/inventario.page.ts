@@ -1,8 +1,13 @@
-// =====================================================
-// IMPORTACIONES NECESARIAS
-// =====================================================
+// Angular e Ionic
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  signal,
+  computed,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent,
@@ -22,16 +27,13 @@ import {
   cashOutline,
 } from 'ionicons/icons';
 
-// Servicios e interfaces propias del módulo de inventario
+// Servicios e interfaces
 import { InventarioApiService } from '../services/inventario-api.service';
 import {
   ResumenInventario,
   ProductoCritico,
 } from '../interfaces/inventario.interface';
 
-// =====================================================
-// DECORADOR @Component
-// =====================================================
 @Component({
   selector: 'app-inventario-page',
   standalone: true,
@@ -48,67 +50,55 @@ import {
     IonSpinner,
   ],
 })
-export class InventarioPage implements OnInit {
-  // =====================================================
-  // 1. SEÑALES (SIGNALS) PARA EL ESTADO REACTIVO
-  // =====================================================
-
-  /**
-   * Almacena los datos del resumen de inventario (KPIs).
-   * Inicialmente es null, luego se llena con la respuesta del backend.
-   */
+export class InventarioPage implements OnInit, OnDestroy {
+  // ============================================================
+  // 1. ESTADO REACTIVO (Señales)
+  // ============================================================
+  /** Resumen de KPIs (total, stock bajo, etc.) */
   resumen = signal<ResumenInventario | null>(null);
-
-  /**
-   * Lista original de productos críticos obtenida del backend.
-   * Se carga una sola vez al iniciar la página.
-   */
+  /** Lista completa de productos críticos (se refresca automáticamente) */
   productosCriticos = signal<ProductoCritico[]>([]);
-
-  /**
-   * Término de búsqueda ingresado por el usuario en el input.
-   * Se actualiza cada vez que el usuario escribe.
-   */
+  /** Término de búsqueda escrito por el usuario */
   searchTerm = signal<string>('');
-
-  /**
-   * Indica si los datos están siendo cargados (para mostrar spinner).
-   */
+  /** Indica si los datos están cargándose inicialmente */
   isLoading = signal(false);
 
-  // =====================================================
-  // 2. PROPIEDAD COMPUTADA (FILTRADO LOCAL EN TIEMPO REAL)
-  // =====================================================
-
+  // ============================================================
+  // 2. FILTRADO LOCAL EN TIEMPO REAL (computado)
+  // ============================================================
   /**
-   * `filteredProductos` es un `computed` que devuelve la lista de productos críticos
-   * filtrada según el `searchTerm`. Se recalcula automáticamente cada vez que cambia
-   * `searchTerm` o `productosCriticos`. Esto permite que el buscador sea instantáneo,
-   * sin necesidad de hacer nuevas peticiones HTTP.
+   * Devuelve los productos críticos que coinciden con el término de búsqueda
+   * (por nombre o SKU). Se recalcula automáticamente cuando cambia searchTerm o productosCriticos.
    */
   filteredProductos = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
-    // Si no hay término de búsqueda, mostrar todos los críticos
     if (!term) return this.productosCriticos();
-    // Filtrar localmente por nombre o SKU (insensible a mayúsculas/minúsculas)
     return this.productosCriticos().filter(
-      (producto) =>
-        producto.name.toLowerCase().includes(term) ||
-        producto.sku.toLowerCase().includes(term),
+      (p) =>
+        p.name.toLowerCase().includes(term) ||
+        p.sku.toLowerCase().includes(term),
     );
   });
 
-  // =====================================================
-  // 3. INYECCIÓN DE DEPENDENCIAS
-  // =====================================================
+  // ============================================================
+  // 3. POLLING (actualización automática)
+  // ============================================================
+  /** Intervalo en milisegundos (30 segundos) */
+  private readonly REFRESH_INTERVAL_MS = 30000; // 30 segundos
+  /** Referencia al intervalo para poder limpiarlo al destruir el componente */
+  private intervalId: any = null;
+
+  // ============================================================
+  // 4. INYECCIÓN DE DEPENDENCIAS
+  // ============================================================
   private inventarioApi = inject(InventarioApiService);
   private toastCtrl = inject(ToastController);
 
-  // =====================================================
-  // 4. CONSTRUCTOR (REGISTRO DE ICONOS)
-  // =====================================================
+  // ============================================================
+  // 5. CICLO DE VIDA
+  // ============================================================
   constructor() {
-    // Registrar los iconos que se usarán en la plantilla HTML
+    // Registrar los iconos que se usarán en la plantilla
     addIcons({
       searchOutline,
       cubeOutline,
@@ -118,21 +108,27 @@ export class InventarioPage implements OnInit {
     });
   }
 
-  // =====================================================
-  // 5. CICLO DE VIDA ngOnInit
-  // =====================================================
   ngOnInit() {
-    this.cargarResumen(); // Carga los KPIs
-    this.cargarProductosCriticos(); // Carga la lista de productos críticos
+    // Carga inicial de datos
+    this.cargarResumen();
+    this.cargarProductosCriticos();
+    // Iniciar el polling (actualización automática periódica)
+    this.iniciarPolling();
   }
 
-  // =====================================================
-  // 6. MÉTODOS PRINCIPALES (LLAMADAS AL API)
-  // =====================================================
-
   /**
-   * Obtiene el resumen de inventario (totales, stock bajo, etc.) desde el backend
-   * y actualiza la señal `resumen`.
+   * Al destruir el componente (por ejemplo, al salir de la página),
+   * detener el intervalo para evitar fugas de memoria.
+   */
+  ngOnDestroy() {
+    this.detenerPolling();
+  }
+
+  // ============================================================
+  // 6. MÉTODOS DE CARGA DE DATOS
+  // ============================================================
+  /**
+   * Obtiene el resumen de KPIs desde el backend y actualiza la señal.
    */
   cargarResumen() {
     this.inventarioApi.obtenerResumen().subscribe({
@@ -143,13 +139,12 @@ export class InventarioPage implements OnInit {
   }
 
   /**
-   * Obtiene todos los productos críticos (stock <= 0 o stock <= stock mínimo)
-   * desde el backend. Nota: se envía una cadena vacía como término de búsqueda
-   * para que el backend devuelva TODOS los críticos. Luego el filtro local
-   * (filteredProductos) se encargará de aplicar la búsqueda en tiempo real.
+   * Obtiene TODOS los productos críticos (sin filtro de búsqueda).
+   * Actualiza la señal `productosCriticos` y desactiva el indicador de carga.
    */
   cargarProductosCriticos() {
     this.isLoading.set(true);
+    // Se envía cadena vacía para obtener la lista completa (sin filtro backend)
     this.inventarioApi.obtenerProductosCriticos('').subscribe({
       next: (data) => {
         this.productosCriticos.set(data);
@@ -162,31 +157,58 @@ export class InventarioPage implements OnInit {
     });
   }
 
-  // =====================================================
-  // 7. MÉTODO DEL BUSCADOR (ACTUALIZA EL TÉRMINO)
-  // =====================================================
-
   /**
-   * Se ejecuta cada vez que el usuario escribe en el campo de búsqueda.
-   * Recibe directamente el valor del input (no el evento DOM completo)
-   * gracias a `(ngModelChange)="onSearch($event)"` en el HTML.
-   * Actualiza la señal `searchTerm`, lo que provoca la recalculación automática
-   * de `filteredProductos` (filtro local instantáneo).
-   *
-   * @param term - Valor actual del input (cadena de texto)
+   * Refresca ambos datos (resumen y productos críticos) simultáneamente.
+   * Es llamado por el polling y también se podría usar para recarga manual.
    */
-  onSearch(term: string) {
-    this.searchTerm.set(term);
+  refrescarDatosCompletos() {
+    this.cargarResumen();
+    this.cargarProductosCriticos();
   }
 
-  // =====================================================
-  // 8. UTILIDADES (MANEJO DE ERRORES)
-  // =====================================================
+  // ============================================================
+  // 7. MÉTODOS DE POLLING
+  // ============================================================
+  /**
+   * Inicia un intervalo que ejecuta `refrescarDatosCompletos` cada
+   * REFRESH_INTERVAL_MS milisegundos.
+   */
+  private iniciarPolling() {
+    if (this.intervalId) return; // Evita duplicar intervalos
+    this.intervalId = setInterval(() => {
+      console.log('🔄 [Inventario] Actualizando datos automáticamente...');
+      this.refrescarDatosCompletos();
+    }, this.REFRESH_INTERVAL_MS);
+  }
 
   /**
+   * Detiene el intervalo de polling.
+   */
+  private detenerPolling() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+  }
+
+  // ============================================================
+  // 8. MANEJO DE LA BÚSQUEDA EN TIEMPO REAL
+  // ============================================================
+  /**
+   * Se ejecuta cada vez que el usuario escribe en el campo de búsqueda.
+   * Recibe el valor como string (no un objeto Event) gracias a ngModelChange.
+   * Solo actualiza la señal searchTerm, el filtrado es automático.
+   */
+  onSearch(valor: string) {
+    this.searchTerm.set(valor);
+    // No se hace ninguna llamada HTTP aquí → filtrado local instantáneo
+  }
+
+  // ============================================================
+  // 9. UTILIDADES
+  // ============================================================
+  /**
    * Muestra un toast de error al usuario.
-   * @param titulo - Título del error
-   * @param mensaje - Mensaje detallado (opcional)
    */
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
