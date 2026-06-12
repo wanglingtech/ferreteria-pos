@@ -1,22 +1,18 @@
 <ion-content class="usuarios-content">
   <div class="usuarios-shell">
     <!-- =====================================================
-         HEADER CORPORATIVO
+         HEADER CORPORATIVO (Hero)
     ===================================================== -->
     <section class="hero-header">
       <div class="hero-content">
         <div class="hero-badge">👤 Gestión de usuarios</div>
-
         <h1>Usuarios</h1>
-
         <p>Administración de usuarios, permisos y accesos del sistema.</p>
-
         <div class="hero-stats">
           <div class="hero-stat">
             <span class="stat-label">Módulo</span>
             <strong>Seguridad</strong>
           </div>
-
           <div class="hero-stat">
             <span class="stat-label">Acceso</span>
             <strong>Administradores</strong>
@@ -26,41 +22,33 @@
     </section>
 
     <!-- =====================================================
-         BUSCADOR + ACCIÓN
+         BARRA DE BÚSQUEDA + BOTÓN NUEVO USUARIO
     ===================================================== -->
     <section class="toolbar-section">
-      <!-- BUSCADOR -->
       <div class="search-box">
         <ion-icon name="search-outline"></ion-icon>
-
         <input
           type="text"
-          placeholder="Buscar usuario..."
+          placeholder="Buscar usuario por nombre, email o usuario..."
           [(ngModel)]="search"
         />
       </div>
-
-      <!-- NUEVO USUARIO -->
       <ion-button class="add-user-btn" (click)="openCreateUser()">
         <ion-icon slot="start" name="person-add-outline"></ion-icon>
-
         Nuevo Usuario
       </ion-button>
     </section>
 
     <!-- =====================================================
-         LISTADO
+         LISTA DE USUARIOS
     ===================================================== -->
     <section class="users-section">
       <div class="section-title">
         <h2>Usuarios registrados</h2>
-
         <p>Usuarios disponibles en el sistema corporativo.</p>
       </div>
 
-      <!-- =====================================================
-           INDICADOR DE CARGA
-      ===================================================== -->
+      <!-- Indicador de carga -->
       <div
         class="loading-state"
         *ngIf="isLoading && filteredUsers.length === 0"
@@ -69,28 +57,22 @@
         <p>Cargando usuarios...</p>
       </div>
 
-      <!-- =====================================================
-           LISTA DE USUARIOS
-      ===================================================== -->
+      <!-- Lista de usuarios (grid de tarjetas) -->
       <div class="users-list" *ngIf="!isLoading && filteredUsers.length > 0">
         <div class="user-card" *ngFor="let user of filteredUsers">
-          <!-- USUARIO -->
+          <!-- Datos del usuario -->
           <div class="user-info">
             <div class="avatar">{{ getInitials(user.fullName) }}</div>
-
             <div class="user-data">
               <h3>{{ user.fullName }}</h3>
-
-              <span class="email"> {{ user.email }} </span>
+              <span class="email">{{ user.email }}</span>
             </div>
           </div>
-
-          <!-- ROL -->
+          <!-- Rol -->
           <div class="role-chip">
             {{ user.role === 'ADMIN' ? 'Administrador' : 'Vendedor' }}
           </div>
-
-          <!-- ESTADO -->
+          <!-- Estado (activo/inactivo) -->
           <div
             class="status-chip"
             [class.active]="user.isActive"
@@ -98,8 +80,7 @@
           >
             {{ user.isActive ? 'Activo' : 'Inactivo' }}
           </div>
-
-          <!-- MENÚ -->
+          <!-- Botón menú (3 puntos) -->
           <ion-button
             fill="clear"
             class="menu-btn"
@@ -113,14 +94,10 @@
         </div>
       </div>
 
-      <!-- =====================================================
-           EMPTY STATE
-      ===================================================== -->
+      <!-- Estado vacío -->
       <div class="empty-state" *ngIf="!isLoading && filteredUsers.length === 0">
         <ion-icon name="people-outline"></ion-icon>
-
         <h3>No hay usuarios registrados</h3>
-
         <p>Cuando existan usuarios en la base de datos aparecerán aquí.</p>
       </div>
     </section>
@@ -140,21 +117,20 @@
         <ion-toolbar class="modal-toolbar">
           <ion-title>Nuevo Usuario</ion-title>
           <ion-button slot="end" fill="clear" (click)="closeModal()">
-            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+            <ion-icon name="close-outline"></ion-icon>
           </ion-button>
         </ion-toolbar>
       </ion-header>
-
       <ion-content class="modal-content">
         <div class="form-container">
           <form [formGroup]="createUserForm" (ngSubmit)="guardarUsuario()">
             <!-- USERNAME -->
             <ion-item class="form-item">
-              <ion-label position="floating">Nombre de usuario</ion-label>
+              <ion-label position="floating">Nombre de usuario *</ion-label>
               <ion-input
                 formControlName="username"
-                placeholder="Ingresa nombre de usuario"
                 type="text"
+                placeholder="Ej: juan_perez"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -162,21 +138,16 @@
               *ngIf="createUserForm.get('username')?.invalid && createUserForm.get('username')?.touched"
               class="error-message"
             >
-              <p *ngIf="createUserForm.get('username')?.hasError('required')">
-                El nombre de usuario es requerido
-              </p>
-              <p *ngIf="createUserForm.get('username')?.hasError('minlength')">
-                El nombre debe tener al menos 3 caracteres
-              </p>
+              {{ getUsernameErrorMessage(createUserForm) }}
             </ion-text>
 
             <!-- EMAIL -->
             <ion-item class="form-item">
-              <ion-label position="floating">Correo electrónico</ion-label>
+              <ion-label position="floating">Correo electrónico *</ion-label>
               <ion-input
                 formControlName="email"
-                placeholder="correo@ejemplo.com"
                 type="email"
+                placeholder="ejemplo@dominio.com"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -184,21 +155,16 @@
               *ngIf="createUserForm.get('email')?.invalid && createUserForm.get('email')?.touched"
               class="error-message"
             >
-              <p *ngIf="createUserForm.get('email')?.hasError('required')">
-                El correo es requerido
-              </p>
-              <p *ngIf="createUserForm.get('email')?.hasError('email')">
-                Ingresa un correo válido
-              </p>
+              {{ getEmailErrorMessage(createUserForm) }}
             </ion-text>
 
             <!-- NOMBRE COMPLETO -->
             <ion-item class="form-item">
-              <ion-label position="floating">Nombre completo</ion-label>
+              <ion-label position="floating">Nombre completo *</ion-label>
               <ion-input
                 formControlName="fullName"
-                placeholder="Juan Pérez"
                 type="text"
+                placeholder="Ej: Juan Pérez Martínez"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -206,21 +172,16 @@
               *ngIf="createUserForm.get('fullName')?.invalid && createUserForm.get('fullName')?.touched"
               class="error-message"
             >
-              <p *ngIf="createUserForm.get('fullName')?.hasError('required')">
-                El nombre completo es requerido
-              </p>
-              <p *ngIf="createUserForm.get('fullName')?.hasError('minlength')">
-                El nombre debe tener al menos 2 caracteres
-              </p>
+              {{ getFullNameErrorMessage(createUserForm) }}
             </ion-text>
 
-            <!-- PASSWORD -->
+            <!-- CONTRASEÑA -->
             <ion-item class="form-item">
-              <ion-label position="floating">Contraseña</ion-label>
+              <ion-label position="floating">Contraseña *</ion-label>
               <ion-input
                 formControlName="password"
-                placeholder="Contraseña segura"
                 type="password"
+                placeholder="Mínimo 6 caracteres"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -228,17 +189,12 @@
               *ngIf="createUserForm.get('password')?.invalid && createUserForm.get('password')?.touched"
               class="error-message"
             >
-              <p *ngIf="createUserForm.get('password')?.hasError('required')">
-                La contraseña es requerida
-              </p>
-              <p *ngIf="createUserForm.get('password')?.hasError('minlength')">
-                La contraseña debe tener al menos 6 caracteres
-              </p>
+              {{ getPasswordErrorMessage(createUserForm, false) }}
             </ion-text>
 
             <!-- ROL -->
             <ion-item class="form-item">
-              <ion-label position="floating">Rol de usuario</ion-label>
+              <ion-label position="floating">Rol de usuario *</ion-label>
               <ion-select formControlName="role">
                 <ion-select-option value="SELLER">Vendedor</ion-select-option>
                 <ion-select-option value="ADMIN"
@@ -272,7 +228,7 @@
   </ion-modal>
 
   <!-- =====================================================
-       ACTION SHEET PARA USUARIOS
+       ACTION SHEET PARA OPCIONES DEL USUARIO
   ===================================================== -->
   <ion-action-sheet
     #actionSheet
@@ -283,8 +239,8 @@
   ></ion-action-sheet>
 
   <!-- =====================================================
-     MODAL EDITAR USUARIO
-===================================================== -->
+       MODAL EDITAR USUARIO
+  ===================================================== -->
   <ion-modal
     #editModal
     [breakpoints]="[0, 0.5, 0.75, 1]"
@@ -296,21 +252,20 @@
         <ion-toolbar class="modal-toolbar">
           <ion-title>Editar Usuario</ion-title>
           <ion-button slot="end" fill="clear" (click)="closeEditModal()">
-            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+            <ion-icon name="close-outline"></ion-icon>
           </ion-button>
         </ion-toolbar>
       </ion-header>
-
       <ion-content class="modal-content">
         <div class="form-container">
           <form [formGroup]="editUserForm" (ngSubmit)="actualizarUsuario()">
             <!-- USERNAME -->
             <ion-item class="form-item">
-              <ion-label position="floating">Nombre de usuario</ion-label>
+              <ion-label position="floating">Nombre de usuario *</ion-label>
               <ion-input
                 formControlName="username"
-                placeholder="Ingresa nombre de usuario"
                 type="text"
+                placeholder="Ej: juan_perez"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -318,21 +273,16 @@
               *ngIf="editUserForm.get('username')?.invalid && editUserForm.get('username')?.touched"
               class="error-message"
             >
-              <p *ngIf="editUserForm.get('username')?.hasError('required')">
-                El nombre de usuario es requerido
-              </p>
-              <p *ngIf="editUserForm.get('username')?.hasError('minlength')">
-                El nombre debe tener al menos 3 caracteres
-              </p>
+              {{ getUsernameErrorMessage(editUserForm) }}
             </ion-text>
 
             <!-- EMAIL -->
             <ion-item class="form-item">
-              <ion-label position="floating">Correo electrónico</ion-label>
+              <ion-label position="floating">Correo electrónico *</ion-label>
               <ion-input
                 formControlName="email"
-                placeholder="correo@ejemplo.com"
                 type="email"
+                placeholder="ejemplo@dominio.com"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -340,21 +290,16 @@
               *ngIf="editUserForm.get('email')?.invalid && editUserForm.get('email')?.touched"
               class="error-message"
             >
-              <p *ngIf="editUserForm.get('email')?.hasError('required')">
-                El correo es requerido
-              </p>
-              <p *ngIf="editUserForm.get('email')?.hasError('email')">
-                Ingresa un correo válido
-              </p>
+              {{ getEmailErrorMessage(editUserForm) }}
             </ion-text>
 
             <!-- NOMBRE COMPLETO -->
             <ion-item class="form-item">
-              <ion-label position="floating">Nombre completo</ion-label>
+              <ion-label position="floating">Nombre completo *</ion-label>
               <ion-input
                 formControlName="fullName"
-                placeholder="Juan Pérez"
                 type="text"
+                placeholder="Ej: Juan Pérez Martínez"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -362,23 +307,18 @@
               *ngIf="editUserForm.get('fullName')?.invalid && editUserForm.get('fullName')?.touched"
               class="error-message"
             >
-              <p *ngIf="editUserForm.get('fullName')?.hasError('required')">
-                El nombre completo es requerido
-              </p>
-              <p *ngIf="editUserForm.get('fullName')?.hasError('minlength')">
-                El nombre debe tener al menos 2 caracteres
-              </p>
+              {{ getFullNameErrorMessage(editUserForm) }}
             </ion-text>
 
-            <!-- PASSWORD (OPCIONAL) -->
+            <!-- CONTRASEÑA (OPCIONAL) -->
             <ion-item class="form-item">
               <ion-label position="floating"
                 >Nueva contraseña (opcional)</ion-label
               >
               <ion-input
                 formControlName="password"
-                placeholder="Déjalo vacío si no quieres cambiarla"
                 type="password"
+                placeholder="Déjalo vacío si no quieres cambiarla"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -386,14 +326,12 @@
               *ngIf="editUserForm.get('password')?.invalid && editUserForm.get('password')?.touched"
               class="error-message"
             >
-              <p *ngIf="editUserForm.get('password')?.hasError('minlength')">
-                La contraseña debe tener al menos 6 caracteres
-              </p>
+              {{ getPasswordErrorMessage(editUserForm, true) }}
             </ion-text>
 
             <!-- ROL -->
             <ion-item class="form-item">
-              <ion-label position="floating">Rol de usuario</ion-label>
+              <ion-label position="floating">Rol de usuario *</ion-label>
               <ion-select formControlName="role">
                 <ion-select-option value="SELLER">Vendedor</ion-select-option>
                 <ion-select-option value="ADMIN"
@@ -408,8 +346,9 @@
                 expand="block"
                 fill="outline"
                 (click)="closeEditModal()"
-                >Cancelar</ion-button
               >
+                Cancelar
+              </ion-button>
               <ion-button
                 expand="block"
                 [disabled]="!editUserForm.valid || isLoading"

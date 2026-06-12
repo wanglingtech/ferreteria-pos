@@ -154,10 +154,37 @@ async function actualizarUsuarioProfile(id, payload) {
   }
 }
 
+// ✅ NUEVO: Eliminar usuario permanentemente
+async function eliminarUsuario(id) {
+  // Verificar que existe
+  const user = await usuariosRepository.findById(id);
+  if (!user) {
+    throw new AppError("Usuario no encontrado", 404);
+  }
+  // Opcional: impedir eliminar al propio usuario logueado (se puede hacer en controller)
+  return usuariosRepository.deleteUser(id);
+}
+
+/**
+ * ✅ ELIMINAR USUARIO PERMANENTEMENTE
+ * Verifica que el usuario exista antes de eliminar.
+ * @param {number} id - ID del usuario a eliminar
+ * @returns {Promise<object>} Usuario eliminado
+ */
+async function eliminarUsuario(id) {
+  const user = await usuariosRepository.findById(id);
+  if (!user) {
+    throw new AppError("Usuario no encontrado", 404);
+  }
+  // Eliminar físicamente de la base de datos
+  return usuariosRepository.deleteUser(id);
+}
+
 module.exports = {
   listarUsuarios,
   crearUsuario,
   cambiarEstado,
   actualizarUsuario,
   actualizarUsuarioProfile,
+  eliminarUsuario,
 };

@@ -88,6 +88,25 @@ async function findById(id) {
   });
 }
 
+/**
+ * ✅ ELIMINAR USUARIO FÍSICAMENTE (PERMANENTE)
+ * Usa el método delete de Prisma.
+ * @param {number} id - ID del usuario a eliminar
+ * @returns {Promise<object>} Usuario eliminado (solo datos básicos)
+ */
+async function deleteUser(id) {
+  // Prisma tiene el método 'delete', no 'deleteUser'
+  return prisma.user.delete({
+    where: { id },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      fullName: true,
+    },
+  });
+}
+
 module.exports = {
   findAll,
   findByUsernameOrEmail,
@@ -95,4 +114,5 @@ module.exports = {
   updateStatus,
   updateUser,
   findById,
+  deleteUser,
 };

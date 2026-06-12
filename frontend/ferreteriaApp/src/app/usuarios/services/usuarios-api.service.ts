@@ -49,4 +49,8 @@ export class UsuariosApiService {
       .put<ApiResponse<Usuario>>(`${this.usuariosBaseUrl}/me/profile`, payload)
       .pipe(map((response) => response.data));
   }
+
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.usuariosBaseUrl}/${id}`);
+  }
 }

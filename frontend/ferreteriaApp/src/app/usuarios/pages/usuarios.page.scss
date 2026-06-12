@@ -495,8 +495,10 @@
     &:not([fill="outline"]) {
       --background: var(--brand-primary);
       --background-hover: var(--brand-hover);
-      --color: white;
-      --box-shadow: 0 4px 12px rgba(5, 94, 238, 0.3);
+      --color: rgb(255, 255, 255);
+      background-color: #0a1a5c;
+      border-radius: 16px;
+      --box-shadow: 0 4px 12px #0a1a5c;
     }
   }
 }

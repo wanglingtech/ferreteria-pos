@@ -45,10 +45,17 @@ const actualizarOwnProfile = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, "Perfil actualizado");
 });
 
+// ✅ NUEVO: Eliminar usuario (físicamente)
+const eliminar = asyncHandler(async (req, res) => {
+  const data = await usuariosService.eliminarUsuario(Number(req.params.id));
+  return sendSuccess(res, data, "Usuario eliminado permanentemente");
+});
+
 module.exports = {
   listar,
   crear,
   cambiarEstado,
   actualizar,
   actualizarOwnProfile,
+  eliminar,
 };

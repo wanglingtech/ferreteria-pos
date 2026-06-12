@@ -25,18 +25,23 @@ router.patch(
   authorizeRoles("ADMIN"),
   usuariosController.cambiarEstado,
 );
-// ✅ NUEVA RUTA: Actualizar usuario (solo ADMIN)
 router.put(
   "/:id",
   authenticate,
   authorizeRoles("ADMIN"),
   usuariosController.actualizar,
 );
-// ✅ NUEVA RUTA: Actualizar propio perfil (cualquier usuario autenticado)
 router.put(
   "/me/profile",
   authenticate,
   usuariosController.actualizarOwnProfile,
+);
+// ✅ Ruta para eliminar físicamente
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("ADMIN"),
+  usuariosController.eliminar,
 );
 
 module.exports = router;
