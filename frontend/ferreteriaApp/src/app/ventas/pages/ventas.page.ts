@@ -75,10 +75,10 @@ export class VentasPage implements OnInit {
   isAdmin = signal(false);
   ventaConfirmada: Venta | null = null;
 
-  // ✅ Señal para el mensaje de error (inicia vacío)
+  // Señal para el mensaje de error del cliente
   clienteError = signal<string>('');
 
-  // ✅ Computado que indica si el formulario es válido (sin errores y con carrito)
+  // Computado que indica si el formulario es válido
   isFormValid = computed(() => {
     return (
       this.clienteNombre.trim().length > 0 &&
@@ -203,7 +203,7 @@ export class VentasPage implements OnInit {
     return Number((this.subtotal + this.igv).toFixed(2));
   }
 
-  // ✅ Validación en tiempo real (actualiza la señal clienteError)
+  // Validación del nombre del cliente (en tiempo real)
   validarCliente() {
     const nombre = this.clienteNombre.trim();
     if (nombre.length === 0) {
@@ -218,7 +218,6 @@ export class VentasPage implements OnInit {
       this.clienteError.set('Máximo 80 caracteres');
       return false;
     }
-    // Expresión regular: letras, espacios, guiones, apóstrofes, puntos, tildes, ñ
     const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-\'\.]+$/;
     if (!regex.test(nombre)) {
       this.clienteError.set(
@@ -226,11 +225,16 @@ export class VentasPage implements OnInit {
       );
       return false;
     }
-    // Si todo está bien, limpia el error
     this.clienteError.set('');
     return true;
   }
 
+  // =================== MÉTODOS PRINCIPALES ===================
+
+  /**
+   * Botón GUARDAR: valida, muestra resumen y al confirmar registra la venta
+   * y luego muestra solo opción COMPARTIR (sin imprimir)
+   */
   async guardarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
@@ -239,12 +243,32 @@ export class VentasPage implements OnInit {
     }
     this.ventaConfirmada = null;
     this.resumenModal.present();
+    // Guardamos en una variable temporal que al confirmar se usará con tipo 'guardar'
+    this.tipoVentaPendiente = 'guardar';
   }
 
+  /**
+   * Botón COBRAR: valida, muestra resumen y al confirmar registra la venta
+   * y luego muestra solo opción IMPRIMIR (sin compartir)
+   */
   async cobrarVenta() {
-    await this.guardarVenta();
+    if (!this.validarCliente()) return;
+    if (this.cart().length === 0) {
+      this.mostrarError('Carrito vacío', 'Agrega productos antes de continuar');
+      return;
+    }
+    this.ventaConfirmada = null;
+    this.resumenModal.present();
+    this.tipoVentaPendiente = 'cobrar';
   }
 
+  // Variable para recordar qué botón se pulsó antes del modal de resumen
+  private tipoVentaPendiente: 'guardar' | 'cobrar' = 'guardar';
+
+  /**
+   * Confirmación desde el modal de resumen.
+   * Llama al registro de la venta y luego muestra el menú según el tipo.
+   */
   async confirmarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
@@ -268,7 +292,13 @@ export class VentasPage implements OnInit {
         this.mostrarExito('Venta registrada exitosamente');
         this.limpiarCarrito();
         this.resumenModal.dismiss();
-        this.mostrarOpcionesPostVenta(venta);
+
+        // Mostrar opciones post-venta según el tipo de botón pulsado
+        if (this.tipoVentaPendiente === 'guardar') {
+          this.mostrarOpcionesPostGuardar(venta);
+        } else {
+          this.mostrarOpcionesPostCobrar(venta);
+        }
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -277,15 +307,41 @@ export class VentasPage implements OnInit {
     });
   }
 
-  private mostrarOpcionesPostVenta(venta: Venta) {
+  // Opciones para el botón GUARDAR: solo Compartir y Cerrar
+  private mostrarOpcionesPostGuardar(venta: Venta) {
+    this.alertCtrl
+      .create({
+        header: 'Venta registrada',
+        message: `Venta N° ${venta.code} registrada con éxito.`,
+        buttons: [
+          {
+            text: 'Compartir',
+            handler: () => this.compartirVenta(venta),
+          },
+          {
+            text: 'Cerrar',
+            role: 'cancel',
+          },
+        ],
+      })
+      .then((alert) => alert.present());
+  }
+
+  // Opciones para el botón COBRAR: solo Imprimir y Cerrar
+  private mostrarOpcionesPostCobrar(venta: Venta) {
     this.alertCtrl
       .create({
         header: 'Venta completada',
-        message: `Venta N° ${venta.code} registrada con éxito. ¿Qué deseas hacer?`,
+        message: `Venta N° ${venta.code} registrada con éxito. ¿Desea imprimir el comprobante?`,
         buttons: [
-          { text: 'Imprimir', handler: () => this.imprimirTicket(venta) },
-          { text: 'Compartir', handler: () => this.compartirVenta(venta) },
-          { text: 'Cerrar', role: 'cancel' },
+          {
+            text: 'Imprimir',
+            handler: () => this.imprimirTicket(venta),
+          },
+          {
+            text: 'Cerrar',
+            role: 'cancel',
+          },
         ],
       })
       .then((alert) => alert.present());
@@ -294,10 +350,10 @@ export class VentasPage implements OnInit {
   limpiarCarrito() {
     this.cart.set([]);
     this.clienteNombre = '';
-    this.clienteError.set(''); // limpia también el error
+    this.clienteError.set('');
   }
 
-  // =================== PDF Y COMPARTIR (sin cambios) ===================
+  // =================== MÉTODOS DE IMPRESIÓN Y COMPARTIR (sin cambios) ===================
   imprimirTicket(venta: Venta) {
     this.ventaConfirmada = venta;
     const qrData = `${window.location.origin}/ventas/detalle/${venta.id}`;
@@ -396,6 +452,7 @@ export class VentasPage implements OnInit {
     this.mostrarExito('Venta cancelada');
   }
 
+  // =================== NOTIFICACIONES ===================
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
       header: titulo,
