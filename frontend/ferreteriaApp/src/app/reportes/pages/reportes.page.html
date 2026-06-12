@@ -3,30 +3,27 @@
     <!-- HERO -->
     <section class="hero-header">
       <div class="hero-badge">
-        <ion-icon name="analytics-outline"></ion-icon>
-        Reportes de Ventas y Productos
+        <ion-icon name="analytics-outline"></ion-icon> Reportes de Ventas y
+        Productos
       </div>
       <h1>Reportes Generales</h1>
       <p>
-        Analiza ventas, indicadores financieros, comportamiento comercial y
-        rendimiento general del negocio.
+        Analiza ventas, indicadores financieros y rendimiento general del
+        negocio.
       </p>
     </section>
 
     <!-- FILTROS -->
     <section class="filters-card">
       <div class="card-title">
-        <ion-icon name="calendar-outline"></ion-icon>
-        Filtro de Fechas
+        <ion-icon name="calendar-outline"></ion-icon> Filtro de Fechas
       </div>
       <div class="filters-grid">
         <div class="date-field">
-          <label>Desde</label>
-          <input type="date" [(ngModel)]="from" />
+          <label>Desde</label><input type="date" [(ngModel)]="from" />
         </div>
         <div class="date-field">
-          <label>Hasta</label>
-          <input type="date" [(ngModel)]="to" />
+          <label>Hasta</label><input type="date" [(ngModel)]="to" />
         </div>
         <ion-button
           class="filter-btn"
@@ -92,6 +89,12 @@
         Productos
       </button>
       <button
+        [class.active]="activeTab === 'generales'"
+        (click)="changeTab('generales')"
+      >
+        Generales
+      </button>
+      <button
         [class.active]="activeTab === 'exportar'"
         (click)="changeTab('exportar')"
       >
@@ -99,7 +102,7 @@
       </button>
     </section>
 
-    <!-- GRÁFICO DE VENTAS POR DÍA -->
+    <!-- GRÁFICO EVOLUCIÓN -->
     <div
       class="chart-card"
       *ngIf="activeTab === 'resumen' || activeTab === 'ventas'"
@@ -110,7 +113,7 @@
       <div class="chart-container"><canvas #salesChartCanvas></canvas></div>
     </div>
 
-    <!-- GRÁFICO DE TOP PRODUCTOS -->
+    <!-- GRÁFICO TOP PRODUCTOS -->
     <div class="chart-card" *ngIf="activeTab === 'productos' && reporte">
       <div class="card-title">
         <ion-icon name="bar-chart-outline"></ion-icon> Productos más vendidos
@@ -151,7 +154,75 @@
       </div>
     </div>
 
-    <!-- EXPORTAR (CSV + PDF) -->
+    <!-- TABLA GENERAL DE VENTAS (paginada) -->
+    <div class="sales-list-card" *ngIf="activeTab === 'generales'">
+      <div class="card-title">
+        <ion-icon name="list-outline"></ion-icon> Listado General de Ventas
+      </div>
+      <div class="search-box-generales">
+        <ion-icon name="search-outline"></ion-icon>
+        <input
+          type="text"
+          placeholder="Buscar por código, cliente o vendedor..."
+          [(ngModel)]="searchGeneral"
+          (ngModelChange)="onSearchGeneralChange()"
+        />
+      </div>
+      <div class="table-wrapper">
+        <table *ngIf="!loadingGeneral && ventasGenerales.length > 0">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Vendedor</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let venta of ventasGenerales">
+              <td>{{ venta.code }}</td>
+              <td>{{ venta.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td>{{ venta.customerName || 'Consumidor Final' }}</td>
+              <td>{{ venta.seller.fullName }}</td>
+              <td>{{ formatCurrency(venta.total) }}</td>
+              <td>
+                <ion-button fill="clear" (click)="verDetalleVenta(venta)"
+                  >Ver</ion-button
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="loadingGeneral" class="loading-state">
+          Cargando ventas...
+        </div>
+        <div
+          *ngIf="!loadingGeneral && ventasGenerales.length === 0"
+          class="empty-state"
+        >
+          No hay ventas en este período.
+        </div>
+        <div class="pagination" *ngIf="totalGeneralPages > 1">
+          <button
+            (click)="cambiarPaginaGeneral(pageGeneral - 1)"
+            [disabled]="pageGeneral === 1"
+          >
+            Anterior
+          </button>
+          <span>Página {{ pageGeneral }} de {{ totalGeneralPages }}</span>
+          <button
+            (click)="cambiarPaginaGeneral(pageGeneral + 1)"
+            [disabled]="pageGeneral === totalGeneralPages"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORTAR -->
     <div class="export-card" *ngIf="activeTab === 'exportar'">
       <div class="export-header">
         <img
@@ -161,20 +232,107 @@
         />
         <h3>Ferretería July</h3>
       </div>
-      <p>
-        Genera reportes en formato CSV (compatible con Excel) o PDF para
-        compartir información empresarial.
-      </p>
+      <p>Genera reportes en formato CSV o PDF.</p>
       <div class="export-buttons">
-        <ion-button class="export-btn" (click)="exportToCSV()">
-          <ion-icon slot="start" name="download-outline"></ion-icon>
-          Exportar a CSV
-        </ion-button>
-        <ion-button class="export-btn pdf-btn" (click)="exportToPDF()">
-          <ion-icon slot="start" name="print-outline"></ion-icon>
-          Exportar a PDF
-        </ion-button>
+        <ion-button class="export-btn" (click)="exportToCSV()"
+          ><ion-icon slot="start" name="download-outline"></ion-icon> Exportar a
+          CSV</ion-button
+        >
+        <ion-button class="export-btn pdf-btn" (click)="exportToPDF()"
+          ><ion-icon slot="start" name="print-outline"></ion-icon> Exportar a
+          PDF</ion-button
+        >
       </div>
     </div>
   </div>
+
+  <!-- MODAL DETALLE VENTA -->
+  <ion-modal
+    #detalleModal
+    [breakpoints]="[0, 0.9, 1]"
+    [initialBreakpoint]="0.9"
+    class="detalle-venta-modal"
+  >
+    <ng-template>
+      <ion-header class="modal-header">
+        <ion-toolbar class="modal-toolbar">
+          <ion-title>Detalle de Venta</ion-title>
+          <ion-button slot="end" fill="clear" (click)="detalleModal.dismiss()"
+            ><ion-icon name="close-outline"></ion-icon
+          ></ion-button>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="modal-content">
+        <div
+          id="detalleVentaContent"
+          class="detalle-venta-content"
+          *ngIf="ventaSeleccionada"
+        >
+          <div class="detalle-header">
+            <img src="assets/logo/logo_ferreteria.png" class="detalle-logo" />
+            <h3>Ferretería July</h3>
+            <p>RUC: 10097428951 | Av. México 118, Comas</p>
+          </div>
+          <div class="detalle-info">
+            <p><strong>Venta N°:</strong> {{ ventaSeleccionada.code }}</p>
+            <p>
+              <strong>Fecha:</strong> {{ ventaSeleccionada.createdAt |
+              date:'dd/MM/yyyy HH:mm' }}
+            </p>
+            <p>
+              <strong>Cliente:</strong> {{ ventaSeleccionada.customerName ||
+              'Consumidor Final' }}
+            </p>
+            <p>
+              <strong>Vendedor:</strong> {{ ventaSeleccionada.seller.fullName }}
+            </p>
+          </div>
+          <div class="detalle-tabla">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unit.</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of ventaSeleccionada.items">
+                  <td>{{ item.product.name }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ formatCurrency(item.unitPrice) }}</td>
+                  <td>{{ formatCurrency(item.lineTotal) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="detalle-totales">
+            <p>Subtotal: {{ formatCurrency(ventaSeleccionada.subtotal) }}</p>
+            <p>IGV (18%): {{ formatCurrency(ventaSeleccionada.igv) }}</p>
+            <p>
+              <strong
+                >TOTAL: {{ formatCurrency(ventaSeleccionada.total) }}</strong
+              >
+            </p>
+          </div>
+          <div class="detalle-footer">¡Gracias por su compra!</div>
+        </div>
+        <div class="modal-actions">
+          <ion-button
+            expand="block"
+            fill="outline"
+            (click)="compartirDetalleComoImagen()"
+            >Compartir como Imagen</ion-button
+          >
+          <ion-button
+            expand="block"
+            fill="clear"
+            (click)="detalleModal.dismiss()"
+            >Cerrar</ion-button
+          >
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

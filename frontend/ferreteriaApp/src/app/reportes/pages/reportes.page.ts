@@ -6,6 +6,7 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
+  OnDestroy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -14,6 +15,10 @@ import {
   IonIcon,
   IonSpinner,
   ToastController,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle, // ✅ añadidos
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -31,14 +36,20 @@ import {
   cashOutline,
   pieChartOutline,
   printOutline,
+  listOutline,
+  searchOutline,
+  closeOutline,
 } from 'ionicons/icons';
 import { Chart, registerables } from 'chart.js';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { ReportesApiService } from '../services/reportes-api.service';
 import { ReportesExportService } from '../services/reportes-export.service';
 import { ReporteGeneral, VentaPorDia } from '../interfaces/reportes.interface';
+import { Venta } from '../../ventas/interfaces/venta.interface';
 import { AuthSessionService } from '../../core/services/auth-session.service';
-import { NotificationService } from '../../core/services/notification.service'; // ✅ importar
+import { NotificationService } from '../../core/services/notification.service';
+import html2canvas from 'html2canvas';
 
 Chart.register(...registerables);
 
@@ -54,13 +65,18 @@ Chart.register(...registerables);
     IonButton,
     IonIcon,
     IonSpinner,
+    IonModal,
+    IonHeader, // ✅ añadido
+    IonToolbar, // ✅ añadido
+    IonTitle, // ✅ añadido
   ],
 })
-export class ReportesPage implements OnInit, AfterViewInit {
+export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('salesChartCanvas')
   salesChartCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('topProductsChartCanvas')
   topProductsChartCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('detalleModal') detalleModal!: IonModal;
   private salesChart: Chart | null = null;
   private topProductsChart: Chart | null = null;
 
@@ -71,11 +87,22 @@ export class ReportesPage implements OnInit, AfterViewInit {
   ventasPorDia: VentaPorDia[] = [];
   isLoading = false;
 
+  searchGeneral = '';
+  ventasGenerales: Venta[] = [];
+  loadingGeneral = false;
+  pageGeneral = 1;
+  pageSizeGeneral = 10;
+  totalGeneralPages = 0;
+  ventaSeleccionada: Venta | null = null;
+  private searchSubject = new Subject<string>();
+
+  private pollingInterval: any = null;
+
   private reportesApi = inject(ReportesApiService);
   private exportService = inject(ReportesExportService);
   private authSession = inject(AuthSessionService);
   private toastCtrl = inject(ToastController);
-  private notificationService = inject(NotificationService); // ✅ agregado
+  private notificationService = inject(NotificationService);
 
   get currentUserName(): string {
     const user = this.authSession.getCurrentUser();
@@ -98,6 +125,9 @@ export class ReportesPage implements OnInit, AfterViewInit {
       cashOutline,
       pieChartOutline,
       printOutline,
+      listOutline,
+      searchOutline,
+      closeOutline,
     });
   }
 
@@ -108,9 +138,22 @@ export class ReportesPage implements OnInit, AfterViewInit {
     this.to = today.toISOString().split('T')[0];
     this.from = sevenDaysAgo.toISOString().split('T')[0];
     this.loadReport();
+
+    this.searchSubject.pipe(debounceTime(500)).subscribe(() => {
+      this.pageGeneral = 1;
+      this.cargarVentasGenerales();
+    });
+
+    // Opcional: polling cada 30 segundos (descomentar si se desea)
+    // this.iniciarPolling();
   }
 
   ngAfterViewInit() {}
+
+  ngOnDestroy() {
+    if (this.pollingInterval) clearInterval(this.pollingInterval);
+    this.searchSubject.complete();
+  }
 
   async loadReport() {
     this.isLoading = true;
@@ -124,6 +167,7 @@ export class ReportesPage implements OnInit, AfterViewInit {
       this.reporte = resumen;
       this.ventasPorDia = ventas;
       this.renderCharts();
+      if (this.activeTab === 'generales') this.cargarVentasGenerales();
     } catch (error) {
       console.error(error);
       this.mostrarError('No se pudo cargar el reporte');
@@ -140,13 +184,10 @@ export class ReportesPage implements OnInit, AfterViewInit {
   renderSalesChart() {
     if (!this.salesChartCanvas) return;
     if (this.salesChart) this.salesChart.destroy();
-
     const ctx = this.salesChartCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
-
-    let labels: string[] = [];
-    let data: number[] = [];
-
+    let labels: string[] = [],
+      data: number[] = [];
     if (this.ventasPorDia && this.ventasPorDia.length) {
       labels = this.ventasPorDia.map((v) => v.date.slice(5));
       data = this.ventasPorDia.map((v) => v.total);
@@ -154,7 +195,6 @@ export class ReportesPage implements OnInit, AfterViewInit {
       labels = ['Sin datos'];
       data = [0];
     }
-
     this.salesChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -179,18 +219,13 @@ export class ReportesPage implements OnInit, AfterViewInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'top', labels: { font: { size: 11 } } },
+          legend: { position: 'top' },
           tooltip: {
             callbacks: { label: (ctx) => `S/ ${ctx.parsed.y.toFixed(2)}` },
           },
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            grid: { color: '#e2e8f0' },
-            ticks: { callback: (val) => `S/ ${val}` },
-          },
-          x: { ticks: { font: { size: 10 } }, grid: { display: false } },
+          y: { beginAtZero: true, ticks: { callback: (val) => `S/ ${val}` } },
         },
       },
     });
@@ -199,10 +234,8 @@ export class ReportesPage implements OnInit, AfterViewInit {
   renderTopProductsChart() {
     if (!this.topProductsChartCanvas || !this.reporte) return;
     if (this.topProductsChart) this.topProductsChart.destroy();
-
     const ctx = this.topProductsChartCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
-
     const top = this.reporte.topProductos.slice(0, 5);
     if (!top.length) {
       this.topProductsChart = new Chart(ctx, {
@@ -217,20 +250,14 @@ export class ReportesPage implements OnInit, AfterViewInit {
             },
           ],
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'top' } },
-        },
+        options: { responsive: true, maintainAspectRatio: false },
       });
       return;
     }
-
     const labels = top.map((p) =>
       p.nombre.length > 15 ? p.nombre.slice(0, 12) + '…' : p.nombre,
     );
     const data = top.map((p) => p.cantidadVendida);
-
     this.topProductsChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -249,24 +276,98 @@ export class ReportesPage implements OnInit, AfterViewInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'top', labels: { font: { size: 11 } } },
           tooltip: {
             callbacks: { label: (ctx) => `${ctx.parsed.y} unidades` },
           },
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: { color: '#e2e8f0' },
-            ticks: { stepSize: 1 },
-          },
-          x: { ticks: { font: { size: 10 } }, grid: { display: false } },
-        },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
       },
     });
   }
 
-  // Exportar a CSV + notificación
+  async cargarVentasGenerales() {
+    this.loadingGeneral = true;
+    try {
+      const result = await firstValueFrom(
+        this.reportesApi.obtenerVentasPaginadas(
+          this.from,
+          this.to,
+          this.searchGeneral,
+          this.pageGeneral,
+          this.pageSizeGeneral,
+        ),
+      );
+      this.ventasGenerales = result.items;
+      this.totalGeneralPages = result.totalPages;
+    } catch (error) {
+      console.error(error);
+      this.mostrarError('Error al cargar ventas');
+    } finally {
+      this.loadingGeneral = false;
+    }
+  }
+
+  onSearchGeneralChange() {
+    this.searchSubject.next(this.searchGeneral);
+  }
+
+  cambiarPaginaGeneral(nuevaPagina: number) {
+    if (nuevaPagina < 1 || nuevaPagina > this.totalGeneralPages) return;
+    this.pageGeneral = nuevaPagina;
+    this.cargarVentasGenerales();
+  }
+
+  verDetalleVenta(venta: Venta) {
+    this.ventaSeleccionada = venta;
+    this.detalleModal.present();
+  }
+
+  async compartirDetalleComoImagen() {
+    const element = document.getElementById('detalleVentaContent');
+    if (!element) return;
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+      });
+      const imageData = canvas.toDataURL('image/png');
+      if (navigator.share) {
+        const blob = await (await fetch(imageData)).blob();
+        const file = new File(
+          [blob],
+          `venta-${this.ventaSeleccionada?.code}.png`,
+          { type: 'image/png' },
+        );
+        await navigator.share({
+          title: `Venta ${this.ventaSeleccionada?.code}`,
+          text: `Total: ${this.formatCurrency(this.ventaSeleccionada?.total || 0)}`,
+          files: [file],
+        });
+        this.mostrarExito('Imagen compartida');
+      } else {
+        const link = document.createElement('a');
+        link.download = `venta-${this.ventaSeleccionada?.code}.png`;
+        link.href = imageData;
+        link.click();
+        this.mostrarExito('Imagen descargada');
+      }
+    } catch (error) {
+      console.error(error);
+      this.mostrarError('No se pudo compartir la imagen');
+    }
+  }
+
+  iniciarPolling() {
+    if (this.pollingInterval) clearInterval(this.pollingInterval);
+    this.pollingInterval = setInterval(() => {
+      if (document.hasFocus()) {
+        console.log('🔄 Actualizando reportes automáticamente...');
+        this.loadReport();
+      }
+    }, 30000);
+  }
+
   async exportToCSV() {
     if (!this.reporte) return;
     try {
@@ -278,8 +379,6 @@ export class ReportesPage implements OnInit, AfterViewInit {
         this.currentUserName,
       );
       this.mostrarExito('Reporte exportado a CSV');
-
-      // 🔔 Notificación al backend
       await firstValueFrom(
         this.notificationService.crearNotificacionFrontend({
           type: 'reporte_exportado',
@@ -289,12 +388,10 @@ export class ReportesPage implements OnInit, AfterViewInit {
         }),
       );
     } catch (error) {
-      console.error('Error en exportación CSV o notificación:', error);
       this.mostrarError('Error al exportar a CSV');
     }
   }
 
-  // Exportar a PDF + notificación
   async exportToPDF() {
     if (!this.reporte) return;
     try {
@@ -307,8 +404,6 @@ export class ReportesPage implements OnInit, AfterViewInit {
         this.currentUserName,
       );
       this.mostrarExito('Reporte exportado a PDF');
-
-      // 🔔 Notificación al backend
       await firstValueFrom(
         this.notificationService.crearNotificacionFrontend({
           type: 'reporte_exportado',
@@ -318,21 +413,19 @@ export class ReportesPage implements OnInit, AfterViewInit {
         }),
       );
     } catch (error: any) {
-      console.error('Error en exportación PDF o notificación:', error);
       this.mostrarError(
-        error.message ||
-          'Error al generar PDF. Verifica que las ventanas emergentes estén permitidas.',
+        error.message || 'Error al generar PDF. Permite ventanas emergentes.',
       );
     }
   }
 
   changeTab(tab: string) {
     this.activeTab = tab;
-    if (tab === 'resumen' || tab === 'ventas') {
+    if (tab === 'resumen' || tab === 'ventas')
       setTimeout(() => this.renderSalesChart(), 100);
-    } else if (tab === 'productos') {
+    else if (tab === 'productos')
       setTimeout(() => this.renderTopProductsChart(), 100);
-    }
+    else if (tab === 'generales') this.cargarVentasGenerales();
   }
 
   formatCurrency(value: number): string {
@@ -352,7 +445,6 @@ export class ReportesPage implements OnInit, AfterViewInit {
     });
     toast.present();
   }
-
   private async mostrarExito(mensaje: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,
