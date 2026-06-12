@@ -25,6 +25,7 @@ async function getResumenInventario() {
 }
 
 async function getProductosCriticos(searchTerm = "") {
+  // Primero obtenemos todos los productos activos
   let products = await prisma.product.findMany({
     where: { isActive: true },
     select: {
@@ -38,11 +39,15 @@ async function getProductosCriticos(searchTerm = "") {
     },
     orderBy: [{ stock: "asc" }, { name: "asc" }],
   });
+
+  // Filtramos los críticos (stock <= 0 o stock <= minStock (o 5 por defecto))
   let criticos = products.filter((p) => {
     if (p.stock <= 0) return true;
     const limite = p.minStock > 0 ? p.minStock : 5;
     return p.stock <= limite;
   });
+
+  // Si hay término de búsqueda, filtramos sobre los críticos
   if (searchTerm && searchTerm.trim()) {
     const term = searchTerm.trim().toLowerCase();
     criticos = criticos.filter(
@@ -51,6 +56,7 @@ async function getProductosCriticos(searchTerm = "") {
         p.sku.toLowerCase().includes(term),
     );
   }
+
   return criticos;
 }
 
