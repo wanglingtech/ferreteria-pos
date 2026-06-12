@@ -18,7 +18,8 @@ import {
   IonModal,
   IonHeader,
   IonToolbar,
-  IonTitle, // ✅ añadidos
+  IonTitle,
+  ActionSheetController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -39,6 +40,7 @@ import {
   listOutline,
   searchOutline,
   closeOutline,
+  shareSocialOutline,
 } from 'ionicons/icons';
 import { Chart, registerables } from 'chart.js';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -66,9 +68,9 @@ Chart.register(...registerables);
     IonIcon,
     IonSpinner,
     IonModal,
-    IonHeader, // ✅ añadido
-    IonToolbar, // ✅ añadido
-    IonTitle, // ✅ añadido
+    IonHeader,
+    IonToolbar,
+    IonTitle,
   ],
 })
 export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
@@ -103,6 +105,7 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
   private authSession = inject(AuthSessionService);
   private toastCtrl = inject(ToastController);
   private notificationService = inject(NotificationService);
+  private actionSheetCtrl = inject(ActionSheetController);
 
   get currentUserName(): string {
     const user = this.authSession.getCurrentUser();
@@ -128,6 +131,7 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
       listOutline,
       searchOutline,
       closeOutline,
+      shareSocialOutline,
     });
   }
 
@@ -143,8 +147,7 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
       this.pageGeneral = 1;
       this.cargarVentasGenerales();
     });
-
-    // Opcional: polling cada 30 segundos (descomentar si se desea)
+    // Opcional: polling cada 30 segundos
     // this.iniciarPolling();
   }
 
@@ -317,45 +320,149 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     this.cargarVentasGenerales();
   }
 
+  // ==================== MENÚ DE OPCIONES PARA CADA VENTA ====================
+  async opcionesVenta(venta: Venta) {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Opciones de venta',
+      buttons: [
+        {
+          text: 'Ver detalle',
+          icon: 'eye-outline',
+          handler: () => this.verDetalleVenta(venta),
+        },
+        {
+          text: 'Compartir imagen',
+          icon: 'share-social-outline',
+          handler: () => this.compartirImagenVenta(venta),
+        },
+        {
+          text: 'Descargar imagen',
+          icon: 'download-outline',
+          handler: () => this.descargarImagenVenta(venta),
+        },
+        {
+          text: 'Cancelar',
+          icon: 'close-outline',
+          role: 'cancel',
+        },
+      ],
+    });
+    await actionSheet.present();
+  }
+
+  // Mostrar modal con detalle
   verDetalleVenta(venta: Venta) {
     this.ventaSeleccionada = venta;
     this.detalleModal.present();
   }
 
-  async compartirDetalleComoImagen() {
-    const element = document.getElementById('detalleVentaContent');
-    if (!element) return;
+  // Genera y comparte imagen de la venta (sin abrir modal)
+  async compartirImagenVenta(venta: Venta) {
+    const blobImagen = await this.generarImagenVenta(venta);
+    if (!blobImagen) return;
+    if (navigator.share) {
+      const file = new File([blobImagen], `venta-${venta.code}.png`, {
+        type: 'image/png',
+      });
+      try {
+        await navigator.share({
+          title: `Venta ${venta.code}`,
+          text: `Total: ${this.formatCurrency(venta.total)}`,
+          files: [file],
+        });
+        this.mostrarExito('Imagen compartida');
+      } catch (err: any) {
+        if (err.name !== 'AbortError')
+          this.mostrarError('No se pudo compartir la imagen', err.message);
+      }
+    } else {
+      this.descargarImagenVenta(venta);
+    }
+  }
+
+  // Genera y descarga la imagen de la venta
+  async descargarImagenVenta(venta: Venta) {
+    const blobImagen = await this.generarImagenVenta(venta);
+    if (!blobImagen) return;
+    const url = URL.createObjectURL(blobImagen);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `venta-${venta.code}.png`;
+    link.click();
+    URL.revokeObjectURL(url);
+    this.mostrarExito('Imagen descargada');
+  }
+
+  // Construye un elemento HTML temporal con los datos de la venta y lo convierte a imagen
+  private async generarImagenVenta(venta: Venta): Promise<Blob | null> {
+    const divTemp = document.createElement('div');
+    divTemp.className = 'temp-detalle-venta';
+    divTemp.style.backgroundColor = 'white';
+    divTemp.style.padding = '20px';
+    divTemp.style.width = '800px';
+    divTemp.style.borderRadius = '16px';
+    divTemp.style.fontFamily = 'Segoe UI, Arial, sans-serif';
+    divTemp.innerHTML = `
+      <div style="text-align: center; border-bottom: 2px solid #0a1a5c; padding-bottom: 12px; margin-bottom: 16px;">
+        <img src="assets/logo/logo_ferreteria.png" style="width: 60px; margin-bottom: 8px;" />
+        <h3 style="margin:0; color:#0a1a5c;">Ferretería July</h3>
+        <p style="font-size:11px; color:#475569;">RUC: 10097428951 | Av. México 118, Comas</p>
+      </div>
+      <div style="margin-bottom:16px;">
+        <p><strong>Venta N°:</strong> ${venta.code}</p>
+        <p><strong>Fecha:</strong> ${new Date(venta.createdAt).toLocaleString('es-PE')}</p>
+        <p><strong>Cliente:</strong> ${venta.customerName || 'Consumidor Final'}</p>
+        <p><strong>Vendedor:</strong> ${venta.seller.fullName}</p>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <thead><tr style="background:#f1f5f9;"><th style="padding:8px; text-align:left;">Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            ${venta.items
+              .map(
+                (item) => `
+              <tr><td style="padding:6px; border-bottom:1px solid #e2e8f0;">${item.product.name}</td>
+              <td style="padding:6px; border-bottom:1px solid #e2e8f0;">${item.quantity}</td>
+              <td style="padding:6px; border-bottom:1px solid #e2e8f0;">${this.formatCurrency(item.unitPrice)}</td>
+              <td style="padding:6px; border-bottom:1px solid #e2e8f0;">${this.formatCurrency(item.lineTotal)}</td></tr>
+            `,
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align:right; margin-top:16px;">
+        <p>Subtotal: ${this.formatCurrency(venta.subtotal)}</p>
+        <p>IGV (18%): ${this.formatCurrency(venta.igv)}</p>
+        <p><strong>TOTAL: ${this.formatCurrency(venta.total)}</strong></p>
+      </div>
+      <div style="text-align:center; margin-top:20px; font-size:10px; color:#94a3b8;">¡Gracias por su compra!</div>
+    `;
+    document.body.appendChild(divTemp);
     try {
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(divTemp, {
         scale: 2,
         backgroundColor: '#ffffff',
         useCORS: true,
       });
-      const imageData = canvas.toDataURL('image/png');
-      if (navigator.share) {
-        const blob = await (await fetch(imageData)).blob();
-        const file = new File(
-          [blob],
-          `venta-${this.ventaSeleccionada?.code}.png`,
-          { type: 'image/png' },
-        );
-        await navigator.share({
-          title: `Venta ${this.ventaSeleccionada?.code}`,
-          text: `Total: ${this.formatCurrency(this.ventaSeleccionada?.total || 0)}`,
-          files: [file],
-        });
-        this.mostrarExito('Imagen compartida');
-      } else {
-        const link = document.createElement('a');
-        link.download = `venta-${this.ventaSeleccionada?.code}.png`;
-        link.href = imageData;
-        link.click();
-        this.mostrarExito('Imagen descargada');
-      }
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/png'),
+      );
+      return blob;
     } catch (error) {
-      console.error(error);
-      this.mostrarError('No se pudo compartir la imagen');
+      console.error('Error generando imagen', error);
+      this.mostrarError('No se pudo generar la imagen');
+      return null;
+    } finally {
+      document.body.removeChild(divTemp);
     }
+  }
+
+  // Compartir desde el modal (si se desea)
+  async compartirDesdeModalComoImagen() {
+    if (!this.ventaSeleccionada) return;
+    await this.compartirImagenVenta(this.ventaSeleccionada);
+    this.detalleModal.dismiss();
   }
 
   iniciarPolling() {
@@ -436,15 +543,16 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     }).format(value);
   }
 
-  private async mostrarError(mensaje: string) {
+  private async mostrarError(mensaje: string, detalle?: string) {
     const toast = await this.toastCtrl.create({
-      message: mensaje,
+      message: detalle ? `${mensaje}: ${detalle}` : mensaje,
       duration: 4000,
       color: 'danger',
       position: 'top',
     });
     toast.present();
   }
+
   private async mostrarExito(mensaje: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,

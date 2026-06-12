@@ -102,7 +102,7 @@
       </button>
     </section>
 
-    <!-- GRÁFICO EVOLUCIÓN -->
+    <!-- GRÁFICOS -->
     <div
       class="chart-card"
       *ngIf="activeTab === 'resumen' || activeTab === 'ventas'"
@@ -113,7 +113,6 @@
       <div class="chart-container"><canvas #salesChartCanvas></canvas></div>
     </div>
 
-    <!-- GRÁFICO TOP PRODUCTOS -->
     <div class="chart-card" *ngIf="activeTab === 'productos' && reporte">
       <div class="card-title">
         <ion-icon name="bar-chart-outline"></ion-icon> Productos más vendidos
@@ -154,7 +153,7 @@
       </div>
     </div>
 
-    <!-- TABLA GENERAL DE VENTAS (paginada) -->
+    <!-- TABLA GENERAL DE VENTAS (con botón de opciones) -->
     <div class="sales-list-card" *ngIf="activeTab === 'generales'">
       <div class="card-title">
         <ion-icon name="list-outline"></ion-icon> Listado General de Ventas
@@ -168,7 +167,7 @@
           (ngModelChange)="onSearchGeneralChange()"
         />
       </div>
-      <div class="table-wrapper">
+      <div class="table-scroll-wrapper">
         <table *ngIf="!loadingGeneral && ventasGenerales.length > 0">
           <thead>
             <tr>
@@ -188,8 +187,8 @@
               <td>{{ venta.seller.fullName }}</td>
               <td>{{ formatCurrency(venta.total) }}</td>
               <td>
-                <ion-button fill="clear" (click)="verDetalleVenta(venta)"
-                  >Ver</ion-button
+                <ion-button fill="clear" (click)="opcionesVenta(venta)"
+                  >Opciones</ion-button
                 >
               </td>
             </tr>
@@ -246,7 +245,7 @@
     </div>
   </div>
 
-  <!-- MODAL DETALLE VENTA -->
+  <!-- MODAL DETALLE VENTA (visualización) -->
   <ion-modal
     #detalleModal
     [breakpoints]="[0, 0.9, 1]"
@@ -287,25 +286,27 @@
               <strong>Vendedor:</strong> {{ ventaSeleccionada.seller.fullName }}
             </p>
           </div>
-          <div class="detalle-tabla">
-            <table>
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
-                  <th>Precio Unit.</th>
-                  <th>Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let item of ventaSeleccionada.items">
-                  <td>{{ item.product.name }}</td>
-                  <td>{{ item.quantity }}</td>
-                  <td>{{ formatCurrency(item.unitPrice) }}</td>
-                  <td>{{ formatCurrency(item.lineTotal) }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="detalle-tabla-wrapper">
+            <div class="detalle-tabla">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unit.</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of ventaSeleccionada.items">
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ formatCurrency(item.unitPrice) }}</td>
+                    <td>{{ formatCurrency(item.lineTotal) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="detalle-totales">
             <p>Subtotal: {{ formatCurrency(ventaSeleccionada.subtotal) }}</p>
@@ -322,8 +323,8 @@
           <ion-button
             expand="block"
             fill="outline"
-            (click)="compartirDetalleComoImagen()"
-            >Compartir como Imagen</ion-button
+            (click)="compartirDesdeModalComoImagen()"
+            >Compartir Imagen</ion-button
           >
           <ion-button
             expand="block"
