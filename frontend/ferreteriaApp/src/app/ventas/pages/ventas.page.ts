@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  inject,
+  signal,
+  computed,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
@@ -21,6 +28,7 @@ import {
   printOutline,
   shareSocialOutline,
   closeOutline,
+  alertCircleOutline,
 } from 'ionicons/icons';
 
 import { ProductosApiService } from '../../productos/services/productos-api.service';
@@ -34,7 +42,6 @@ import {
 } from '../interfaces/venta.interface';
 import { PdfGeneratorService } from '../services/pdf-generator.service';
 
-// Librerías necesarias para el QR y PDF (ya instaladas)
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -54,7 +61,6 @@ import html2canvas from 'html2canvas';
     IonHeader,
     IonToolbar,
     IonTitle,
-    // Eliminados IonItem, IonLabel, IonInput, IonText (no se usan en el HTML)
   ],
 })
 export class VentasPage implements OnInit {
@@ -68,6 +74,18 @@ export class VentasPage implements OnInit {
   isLoading = signal(false);
   isAdmin = signal(false);
   ventaConfirmada: Venta | null = null;
+
+  // ✅ Señal para el mensaje de error (inicia vacío)
+  clienteError = signal<string>('');
+
+  // ✅ Computado que indica si el formulario es válido (sin errores y con carrito)
+  isFormValid = computed(() => {
+    return (
+      this.clienteNombre.trim().length > 0 &&
+      !this.clienteError() &&
+      this.cart().length > 0
+    );
+  });
 
   private productosApi = inject(ProductosApiService);
   private ventasApi = inject(VentasApiService);
@@ -85,6 +103,7 @@ export class VentasPage implements OnInit {
       printOutline,
       shareSocialOutline,
       closeOutline,
+      alertCircleOutline,
     });
   }
 
@@ -184,6 +203,34 @@ export class VentasPage implements OnInit {
     return Number((this.subtotal + this.igv).toFixed(2));
   }
 
+  // ✅ Validación en tiempo real (actualiza la señal clienteError)
+  validarCliente() {
+    const nombre = this.clienteNombre.trim();
+    if (nombre.length === 0) {
+      this.clienteError.set('El nombre del cliente es obligatorio');
+      return false;
+    }
+    if (nombre.length < 3) {
+      this.clienteError.set('Mínimo 3 caracteres');
+      return false;
+    }
+    if (nombre.length > 80) {
+      this.clienteError.set('Máximo 80 caracteres');
+      return false;
+    }
+    // Expresión regular: letras, espacios, guiones, apóstrofes, puntos, tildes, ñ
+    const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-\'\.]+$/;
+    if (!regex.test(nombre)) {
+      this.clienteError.set(
+        'Solo letras, espacios, guiones, apóstrofes y puntos. No use números ni símbolos.',
+      );
+      return false;
+    }
+    // Si todo está bien, limpia el error
+    this.clienteError.set('');
+    return true;
+  }
+
   async guardarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
@@ -244,23 +291,15 @@ export class VentasPage implements OnInit {
       .then((alert) => alert.present());
   }
 
-  private validarCliente(): boolean {
-    if (!this.clienteNombre.trim()) {
-      this.mostrarError('Cliente requerido', 'Ingresa el nombre del cliente');
-      return false;
-    }
-    return true;
-  }
-
   limpiarCarrito() {
     this.cart.set([]);
     this.clienteNombre = '';
+    this.clienteError.set(''); // limpia también el error
   }
 
-  // =================== PDF Y COMPARTIR ===================
+  // =================== PDF Y COMPARTIR (sin cambios) ===================
   imprimirTicket(venta: Venta) {
     this.ventaConfirmada = venta;
-    // Datos para el QR (puedes cambiar la URL)
     const qrData = `${window.location.origin}/ventas/detalle/${venta.id}`;
     setTimeout(() => {
       this.pdfGenerator.generateTicketPdf(
@@ -275,17 +314,13 @@ export class VentasPage implements OnInit {
     this.ventaConfirmada = venta;
     const qrData = `${window.location.origin}/ventas/detalle/${venta.id}`;
     const pdfBlob = await this.generarPdfBlob(venta, qrData);
-
     if (!pdfBlob) {
       this.mostrarError('Error', 'No se pudo generar el PDF para compartir');
       return;
     }
-
     const file = new File([pdfBlob], `factura-${venta.code}.pdf`, {
       type: 'application/pdf',
     });
-
-    // Verificar si el navegador permite compartir archivos
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
@@ -296,13 +331,12 @@ export class VentasPage implements OnInit {
         this.mostrarExito('Factura compartida exitosamente');
       } catch (err: any) {
         console.error('Error al compartir:', err);
-        // Mostrar mensaje de error más amigable
-        const errorMsg =
-          err?.message || 'El usuario canceló o hubo un problema';
-        this.mostrarError('No se pudo compartir', errorMsg);
+        this.mostrarError(
+          'No se pudo compartir',
+          err?.message || 'Error desconocido',
+        );
       }
     } else {
-      // Fallback: copiar enlace y sugerir descarga
       navigator.clipboard.writeText(qrData);
       this.mostrarExito(
         'Enlace copiado al portapapeles. Usa "Imprimir" para descargar el PDF.',
@@ -310,7 +344,6 @@ export class VentasPage implements OnInit {
     }
   }
 
-  // Genera un blob del PDF a partir del elemento oculto ticket-content
   private async generarPdfBlob(
     venta: Venta,
     qrData: string,
@@ -318,17 +351,13 @@ export class VentasPage implements OnInit {
     this.ventaConfirmada = venta;
     const element = document.getElementById('ticket-content');
     if (!element) return null;
-
-    // Clonar para no interferir con la vista
     const clone = element.cloneNode(true) as HTMLElement;
     clone.style.display = 'block';
     clone.style.position = 'absolute';
     clone.style.left = '-9999px';
     clone.style.top = '-9999px';
     document.body.appendChild(clone);
-
     try {
-      // Generar QR y agregarlo al clon
       const qrCanvas = document.createElement('canvas');
       await QRCode.toCanvas(qrCanvas, qrData, { width: 150, margin: 2 });
       const qrImg = document.createElement('img');
@@ -338,7 +367,6 @@ export class VentasPage implements OnInit {
       qrImg.style.display = 'block';
       qrImg.style.marginLeft = 'auto';
       clone.appendChild(qrImg);
-
       const canvas = await html2canvas(clone, {
         scale: 2,
         backgroundColor: '#ffffff',
@@ -346,7 +374,6 @@ export class VentasPage implements OnInit {
         useCORS: true,
       });
       const imgData = canvas.toDataURL('image/png');
-      // Formato ticket (80mm de ancho)
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -355,8 +382,7 @@ export class VentasPage implements OnInit {
       const imgWidth = 80;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      const blob = pdf.output('blob');
-      return blob;
+      return pdf.output('blob');
     } catch (error) {
       console.error('Error generando blob PDF:', error);
       return null;
@@ -370,7 +396,6 @@ export class VentasPage implements OnInit {
     this.mostrarExito('Venta cancelada');
   }
 
-  // =================== NOTIFICACIONES ===================
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
       header: titulo,

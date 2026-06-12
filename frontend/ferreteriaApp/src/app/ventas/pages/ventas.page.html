@@ -46,10 +46,16 @@
       <input
         class="client-input"
         type="text"
-        placeholder="Nombre del cliente"
+        placeholder="Nombre del cliente (solo letras y espacios)"
         [(ngModel)]="clienteNombre"
+        (input)="validarCliente()"
         required
       />
+      <!-- ✅ Mensaje de error dinámico (solo visible si hay error) -->
+      <div *ngIf="clienteError()" class="error-message">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        {{ clienteError() }}
+      </div>
     </section>
 
     <!-- CARRITO -->
