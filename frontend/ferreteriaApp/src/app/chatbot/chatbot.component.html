@@ -1,4 +1,4 @@
-<!-- Botón flotante animado (solo visible si el chat está cerrado) -->
+<!-- Botón flotante animado -->
 <ion-fab
   *ngIf="!isOpen"
   slot="fixed"
@@ -12,7 +12,7 @@
   </ion-fab-button>
 </ion-fab>
 
-<!-- Modal del chat (corregido: se controla con [isOpen] y eventos separados) -->
+<!-- Modal del chat -->
 <ion-modal
   [isOpen]="isOpen"
   [breakpoints]="[0, 0.5, 0.9, 1]"
@@ -39,7 +39,6 @@
 
     <ion-content class="chat-content" #chatContent>
       <div class="messages-container">
-        <!-- Mensajes -->
         <div
           *ngFor="let msg of messages; let i = index"
           [class.user]="msg.isUser"
@@ -53,6 +52,25 @@
               <span class="bot-name">Asistente</span>
             </div>
             <p [innerHTML]="msg.text"></p>
+            <!-- Gráfico -->
+            <canvas
+              *ngIf="msg.chartData"
+              [id]="'chart-' + i"
+              width="400"
+              height="200"
+              style="max-width: 100%; margin-top: 8px"
+            ></canvas>
+            <!-- Sugerencias rápidas -->
+            <div *ngIf="msg.suggestions" class="suggestions-row">
+              <ion-chip
+                *ngFor="let sug of msg.suggestions"
+                (click)="onSuggestionClick(sug)"
+                color="primary"
+              >
+                <ion-icon name="flash-outline"></ion-icon>
+                <ion-label>{{ sug }}</ion-label>
+              </ion-chip>
+            </div>
             <div class="message-footer">
               <span class="timestamp">{{
                 msg.timestamp | date: "shortTime"
@@ -76,8 +94,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Indicador de escritura (typing) -->
         <div *ngIf="isTyping" class="message bot typing-indicator">
           <div class="bubble">
             <div class="typing-dots">
@@ -97,6 +113,14 @@
           (keyup.enter)="sendMessage()"
           [disabled]="isLoading"
         ></ion-input>
+        <ion-button
+          slot="end"
+          fill="clear"
+          (click)="onSuggestionClick('sugerencias')"
+          title="Sugerencias"
+        >
+          <ion-icon name="flash-outline"></ion-icon>
+        </ion-button>
         <ion-button
           slot="end"
           fill="clear"

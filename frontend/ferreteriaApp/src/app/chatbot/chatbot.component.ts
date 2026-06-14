@@ -4,6 +4,7 @@ import {
   ViewChild,
   AfterViewChecked,
   OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +20,10 @@ import {
   IonFooter,
   IonFab,
   IonFabButton,
+  IonChip,
+  IonLabel,
   ModalController,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -30,11 +34,20 @@ import {
   imageOutline,
   downloadOutline,
   logoElectron,
+  barChartOutline,
+  peopleOutline,
+  cubeOutline,
+  notificationsOutline,
+  cloudDownloadOutline,
+  flashOutline,
 } from 'ionicons/icons';
 import { ChatbotApiService } from './services/chatbot-api.service';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { firstValueFrom } from 'rxjs';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 interface Message {
   text: string;
@@ -42,6 +55,8 @@ interface Message {
   timestamp: Date;
   saleData?: any;
   actions?: ('pdf' | 'image')[];
+  chartData?: any;
+  suggestions?: string[];
 }
 
 @Component({
@@ -63,21 +78,25 @@ interface Message {
     IonFooter,
     IonFab,
     IonFabButton,
+    IonChip,
+    IonLabel,
   ],
 })
-export class ChatbotComponent implements AfterViewChecked, OnInit {
+export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
   @ViewChild('chatContent') chatContent!: ElementRef;
-  @ViewChild('messageInput', { read: IonInput }) messageInput!: IonInput; // ✅ corregido
+  @ViewChild('messageInput', { read: IonInput }) messageInput!: IonInput;
 
   isOpen = false;
   messages: Message[] = [];
   newMessage = '';
   isLoading = false;
   isTyping = false;
+  private chartInstances: Map<number, Chart> = new Map();
 
   constructor(
     private chatbotApi: ChatbotApiService,
     private modalCtrl: ModalController,
+    private toastCtrl: ToastController,
   ) {
     addIcons({
       chatbubbleEllipsesOutline,
@@ -87,6 +106,12 @@ export class ChatbotComponent implements AfterViewChecked, OnInit {
       imageOutline,
       downloadOutline,
       logoElectron,
+      barChartOutline,
+      peopleOutline,
+      cubeOutline,
+      notificationsOutline,
+      cloudDownloadOutline,
+      flashOutline,
     });
   }
 
@@ -94,7 +119,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit {
     this.loadConversationHistory();
     if (this.messages.length === 0) {
       this.addBotMessage(
-        '¡Hola! Soy tu asistente inteligente. Pregúntame sobre ventas, clientes o productos. Escribe "ayuda" para conocer mis funciones.',
+        '¡Hola! Soy tu asistente inteligente. Puedo ayudarte con ventas, productos, gráficos, notificaciones y más. Escribe "sugerencias" para ver opciones.',
       );
     }
   }
@@ -103,11 +128,13 @@ export class ChatbotComponent implements AfterViewChecked, OnInit {
     this.scrollToBottom();
   }
 
+  ngOnDestroy() {
+    this.chartInstances.forEach((chart) => chart.destroy());
+  }
+
   openChat() {
     this.isOpen = true;
-    setTimeout(() => {
-      this.messageInput?.setFocus(); // ✅ funciona ahora
-    }, 300);
+    setTimeout(() => this.messageInput?.setFocus(), 300);
   }
 
   closeChat() {
@@ -123,16 +150,28 @@ export class ChatbotComponent implements AfterViewChecked, OnInit {
     this.saveConversationHistory();
   }
 
-  addBotMessage(text: string, saleData?: any) {
+  addBotMessage(
+    text: string,
+    saleData?: any,
+    chartData?: any,
+    suggestions?: string[],
+  ) {
     const msg: Message = {
       text,
       isUser: false,
       timestamp: new Date(),
       saleData,
+      chartData,
+      suggestions,
     };
     if (saleData) msg.actions = ['pdf', 'image'];
     this.messages.push(msg);
     this.saveConversationHistory();
+    if (chartData)
+      setTimeout(
+        () => this.renderChart(this.messages.length - 1, chartData),
+        100,
+      );
   }
 
   async sendMessage() {
@@ -144,13 +183,30 @@ export class ChatbotComponent implements AfterViewChecked, OnInit {
     this.isLoading = true;
     this.isTyping = true;
 
-    // Simular "escribiendo" mientras se recibe respuesta
     setTimeout(async () => {
       try {
         const response = await firstValueFrom(this.chatbotApi.sendMessage(msg));
-        const data = response.data;
+        const data = response.data as any; // ✅ Convertir a any para acceder a propiedades dinámicas
         this.isTyping = false;
-        this.addBotMessage(data.text, data.saleData);
+
+        // ✅ Verificar si es un gráfico
+        if (data.type === 'chart' && data.labels && data.data) {
+          this.addBotMessage(data.title || 'Gráfico de ventas', undefined, {
+            labels: data.labels,
+            data: data.data,
+            borderColor: data.borderColor || '#0a1a5c',
+            backgroundColor: data.backgroundColor || 'rgba(10, 26, 92, 0.2)',
+            type: data.chartType || 'line',
+          });
+        }
+        // ✅ Verificar si es sugerencias
+        else if (data.type === 'suggestions' && data.suggestions) {
+          this.addBotMessage(data.text, undefined, undefined, data.suggestions);
+        }
+        // ✅ Mensaje normal
+        else {
+          this.addBotMessage(data.text, data.saleData);
+        }
       } catch (error) {
         console.error(error);
         this.isTyping = false;
@@ -162,6 +218,43 @@ export class ChatbotComponent implements AfterViewChecked, OnInit {
         setTimeout(() => this.messageInput?.setFocus(), 100);
       }
     }, 600);
+  }
+
+  async onSuggestionClick(suggestion: string) {
+    this.newMessage = suggestion;
+    await this.sendMessage();
+  }
+
+  private renderChart(index: number, chartData: any) {
+    setTimeout(() => {
+      const canvas = document.getElementById(
+        `chart-${index}`,
+      ) as HTMLCanvasElement;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      if (this.chartInstances.has(index))
+        this.chartInstances.get(index)?.destroy();
+      const chart = new Chart(ctx, {
+        type: chartData.type,
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: 'Ventas (S/.)',
+              data: chartData.data,
+              borderColor: chartData.borderColor,
+              backgroundColor: chartData.backgroundColor,
+              borderWidth: 2,
+              fill: chartData.type === 'line',
+              tension: 0.3,
+            },
+          ],
+        },
+        options: { responsive: true, maintainAspectRatio: true },
+      });
+      this.chartInstances.set(index, chart);
+    }, 100);
   }
 
   async downloadPdf(saleData: any) {
@@ -248,7 +341,8 @@ export class ChatbotComponent implements AfterViewChecked, OnInit {
               <td style="padding:8px;">${item.quantity}</td>
               <td style="padding:8px;">S/ ${Number(item.unitPrice).toFixed(2)}</td>
               <td style="padding:8px;">S/ ${Number(item.lineTotal).toFixed(2)}</td>
-            </tr>`,
+            </tr>
+            `,
               )
               .join('')}
           </tbody>
