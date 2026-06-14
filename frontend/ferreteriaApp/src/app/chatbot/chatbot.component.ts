@@ -3,6 +3,7 @@ import {
   ElementRef,
   ViewChild,
   AfterViewChecked,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +12,6 @@ import {
   IonInput,
   IonButton,
   IonIcon,
-  IonSpinner,
   IonModal,
   IonHeader,
   IonToolbar,
@@ -29,14 +29,17 @@ import {
   documentTextOutline,
   imageOutline,
   downloadOutline,
+  logoElectron,
 } from 'ionicons/icons';
 import { ChatbotApiService } from './services/chatbot-api.service';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { firstValueFrom } from 'rxjs';
 
 interface Message {
   text: string;
   isUser: boolean;
+  timestamp: Date;
   saleData?: any;
   actions?: ('pdf' | 'image')[];
 }
@@ -53,7 +56,6 @@ interface Message {
     IonInput,
     IonButton,
     IonIcon,
-    IonSpinner,
     IonModal,
     IonHeader,
     IonToolbar,
@@ -63,12 +65,15 @@ interface Message {
     IonFabButton,
   ],
 })
-export class ChatbotComponent implements AfterViewChecked {
+export class ChatbotComponent implements AfterViewChecked, OnInit {
   @ViewChild('chatContent') chatContent!: ElementRef;
+  @ViewChild('messageInput', { read: IonInput }) messageInput!: IonInput; // ✅ corregido
+
   isOpen = false;
   messages: Message[] = [];
   newMessage = '';
   isLoading = false;
+  isTyping = false;
 
   constructor(
     private chatbotApi: ChatbotApiService,
@@ -81,51 +86,82 @@ export class ChatbotComponent implements AfterViewChecked {
       documentTextOutline,
       imageOutline,
       downloadOutline,
+      logoElectron,
     });
-    this.messages.push({
-      text: '¡Hola! Soy tu asistente inteligente. Pregúntame sobre ventas, clientes o productos. Escribe "ayuda" para conocer mis funciones.',
-      isUser: false,
-    });
+  }
+
+  ngOnInit() {
+    this.loadConversationHistory();
+    if (this.messages.length === 0) {
+      this.addBotMessage(
+        '¡Hola! Soy tu asistente inteligente. Pregúntame sobre ventas, clientes o productos. Escribe "ayuda" para conocer mis funciones.',
+      );
+    }
   }
 
   ngAfterViewChecked() {
     this.scrollToBottom();
   }
 
-  toggleChat() {
-    this.isOpen = !this.isOpen;
+  openChat() {
+    this.isOpen = true;
+    setTimeout(() => {
+      this.messageInput?.setFocus(); // ✅ funciona ahora
+    }, 300);
+  }
+
+  closeChat() {
+    this.isOpen = false;
+  }
+
+  onModalDismiss() {
+    this.isOpen = false;
+  }
+
+  addUserMessage(text: string) {
+    this.messages.push({ text, isUser: true, timestamp: new Date() });
+    this.saveConversationHistory();
+  }
+
+  addBotMessage(text: string, saleData?: any) {
+    const msg: Message = {
+      text,
+      isUser: false,
+      timestamp: new Date(),
+      saleData,
+    };
+    if (saleData) msg.actions = ['pdf', 'image'];
+    this.messages.push(msg);
+    this.saveConversationHistory();
   }
 
   async sendMessage() {
     const msg = this.newMessage.trim();
-    if (!msg) return;
+    if (!msg || this.isLoading) return;
 
-    this.messages.push({ text: msg, isUser: true });
+    this.addUserMessage(msg);
     this.newMessage = '';
     this.isLoading = true;
+    this.isTyping = true;
 
-    this.chatbotApi.sendMessage(msg).subscribe({
-      next: (response) => {
+    // Simular "escribiendo" mientras se recibe respuesta
+    setTimeout(async () => {
+      try {
+        const response = await firstValueFrom(this.chatbotApi.sendMessage(msg));
         const data = response.data;
-        const botMsg: Message = {
-          text: data.text,
-          isUser: false,
-          saleData: data.saleData,
-        };
-        if (data.saleData) {
-          botMsg.actions = ['pdf', 'image'];
-        }
-        this.messages.push(botMsg);
+        this.isTyping = false;
+        this.addBotMessage(data.text, data.saleData);
+      } catch (error) {
+        console.error(error);
+        this.isTyping = false;
+        this.addBotMessage(
+          '❌ Lo siento, ocurrió un error. Inténtalo de nuevo.',
+        );
+      } finally {
         this.isLoading = false;
-      },
-      error: () => {
-        this.messages.push({
-          text: 'Lo siento, ocurrió un error. Inténtalo de nuevo.',
-          isUser: false,
-        });
-        this.isLoading = false;
-      },
-    });
+        setTimeout(() => this.messageInput?.setFocus(), 100);
+      }
+    }, 600);
   }
 
   async downloadPdf(saleData: any) {
@@ -147,16 +183,12 @@ export class ChatbotComponent implements AfterViewChecked {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save(`venta-${venta.code}.pdf`);
-      this.messages.push({
-        text: `✅ PDF de la venta ${venta.code} descargado.`,
-        isUser: false,
-      });
+      this.addBotMessage(`✅ PDF de la venta ${venta.code} descargado.`);
     } catch (error) {
       console.error(error);
-      this.messages.push({
-        text: '❌ No se pudo generar el PDF.',
-        isUser: false,
-      });
+      this.addBotMessage(
+        `❌ No se pudo generar el PDF de la venta ${venta.code}.`,
+      );
     } finally {
       document.body.removeChild(element);
     }
@@ -175,16 +207,12 @@ export class ChatbotComponent implements AfterViewChecked {
       link.download = `venta-${venta.code}.png`;
       link.href = canvas.toDataURL();
       link.click();
-      this.messages.push({
-        text: `✅ Imagen de la venta ${venta.code} descargada.`,
-        isUser: false,
-      });
+      this.addBotMessage(`✅ Imagen de la venta ${venta.code} descargada.`);
     } catch (error) {
       console.error(error);
-      this.messages.push({
-        text: '❌ No se pudo generar la imagen.',
-        isUser: false,
-      });
+      this.addBotMessage(
+        `❌ No se pudo generar la imagen de la venta ${venta.code}.`,
+      );
     } finally {
       document.body.removeChild(element);
     }
@@ -216,13 +244,11 @@ export class ChatbotComponent implements AfterViewChecked {
             ${venta.items
               .map(
                 (item: any) => `
-              <tr>
-                <td style="padding:8px; border-bottom:1px solid #e2e8f0;">${item.product.name}</td>
-                <td style="padding:8px; border-bottom:1px solid #e2e8f0;">${item.quantity}</td>
-                <td style="padding:8px; border-bottom:1px solid #e2e8f0;">S/ ${Number(item.unitPrice).toFixed(2)}</td>
-                <td style="padding:8px; border-bottom:1px solid #e2e8f0;">S/ ${Number(item.lineTotal).toFixed(2)}</td>
-              </tr>
-            `,
+              <tr><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${item.product.name}</td>
+              <td style="padding:8px;">${item.quantity}</td>
+              <td style="padding:8px;">S/ ${Number(item.unitPrice).toFixed(2)}</td>
+              <td style="padding:8px;">S/ ${Number(item.lineTotal).toFixed(2)}</td>
+            </tr>`,
               )
               .join('')}
           </tbody>
@@ -238,14 +264,37 @@ export class ChatbotComponent implements AfterViewChecked {
     return div;
   }
 
+  private saveConversationHistory() {
+    const toStore = this.messages.slice(-50).map((m) => ({
+      text: m.text,
+      isUser: m.isUser,
+      timestamp: m.timestamp.toISOString(),
+      saleData: m.saleData ? { code: m.saleData.code } : null,
+    }));
+    localStorage.setItem('chatbot_history', JSON.stringify(toStore));
+  }
+
+  private loadConversationHistory() {
+    const stored = localStorage.getItem('chatbot_history');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        this.messages = parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp),
+          saleData: m.saleData ? { code: m.saleData.code } : null,
+          actions: m.saleData ? ['pdf', 'image'] : undefined,
+        }));
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+  }
+
   private scrollToBottom() {
     if (this.chatContent) {
       this.chatContent.nativeElement.scrollTop =
         this.chatContent.nativeElement.scrollHeight;
     }
-  }
-
-  closeModal() {
-    this.modalCtrl.dismiss();
   }
 }

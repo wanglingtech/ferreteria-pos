@@ -1,4 +1,4 @@
-<!-- Botón flotante (solo visible si el chat está cerrado) -->
+<!-- Botón flotante animado (solo visible si el chat está cerrado) -->
 <ion-fab
   *ngIf="!isOpen"
   slot="fixed"
@@ -7,25 +7,31 @@
   edge
   class="chat-fab"
 >
-  <ion-fab-button (click)="toggleChat()">
+  <ion-fab-button (click)="openChat()" class="chat-fab-button">
     <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
   </ion-fab-button>
 </ion-fab>
 
-<!-- Modal del chat -->
+<!-- Modal del chat (corregido: se controla con [isOpen] y eventos separados) -->
 <ion-modal
   [isOpen]="isOpen"
   [breakpoints]="[0, 0.5, 0.9, 1]"
   [initialBreakpoint]="0.9"
   [handle]="true"
-  (didDismiss)="toggleChat()"
+  (didDismiss)="onModalDismiss()"
   class="chat-modal"
 >
   <ng-template>
     <ion-header class="chat-header">
       <ion-toolbar>
-        <ion-title>Asistente Ferretería</ion-title>
-        <ion-button slot="end" fill="clear" (click)="toggleChat()">
+        <ion-title>
+          <ion-icon
+            name="chatbubble-ellipses-outline"
+            class="header-icon"
+          ></ion-icon>
+          Asistente Ferretería
+        </ion-title>
+        <ion-button slot="end" fill="clear" (click)="closeChat()">
           <ion-icon name="close-outline"></ion-icon>
         </ion-button>
       </ion-toolbar>
@@ -33,53 +39,70 @@
 
     <ion-content class="chat-content" #chatContent>
       <div class="messages-container">
+        <!-- Mensajes -->
         <div
-          *ngFor="let msg of messages"
+          *ngFor="let msg of messages; let i = index"
           [class.user]="msg.isUser"
           [class.bot]="!msg.isUser"
-          class="message"
+          class="message animate-message"
+          [style.animationDelay]="i * 0.03 + 's'"
         >
           <div class="bubble">
+            <div class="message-header" *ngIf="!msg.isUser">
+              <ion-icon name="logo-electron" class="bot-icon"></ion-icon>
+              <span class="bot-name">Asistente</span>
+            </div>
             <p [innerHTML]="msg.text"></p>
-            <div *ngIf="msg.actions" class="action-buttons">
-              <ion-button
-                fill="clear"
-                size="small"
-                (click)="downloadPdf(msg.saleData)"
-              >
-                <ion-icon name="document-text-outline"></ion-icon> PDF
-              </ion-button>
-              <ion-button
-                fill="clear"
-                size="small"
-                (click)="downloadImage(msg.saleData)"
-              >
-                <ion-icon name="image-outline"></ion-icon> Imagen
-              </ion-button>
+            <div class="message-footer">
+              <span class="timestamp">{{
+                msg.timestamp | date: "shortTime"
+              }}</span>
+              <div *ngIf="msg.actions" class="action-buttons">
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  (click)="downloadPdf(msg.saleData)"
+                >
+                  <ion-icon name="document-text-outline"></ion-icon> PDF
+                </ion-button>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  (click)="downloadImage(msg.saleData)"
+                >
+                  <ion-icon name="image-outline"></ion-icon> Imagen
+                </ion-button>
+              </div>
             </div>
           </div>
         </div>
-        <div *ngIf="isLoading" class="message bot">
+
+        <!-- Indicador de escritura (typing) -->
+        <div *ngIf="isTyping" class="message bot typing-indicator">
           <div class="bubble">
-            <ion-spinner name="dots"></ion-spinner>
+            <div class="typing-dots">
+              <span></span><span></span><span></span>
+            </div>
           </div>
         </div>
       </div>
-      <!-- ✅ ELIMINADO: <app-chatbot></app-chatbot> (NO debe estar aquí) -->
     </ion-content>
 
     <ion-footer class="chat-footer">
       <ion-toolbar>
         <ion-input
-          placeholder="Escribe tu consulta..."
+          #messageInput
+          placeholder="Escribe tu consulta aquí..."
           [(ngModel)]="newMessage"
           (keyup.enter)="sendMessage()"
+          [disabled]="isLoading"
         ></ion-input>
         <ion-button
           slot="end"
           fill="clear"
           (click)="sendMessage()"
-          [disabled]="!newMessage.trim()"
+          [disabled]="!newMessage.trim() || isLoading"
+          class="send-button"
         >
           <ion-icon name="send-outline"></ion-icon>
         </ion-button>
