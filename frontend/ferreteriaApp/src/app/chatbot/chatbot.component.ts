@@ -22,8 +22,10 @@ import {
   IonFabButton,
   IonChip,
   IonLabel,
+  IonButtons, // ✅ IMPORTANTE: agregado
   ModalController,
   ToastController,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -40,6 +42,7 @@ import {
   notificationsOutline,
   cloudDownloadOutline,
   flashOutline,
+  trashOutline, // ✅ para el botón limpiar
 } from 'ionicons/icons';
 import { ChatbotApiService } from './services/chatbot-api.service';
 import html2canvas from 'html2canvas';
@@ -80,6 +83,7 @@ interface Message {
     IonFabButton,
     IonChip,
     IonLabel,
+    IonButtons, // ✅ agregado
   ],
 })
 export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
@@ -97,6 +101,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     private chatbotApi: ChatbotApiService,
     private modalCtrl: ModalController,
     private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
   ) {
     addIcons({
       chatbubbleEllipsesOutline,
@@ -112,6 +117,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
       notificationsOutline,
       cloudDownloadOutline,
       flashOutline,
+      trashOutline,
     });
   }
 
@@ -186,10 +192,9 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     setTimeout(async () => {
       try {
         const response = await firstValueFrom(this.chatbotApi.sendMessage(msg));
-        const data = response.data as any; // ✅ Convertir a any para acceder a propiedades dinámicas
+        const data = response.data as any;
         this.isTyping = false;
 
-        // ✅ Verificar si es un gráfico
         if (data.type === 'chart' && data.labels && data.data) {
           this.addBotMessage(data.title || 'Gráfico de ventas', undefined, {
             labels: data.labels,
@@ -198,13 +203,9 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
             backgroundColor: data.backgroundColor || 'rgba(10, 26, 92, 0.2)',
             type: data.chartType || 'line',
           });
-        }
-        // ✅ Verificar si es sugerencias
-        else if (data.type === 'suggestions' && data.suggestions) {
+        } else if (data.type === 'suggestions' && data.suggestions) {
           this.addBotMessage(data.text, undefined, undefined, data.suggestions);
-        }
-        // ✅ Mensaje normal
-        else {
+        } else {
           this.addBotMessage(data.text, data.saleData);
         }
       } catch (error) {
@@ -223,6 +224,35 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
   async onSuggestionClick(suggestion: string) {
     this.newMessage = suggestion;
     await this.sendMessage();
+  }
+
+  async confirmClearChat() {
+    const alert = await this.alertCtrl.create({
+      header: 'Limpiar conversación',
+      message:
+        '¿Estás seguro de que deseas borrar todo el historial del chat? Esta acción no se puede deshacer.',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Limpiar', handler: () => this.clearChat() },
+      ],
+    });
+    await alert.present();
+  }
+
+  private clearChat() {
+    this.messages = [];
+    this.addBotMessage(
+      '¡Hola! Soy tu asistente inteligente. Puedo ayudarte con ventas, productos, gráficos, notificaciones y más. Escribe "sugerencias" para ver opciones.',
+    );
+    localStorage.removeItem('chatbot_history');
+    this.toastCtrl
+      .create({
+        message: 'Chat limpiado',
+        duration: 2000,
+        color: 'success',
+        position: 'top',
+      })
+      .then((toast) => toast.present());
   }
 
   private renderChart(index: number, chartData: any) {
@@ -337,7 +367,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
             ${venta.items
               .map(
                 (item: any) => `
-              <tr><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${item.product.name}</td>
+              <td><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${item.product.name}</td>
               <td style="padding:8px;">${item.quantity}</td>
               <td style="padding:8px;">S/ ${Number(item.unitPrice).toFixed(2)}</td>
               <td style="padding:8px;">S/ ${Number(item.lineTotal).toFixed(2)}</td>

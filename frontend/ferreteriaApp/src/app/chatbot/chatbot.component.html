@@ -31,9 +31,16 @@
           ></ion-icon>
           Asistente Ferretería
         </ion-title>
-        <ion-button slot="end" fill="clear" (click)="closeChat()">
-          <ion-icon name="close-outline"></ion-icon>
-        </ion-button>
+        <ion-buttons slot="end">
+          <!-- Botón limpiar chat -->
+          <ion-button fill="clear" (click)="confirmClearChat()">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+          <!-- Botón cerrar -->
+          <ion-button fill="clear" (click)="closeChat()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 

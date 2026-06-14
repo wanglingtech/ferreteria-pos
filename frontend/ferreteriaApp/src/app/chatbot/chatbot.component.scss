@@ -11,8 +11,8 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
 
 // Botón flotante animado
 .chat-fab {
-  margin-bottom: 70px;
-  z-index: 1000;
+  margin-bottom: 50px; /* Ajusta según necesites (más arriba = más px) */
+  z-index: 1200;
   animation: fadeInUp 0.3s ease-out;
 }
 
@@ -221,10 +221,44 @@ ion-modal {
   }
 }
 
+// Sugerencias rápidas
+.suggestions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+
+  ion-chip {
+    cursor: pointer;
+    transition: transform 0.1s ease;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+}
+
+// Gráficos
+canvas {
+  max-width: 100%;
+  height: auto;
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  margin-top: 8px;
+}
+
+// Botones en el header
+ion-buttons {
+  ion-button {
+    margin: 0 4px;
+  }
+}
+
 // Responsive
 @media (max-width: 576px) {
   .chat-fab {
-    margin-bottom: 65px;
+    margin-bottom: 100px;
   }
 
   .message .bubble {
@@ -247,38 +281,5 @@ ion-modal {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-// Nuevos estilos
-.suggestions-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-  ion-chip {
-    cursor: pointer;
-    transition: transform 0.1s ease;
-    &:hover {
-      transform: scale(1.02);
-    }
-  }
-}
-
-canvas {
-  max-width: 100%;
-  height: auto;
-  background: white;
-  border-radius: 12px;
-  padding: 8px;
-  margin-top: 8px;
-}
-
-// Ajuste para el botón de sugerencias en el footer
-.chat-footer ion-toolbar {
-  display: flex;
-  align-items: center;
-  .send-button {
-    margin-left: 4px;
   }
 }
