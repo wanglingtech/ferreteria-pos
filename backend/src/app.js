@@ -15,6 +15,7 @@ const {
 } = require("./shared/middlewares/error.middleware");
 const categoriasRoutes = require("./modules/categorias/categorias.routes");
 const notificationsRoutes = require("./modules/notifications/notifications.routes");
+const chatbotRoutes = require("./modules/chatbot/chatbot.routes");
 const app = express();
 
 app.use(cors());
@@ -30,6 +31,7 @@ app.get("/api/v1/health", (req, res) => {
   });
 });
 
+app.use("/api/v1/chatbot", chatbotRoutes);
 app.use("/api/v1/notificaciones", notificationsRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
