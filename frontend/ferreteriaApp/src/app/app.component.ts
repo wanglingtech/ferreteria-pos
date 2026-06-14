@@ -3,11 +3,12 @@ import { IonApp, IonRouterOutlet, IonToast } from '@ionic/angular/standalone';
 import { Subject, takeUntil } from 'rxjs';
 
 import { HttpErrorService } from './core/services/http-error.service';
+import { ChatbotComponent } from './chatbot/chatbot.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet, IonToast],
+  imports: [IonApp, IonRouterOutlet, IonToast, ChatbotComponent], // ✅ added ChatbotComponent
 })
 export class AppComponent implements OnInit, OnDestroy {
   protected toastOpen = false;

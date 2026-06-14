@@ -1,0 +1,89 @@
+<!-- Botón flotante (solo visible si el chat está cerrado) -->
+<ion-fab
+  *ngIf="!isOpen"
+  slot="fixed"
+  vertical="bottom"
+  horizontal="end"
+  edge
+  class="chat-fab"
+>
+  <ion-fab-button (click)="toggleChat()">
+    <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+
+<!-- Modal del chat -->
+<ion-modal
+  [isOpen]="isOpen"
+  [breakpoints]="[0, 0.5, 0.9, 1]"
+  [initialBreakpoint]="0.9"
+  [handle]="true"
+  (didDismiss)="toggleChat()"
+  class="chat-modal"
+>
+  <ng-template>
+    <ion-header class="chat-header">
+      <ion-toolbar>
+        <ion-title>Asistente Ferretería</ion-title>
+        <ion-button slot="end" fill="clear" (click)="toggleChat()">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="chat-content" #chatContent>
+      <div class="messages-container">
+        <div
+          *ngFor="let msg of messages"
+          [class.user]="msg.isUser"
+          [class.bot]="!msg.isUser"
+          class="message"
+        >
+          <div class="bubble">
+            <p [innerHTML]="msg.text"></p>
+            <div *ngIf="msg.actions" class="action-buttons">
+              <ion-button
+                fill="clear"
+                size="small"
+                (click)="downloadPdf(msg.saleData)"
+              >
+                <ion-icon name="document-text-outline"></ion-icon> PDF
+              </ion-button>
+              <ion-button
+                fill="clear"
+                size="small"
+                (click)="downloadImage(msg.saleData)"
+              >
+                <ion-icon name="image-outline"></ion-icon> Imagen
+              </ion-button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="isLoading" class="message bot">
+          <div class="bubble">
+            <ion-spinner name="dots"></ion-spinner>
+          </div>
+        </div>
+      </div>
+      <!-- ✅ ELIMINADO: <app-chatbot></app-chatbot> (NO debe estar aquí) -->
+    </ion-content>
+
+    <ion-footer class="chat-footer">
+      <ion-toolbar>
+        <ion-input
+          placeholder="Escribe tu consulta..."
+          [(ngModel)]="newMessage"
+          (keyup.enter)="sendMessage()"
+        ></ion-input>
+        <ion-button
+          slot="end"
+          fill="clear"
+          (click)="sendMessage()"
+          [disabled]="!newMessage.trim()"
+        >
+          <ion-icon name="send-outline"></ion-icon>
+        </ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>

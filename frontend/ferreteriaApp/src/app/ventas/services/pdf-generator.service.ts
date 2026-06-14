@@ -142,4 +142,44 @@ export class PdfGeneratorService {
       document.body.removeChild(clone);
     }
   }
+
+  // Dentro de la clase PdfGeneratorService, agrega:
+
+  /**
+   * Genera un PDF directamente desde un elemento HTML (no por ID)
+   */
+  async generatePdfFromElement(
+    element: HTMLElement,
+    fileName: string = 'documento.pdf',
+  ): Promise<void> {
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.style.display = 'block';
+    clone.style.position = 'absolute';
+    clone.style.left = '-9999px';
+    clone.style.top = '-9999px';
+    document.body.appendChild(clone);
+    try {
+      const canvas = await html2canvas(clone, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true,
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [80, canvas.height * (80 / canvas.width)],
+      });
+      const imgWidth = 80;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(fileName);
+    } catch (error) {
+      console.error('Error al generar PDF desde elemento:', error);
+      throw error;
+    } finally {
+      document.body.removeChild(clone);
+    }
+  }
 }
