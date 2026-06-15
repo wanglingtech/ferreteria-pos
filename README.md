@@ -122,20 +122,7 @@ ionic serve
 # 🏗️ Arquitectura del Proyecto
 
 El sistema está construido bajo una Arquitectura Limpia, separando el código en capas bien definidas para garantizar mantenibilidad y escalabilidad.
-
-text
-ferreteria-july/
-├── backend/ # API REST en Node.js + Express
-│ ├── src/
-│ │ ├── modules/ # Módulos funcionales (ventas, inventario, etc.)
-│ │ ├── shared/ # Utilidades, middlewares, errores
-│ │ └── config/ # Configuraciones (base de datos, entorno)
-│ └── prisma/ # Esquemas y migraciones de Prisma
-└── frontend/ # Aplicación Angular/Ionic
-└── ferreteriaApp/
-└── src/
-└── app/ # Módulos de la aplicación (core, shared, features)
-Esta estructura promueve la reutilización de código, facilita las pruebas unitarias y permite que el proyecto crezca de forma ordenada.
+![alt text](image.png)
 
 # 🤝 Contribuciones
 
@@ -143,10 +130,31 @@ Las contribuciones son lo que hacen a la comunidad de código abierto un lugar i
 
 No olvides darle una ⭐ al proyecto si te fue útil.
 
-📄 Licencia
-Este proyecto está bajo la Licencia MIT. Para más detalles, revisa el archivo LICENSE.
+## 👨‍💻 **Desarrollador**
 
-👨‍💻 Desarrollador
+<p align="center">
+  <br>
+  <img src="frontend/ferreteriaApp/src/assets/icon/wangling.jpg" alt="Foto de perfil" width="120" style="border-radius: 50%;">
+  <br>
+  <strong>WangLing</strong>
+  <br>
+  <em>Desarrollador Full-Stack | Apasionado por la tecnología y las soluciones empresariales</em>
+</p>
 
-<p align="center"> <br> <img src="/frontend/ferreteriaApp/src/assets/icon/wangling.jpg" alt="Foto de perfil" width="120" style="border-radius: 50%;"> <br> <strong>WangLing</strong> <br> <em>Desarrollador Full-Stack | Apasionado por la tecnología y las soluciones empresariales</em> </p><p align="center"> <a href="https://github.com/wangling941"> <img src="https://img.shields.io/badge/GitHub-wangling941-181717?style=for-the-badge&logo=github" alt="GitHub"> </a> &nbsp; <a href="kevinvillegassolisxd@gmail.com"> <img src="https://img.shields.io/badge/Email-contacto-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"> </a> &nbsp; <a href="https://www.linkedin.com/in/kevin-villegas-solis-7b0038366/"> <img src="https://img.shields.io/badge/LinkedIn-wangling941-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"> </a> </p>
-<p align="center"> Hecho con ❤️ para Ferretería July. </p> ```
+<p align="center">
+  <a href="https://github.com/wangling941">
+    <img src="https://img.shields.io/badge/GitHub-wangling941-181717?style=for-the-badge&logo=github" alt="GitHub">
+  </a>
+  &nbsp;
+  <a href="mailto:kevinvillegassolisxd@gmail.com">
+    <img src="https://img.shields.io/badge/Email-Contacto-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+  </a>
+  &nbsp;
+  <a href="https://www.linkedin.com/in/kevin-villegas-solis-7b0038366/">
+    <img src="https://img.shields.io/badge/LinkedIn-Kevin%20Villegas%20Solis-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+  </a>
+</p>
+
+<p align="center">
+  Hecho con ❤️ para Ferretería July.
+</p>
