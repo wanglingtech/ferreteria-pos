@@ -121,8 +121,7 @@ ionic serve
 
 # 🏗️ Arquitectura del Proyecto
 
-El sistema está construido bajo una Arquitectura Limpia, separando el código en capas bien definidas para garantizar mantenibilidad y escalabilidad.
-![alt text](image.png)
+El sistema está construido bajo una Screaming Architecture y Clean Architecture Simplificada, separando el código en capas bien definidas para garantizar mantenibilidad y escalabilidad. Mientras que Clean Architecture provee las reglas técnicas de desacoplamiento y dirección de dependencias, Screaming Architecture define cómo debe organizarse visualmente el proyecto para que la estructura de carpetas refleje el negocio (las intenciones del sistema) y no las herramientas técnicas.
 
 # 🤝 Contribuciones
 
