@@ -257,3 +257,31 @@ El sistema deberá conservar historial de:
 - ventas,
 - movimientos de inventario,
 - acciones relevantes del sistema.
+
+| ID   | Requerimiento         | Estado | Módulo / Evidencia                        |
+| ---- | --------------------- | ------ | ----------------------------------------- |
+| RF01 | Autenticación JWT     | ✅     | `auth.middleware.js`                      |
+| RF02 | Roles ADMIN/SELLER    | ✅     | `authorizeRoles`                          |
+| RF03 | Login/Logout          | ✅     | `auth` endpoints + frontend               |
+| RF04 | CRUD usuarios         | ✅     | `usuarios` módulo                         |
+| RF05 | CRUD productos        | ✅     | `productos` módulo                        |
+| RF06 | Búsqueda productos    | ✅     | Filtros en `productos.repository`         |
+| RF07 | CRUD categorías       | ✅     | `categorias` módulo                       |
+| RF08 | Control stock         | ✅     | `inventario` y `dashboard` KPIs           |
+| RF09 | Stock mínimo          | ✅     | Campo `minStock` en Product               |
+| RF10 | POS con cálculos      | ✅     | `ventas` página + carrito                 |
+| RF11 | Validación stock      | ✅     | Lógica en `ventas.service`                |
+| RF12 | Descuento automático  | ✅     | Transacción Prisma en `ventas.repository` |
+| RF13 | Carrito venta         | ✅     | Frontend `ventas.page`                    |
+| RF14 | Cliente opcional      | ✅     | Campo `customerName`                      |
+| RF15 | Detalle venta         | ✅     | PDF/Imagen con `html2canvas`              |
+| RF16 | Compartir comprobante | ✅     | Botones en ventas y reportes              |
+| RF17 | Dashboard             | ✅     | `dashboard` página                        |
+| RF18 | KPIs varios           | ✅     | KPIs en dashboard e inventario            |
+| RF19 | Gráficos              | ✅     | Chart.js en `reportes`                    |
+| RF20 | Reportes CSV/PDF      | ✅     | `reportes-export.service`                 |
+| RF21 | Filtro fechas         | ✅     | Filtros en `reportes`                     |
+| RF22 | Navegación            | ✅     | Sidebar + Tab-bar                         |
+| RF23 | PostgreSQL            | ✅     | Prisma schema                             |
+| RF24 | Integridad            | ✅     | Transacciones Prisma                      |
+| RF25 | Historial             | ✅     | `StockMovement` y ventas                  |

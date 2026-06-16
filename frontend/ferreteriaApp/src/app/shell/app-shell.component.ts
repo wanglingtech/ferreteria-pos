@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import {
   Router,
   ActivatedRoute,
   NavigationEnd,
   RouterOutlet,
 } from '@angular/router';
-import { filter, debounceTime, map } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 import {
   IonMenu,
@@ -30,16 +31,18 @@ import { NotificationService } from '../core/services/notification.service';
     CommonModule,
     IonMenu,
     IonContent,
-    IonRouterOutlet, // ✅ IMPORTANTE (arregla NG8001)
+    IonRouterOutlet,
     HeaderComponent,
     SiderbarComponent,
     BottomNavComponent,
   ],
 })
-export class AppShellComponent implements OnInit {
+export class AppShellComponent implements OnInit, OnDestroy, AfterViewInit {
   protected pageTitle = 'Dashboard';
   protected pageSubtitle = 'Ferretería July';
   protected user = this.authSession.getCurrentUser();
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private menuCtrl: MenuController,
@@ -50,36 +53,66 @@ export class AppShellComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // ✅ Cargar título inicial
-    this.updateTitleFromRoute();
-
-    // ✅ Escuchar cambios de ruta para actualizar título DINÁMICAMENTE
+    // 1. Actualizar título al navegar
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        debounceTime(100), // Esperar a que la ruta se procese completamente
+        takeUntil(this.destroy$),
       )
       .subscribe(() => {
         this.updateTitleFromRoute();
       });
 
-    // ✅ Cargar notificaciones al inicializar
+    // 2. Actualizar usuario cuando cambie en sesión
+    this.authSession.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((updatedUser) => {
+        this.user = updatedUser;
+      });
+
+    // 3. Cargar notificaciones
     this.notificationService.cargarNotificaciones();
 
-    // ✅ Actualizar user cuando cambia en session
-    this.authSession.currentUser$.subscribe((updatedUser) => {
-      this.user = updatedUser;
-    });
+    // 4. Inicializar título
+    this.updateTitleFromRoute();
   }
 
+  ngAfterViewInit(): void {
+    // Reforzar actualización después de renderizar (útil para carga inicial)
+    setTimeout(() => this.updateTitleFromRoute(), 50);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Obtiene el título y subtítulo de la ruta activa usando RouterState.
+   * Recorre el árbol de rutas desde la raíz para encontrar la hoja activa.
+   */
   private updateTitleFromRoute(): void {
-    let route = this.activatedRoute;
+    // Obtener la ruta raíz del estado actual
+    let route = this.router.routerState.snapshot.root;
+    // Avanzar por los hijos hasta la hoja (último hijo sin firstChild)
     while (route.firstChild) {
       route = route.firstChild;
     }
-    const data = route.snapshot.data;
-    this.pageTitle = data?.['title'] ?? 'Dashboard';
-    this.pageSubtitle = data?.['subtitle'] ?? 'Ferretería July';
+    // Obtener los datos de la ruta activa (la hoja)
+    const data = route.data || {};
+
+    const title = data['title'] ?? 'Dashboard';
+    const subtitle = data['subtitle'] ?? 'Ferretería July';
+
+    if (this.pageTitle !== title) {
+      this.pageTitle = title;
+    }
+    if (this.pageSubtitle !== subtitle) {
+      this.pageSubtitle = subtitle;
+    }
+
+    // Depuración (descomentar para ver en consola)
+    // console.log(`📌 Título: ${this.pageTitle} - Subtítulo: ${this.pageSubtitle}`);
   }
 
   async openMenu(): Promise<void> {
