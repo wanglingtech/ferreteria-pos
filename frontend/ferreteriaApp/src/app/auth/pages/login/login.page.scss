@@ -22,86 +22,125 @@ $radius: 28px;
 }
 
 // ============================================================
-//  FONDO CON PARTÍCULAS
+//  FONDO CON IMAGEN DE FERRETERÍA Y OVERLAY
 // ============================================================
 .login-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(135deg, #0a1a5c 0%, #1e3a8a 40%, #3b82f6 100%);
   overflow: hidden;
-}
 
-.particle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  animation: floatParticle 12s ease-in-out infinite alternate;
-}
+  .bg-image {
+    position: absolute;
+    inset: 0;
+    // 🔧 Imagen de fondo temática (herramientas, almacén, estanterías)
+    // Puedes reemplazar la URL por tu propia imagen
+    background-image: url("https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+    filter: brightness(0.6) saturate(1.1);
+  }
 
-.particle-1 {
-  width: 400px;
-  height: 400px;
-  top: -150px;
-  right: -100px;
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.25),
-    transparent 70%
-  );
-  animation-duration: 14s;
-}
+  // Overlay oscuro para legibilidad del texto
+  .bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(10, 26, 92, 0.85) 0%,
+      rgba(30, 58, 138, 0.75) 40%,
+      rgba(59, 130, 246, 0.55) 100%
+    );
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
 
-.particle-2 {
-  width: 300px;
-  height: 300px;
-  bottom: -80px;
-  left: -120px;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.08),
-    transparent 60%
-  );
-  animation-duration: 10s;
-  animation-delay: 1s;
-}
+  // Patrón sutil de herramientas (opcional)
+  .bg-pattern {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
 
-.particle-3 {
-  width: 200px;
-  height: 200px;
-  top: 40%;
-  left: 10%;
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.15),
-    transparent 70%
-  );
-  animation-duration: 16s;
-  animation-delay: 2s;
-}
+  // Partículas decorativas
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    animation: floatParticle 12s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
 
-.particle-4 {
-  width: 150px;
-  height: 150px;
-  bottom: 20%;
-  right: 15%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.05),
-    transparent 60%
-  );
-  animation-duration: 12s;
-  animation-delay: 3s;
-}
-
-.particle-5 {
-  width: 250px;
-  height: 250px;
-  top: 10%;
-  right: 30%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent 70%);
-  animation-duration: 18s;
-  animation-delay: 0.5s;
+  .particle-1 {
+    width: 400px;
+    height: 400px;
+    top: -150px;
+    right: -100px;
+    background: radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.25),
+      transparent 70%
+    );
+    animation-duration: 14s;
+  }
+  .particle-2 {
+    width: 300px;
+    height: 300px;
+    bottom: -80px;
+    left: -120px;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.08),
+      transparent 60%
+    );
+    animation-duration: 10s;
+    animation-delay: 1s;
+  }
+  .particle-3 {
+    width: 200px;
+    height: 200px;
+    top: 40%;
+    left: 10%;
+    background: radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.15),
+      transparent 70%
+    );
+    animation-duration: 16s;
+    animation-delay: 2s;
+  }
+  .particle-4 {
+    width: 150px;
+    height: 150px;
+    bottom: 20%;
+    right: 15%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.05),
+      transparent 60%
+    );
+    animation-duration: 12s;
+    animation-delay: 3s;
+  }
+  .particle-5 {
+    width: 250px;
+    height: 250px;
+    top: 10%;
+    right: 30%;
+    background: radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.1),
+      transparent 70%
+    );
+    animation-duration: 18s;
+    animation-delay: 0.5s;
+  }
 }
 
 @keyframes floatParticle {
@@ -195,7 +234,7 @@ $radius: 28px;
 
 .brand-tagline {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   font-weight: 400;
   letter-spacing: 2.5px;
@@ -316,7 +355,7 @@ $radius: 28px;
 }
 
 // ============================================================
-//  TOGGLE PASSWORD
+//  TOGGLE PASSWORD (CORREGIDO)
 // ============================================================
 .toggle-password {
   --background: transparent !important;
@@ -327,10 +366,13 @@ $radius: 28px;
   height: 100%;
   margin: 0;
   padding: 0 4px;
+  --padding-start: 4px;
+  --padding-end: 4px;
 
   .eye-icon {
     font-size: 1.2rem;
     transition: all 0.2s ease;
+    color: $gray-mid;
   }
 
   &:hover .eye-icon {
@@ -435,15 +477,27 @@ $radius: 28px;
 }
 
 // ============================================================
-//  FOOTER
+//  FOOTER (CORREGIDO: visible en todos los dispositivos)
 // ============================================================
 .footer-text {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.75rem;
   text-align: center;
   margin-top: 8px;
   letter-spacing: 0.5px;
   animation: fadeIn 0.8s ease 0.8s both;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  padding: 8px 20px;
+  border-radius: 30px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
 }
 
 // ============================================================
@@ -474,31 +528,104 @@ $radius: 28px;
 // ============================================================
 //  RESPONSIVE
 // ============================================================
+// MÓVILES PEQUEÑOS
 @media (max-width: 480px) {
   .login-card ion-card-content {
-    padding: 24px 18px;
+    padding: 20px 16px;
   }
 
   .brand-name {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  .brand-tagline {
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
   }
 
   .logo-wrapper {
-    width: 100px;
-    height: 100px;
+    width: 85px;
+    height: 85px;
   }
 
   .login-button {
-    height: 48px;
-    font-size: 0.9rem;
+    height: 46px;
+    font-size: 0.85rem;
   }
 
   .form-item {
-    --min-height: 48px;
-    --padding-start: 12px;
+    --min-height: 44px;
+    --padding-start: 10px;
   }
 
   .card-header h2 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+  }
+
+  .card-header p {
+    font-size: 0.8rem;
+  }
+
+  .footer-text {
+    font-size: 0.6rem;
+    padding: 6px 12px;
+    max-width: 100%;
+  }
+
+  .login-container {
+    padding: 16px;
+    gap: 20px;
+  }
+}
+
+// TABLET Y ESCRITORIO
+@media (min-width: 768px) {
+  .brand-name {
+    font-size: 2.4rem;
+  }
+
+  .logo-wrapper {
+    width: 160px;
+    height: 160px;
+  }
+
+  .login-card {
+    max-width: 450px;
+    ion-card-content {
+      padding: 40px 36px;
+    }
+  }
+
+  .card-header h2 {
+    font-size: 2rem;
+  }
+
+  .footer-text {
+    max-width: 450px;
+  }
+}
+
+// ESCRITORIO GRANDE
+@media (min-width: 1024px) {
+  .login-container {
+    padding: 40px;
+  }
+
+  .login-card {
+    max-width: 480px;
+  }
+
+  .footer-text {
+    max-width: 480px;
+  }
+}
+
+// ============================================================
+//  FALLBACK: Si la imagen no carga, fondo degradado
+// ============================================================
+@supports not (background-image: url("")) {
+  .login-bg .bg-image {
+    background: linear-gradient(135deg, #0a1a5c 0%, #1e3a8a 40%, #3b82f6 100%);
+    filter: none;
   }
 }

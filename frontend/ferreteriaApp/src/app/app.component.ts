@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common'; // ✅ agregado
 import { IonApp, IonRouterOutlet, IonToast } from '@ionic/angular/standalone';
 import { Subject, takeUntil } from 'rxjs';
 import { Router, NavigationEnd } from '@angular/router';
@@ -10,7 +11,13 @@ import { ChatbotComponent } from './chatbot/chatbot.component';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet, IonToast, ChatbotComponent],
+  imports: [
+    CommonModule, // ✅ importado para ngIf
+    IonApp,
+    IonRouterOutlet,
+    IonToast,
+    ChatbotComponent,
+  ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   protected toastOpen = false;
@@ -32,7 +39,6 @@ export class AppComponent implements OnInit, OnDestroy {
         this.toastOpen = true;
       });
 
-    // Detectar si estamos en login
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
