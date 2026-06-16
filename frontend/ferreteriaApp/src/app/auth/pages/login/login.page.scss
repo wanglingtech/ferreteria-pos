@@ -1,319 +1,432 @@
+// ============================================================
+//  VARIABLES
+// ============================================================
+$primary: #0a1a5c;
+$primary-light: #1e3a8a;
+$primary-dark: #071447;
+$accent: #3b82f6;
+$white: #ffffff;
+$gray-light: #f0f4ff;
+$gray-mid: #8a9bb5;
+$shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$radius: 24px;
+
+// ============================================================
+//  CONTENEDOR PRINCIPAL
+// ============================================================
 .login-content {
-  --background: #ffffffe0;
+  --background: transparent;
   height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
-/* =========================
-   IONIC SCROLL FIX
-========================= */
-ion-content {
-  --overflow: auto;
+// ============================================================
+//  FONDO CON DEGRADADO Y FORMAS
+// ============================================================
+.login-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(135deg, #0a1a5c 0%, #1e3a8a 40%, #3b82f6 100%);
+
+  .bg-shape {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    animation: float 8s ease-in-out infinite alternate;
+  }
+
+  .shape-1 {
+    width: 500px;
+    height: 500px;
+    top: -200px;
+    right: -100px;
+    background: radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.3),
+      transparent 70%
+    );
+    animation-duration: 12s;
+  }
+  .shape-2 {
+    width: 400px;
+    height: 400px;
+    bottom: -100px;
+    left: -150px;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.08),
+      transparent 60%
+    );
+    animation-duration: 10s;
+    animation-delay: 1s;
+  }
+  .shape-3 {
+    width: 300px;
+    height: 300px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.15),
+      transparent 70%
+    );
+    animation-duration: 14s;
+    animation-delay: 2s;
+  }
 }
 
-/* =========================
-   CONTENEDOR
-========================= */
+@keyframes float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(30px, -20px) scale(1.05);
+  }
+}
+
+// ============================================================
+//  CONTENEDOR LOGIN
+// ============================================================
 .login-container {
   position: relative;
   z-index: 2;
-  padding: 24px;
   min-height: 100dvh;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 22px;
+  align-items: center;
+  padding: 24px;
+  gap: 28px;
 }
 
-/* =========================
-   BRAND
-========================= */
+// ============================================================
+//  BRAND SECTION
+// ============================================================
 .brand-section {
   text-align: center;
-  color: #0a1a5c;
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-/* LOGO */
-.logo {
-  width: clamp(140px, 18vw, 180px);
-  height: clamp(140px, 18vw, 180px);
+.logo-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 4px;
 
-  object-fit: contain;
-  border-radius: 18px;
+  .logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 20px;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
+    animation: fadeIn 0.8s ease;
+  }
 
-  animation: fadeIn 0.6s ease;
+  .logo-glow {
+    position: absolute;
+    inset: -8px;
+    border-radius: 28px;
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(59, 130, 246, 0.4),
+      transparent 70%
+    );
+    filter: blur(20px);
+    z-index: 0;
+    animation: pulseGlow 3s ease-in-out infinite alternate;
+  }
 }
 
-/* =========================
-   CARD PREMIUM
-========================= */
+@keyframes pulseGlow {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.brand-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: $white;
+  margin: 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.8s ease 0.2s both;
+}
+
+.brand-tagline {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: fadeIn 0.8s ease 0.4s both;
+}
+
+// ============================================================
+//  LOGIN CARD
+// ============================================================
 .login-card {
-  border-radius: 22px;
-  padding: 10px 10px;
-  max-width: 400px;
-  align-self: center;
+  width: 100%;
+  max-width: 420px;
+  border-radius: $radius;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: $shadow;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.6s ease 0.3s both;
+  overflow: hidden;
+  margin: 0;
 
-  box-shadow:
-    0 30px 60px rgba(10, 26, 92, 0.12),
-    0 10px 25px rgba(0, 0, 0, 0.04);
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  background: rgb(255, 255, 255);
-
-  animation: slideUp 0.5s ease;
+  ion-card-content {
+    padding: 32px 28px;
+  }
 }
 
-/* =========================
-   HEADER
-========================= */
-.header {
+// ============================================================
+//  CARD HEADER
+// ============================================================
+.card-header {
   text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 28px;
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: $primary;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.3px;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: $gray-mid;
+    margin: 0;
+  }
 }
 
-.header h2 {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0a1a5c;
-  letter-spacing: -0.2px;
+// ============================================================
+//  FORM
+// ============================================================
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input-group {
+  margin-bottom: 4px;
+}
+
+// ============================================================
+//  INPUTS
+// ============================================================
+.form-item {
+  --background: rgba(248, 250, 255, 0.7);
+  --color: $primary;
+  --placeholder-color: $gray-mid;
+  --border-radius: 16px;
+  --min-height: 56px;
+  --padding-start: 16px;
+  --padding-end: 12px;
   margin-bottom: 6px;
+  border: 1.5px solid rgba(10, 26, 92, 0.12);
+  border-radius: 16px;
+  transition: all 0.25s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+
+  &:hover {
+    border-color: rgba(10, 26, 92, 0.25);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  &.ion-focused {
+    border-color: $primary;
+    box-shadow: 0 0 0 4px rgba(10, 26, 92, 0.08);
+  }
+
+  &.invalid {
+    border-color: #e53935;
+    box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.1);
+  }
+
+  .input-icon {
+    color: $gray-mid;
+    font-size: 1.2rem;
+    margin-right: 8px;
+    transition: color 0.2s ease;
+  }
+
+  &.ion-focused .input-icon {
+    color: $primary;
+  }
+
+  &.invalid .input-icon {
+    color: #e53935;
+  }
+
+  ion-input {
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
 }
 
-.header p {
-  font-size: 12px;
-  color: rgba(10, 26, 92, 0.65);
-}
-
-/* =========================
-   INPUTS
-========================= */
-.input_user,
-.input_pass {
-  --background: #f8faff;
-  --color: #072291;
-  --placeholder-color: rgba(10, 26, 92, 0.45);
-
-  border-radius: 18px;
-  margin-bottom: 10px;
-
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-/* hover */
-.input_user:hover,
-.input_pass:hover {
-  transform: translateY(-1px);
-}
-
-/* border */
-.input_user::part(native),
-.input_pass::part(native) {
-  border: 1.5px solid rgba(7, 15, 133, 0.75);
-  border-radius: 18px;
-
-  padding-left: 12px;
-  padding-right: 12px;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-/* focus */
-.input_user.ion-focused::part(native),
-.input_pass.ion-focused::part(native) {
-  border-color: #0a1a5c;
-
-  box-shadow:
-    0 0 0 3px rgba(10, 26, 92, 0.12),
-    0 6px 16px rgba(10, 26, 92, 0.08);
-}
-
-/* =========================
-   LABELS
-========================= */
-ion-label {
-  color: #0a1a5c !important;
-  font-weight: 600;
-}
-
-/* =========================
-   PASSWORD FIELD
-========================= */
-ion-item.input_pass {
-  display: flex;
-  align-items: center;
-}
-
-/* BOTÓN OJO */
+// ============================================================
+//  TOGGLE PASSWORD
+// ============================================================
 .toggle-password {
-  height: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  --padding-start: 0;
-  --padding-end: 0;
-
-  /* FIX fondo fantasma */
   --background: transparent !important;
   --background-hover: transparent !important;
   --background-activated: transparent !important;
   --box-shadow: none !important;
-  --border-style: none;
+  --color: $gray-mid;
+  height: 100%;
+  margin: 0;
+  padding: 0 4px;
 
-  /* mismo azul login */
-  --color: #0a1a5c;
+  .eye-icon {
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+  }
 
-  margin-top: 18px;
+  &:hover .eye-icon {
+    color: $primary;
+  }
 }
 
-/* ICONO */
-.eye-icon {
-  font-size: 20px;
-  color: #0a1a5c;
-
-  transition:
-    transform 0.2s ease,
-    opacity 0.2s ease;
-}
-
-/* animación ojo */
-.toggle-password.active .eye-icon {
-  transform: rotate(180deg) scale(1.1);
-}
-
-/* =========================
-   OPTIONS
-========================= */
-.options {
-  display: flex;
-  align-items: center;
-
-  margin: 14px 0 18px;
-}
-
-/* remember */
-.remember {
-  --background: transparent;
-  --padding-start: 0;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  font-size: 13px;
-  color: #0a1a5c;
-
-  margin-left: 2px;
-}
-
-/* checkbox */
-.remember ion-checkbox {
-  --size: 16px;
-
-  --checkbox-background-checked: #0a1a5c;
-  --border-color-checked: #0a1a5c;
-  --checkmark-color: #ffffff;
-
-  margin-right: 4px;
-}
-
-/* =========================
-   BUTTON PRIMARY
-========================= */
-.btn-primary {
-  --background: #0a1a5c;
-  --background-hover: #10257a;
-  --background-activated: #091549;
-
-  --border-radius: 18px;
-  --color: #ffffff;
-
-  height: 50px;
-
-  font-weight: 600;
-  font-size: 15px;
-
-  margin-top: 10px;
-
-  box-shadow: 0 14px 30px rgba(10, 26, 92, 0.18);
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-/* hover */
-.btn-primary:hover {
-  transform: translateY(-1px);
-}
-
-/* disabled */
-.btn-primary.button-disabled {
-  opacity: 0.55;
-  box-shadow: none;
-}
-
-/* =========================
-   VALIDACIONES
-========================= */
+// ============================================================
+//  FIELD ERRORS
+// ============================================================
 .field-error {
+  font-size: 0.75rem;
   color: #e53935;
-  font-size: 12px;
-  margin: -2px 0 10px 8px;
-
+  padding-left: 16px;
+  margin: -2px 0 8px 0;
   font-weight: 500;
+  min-height: 20px;
+
+  span {
+    display: block;
+  }
 }
 
-/* input error */
-.input_user.invalid::part(native),
-.input_pass.invalid::part(native) {
-  border: 1.5px solid #e53935 !important;
+// ============================================================
+//  OPTIONS ROW
+// ============================================================
+.options-row {
+  display: flex;
+  align-items: center;
+  margin: 8px 0 16px 0;
+  padding-left: 4px;
+
+  .remember-item {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --min-height: 32px;
+    font-size: 0.85rem;
+    color: $primary;
+
+    ion-checkbox {
+      --size: 18px;
+      --checkbox-background-checked: $primary;
+      --border-color-checked: $primary;
+      --checkmark-color: $white;
+      margin-right: 10px;
+    }
+
+    ion-label {
+      font-weight: 500;
+      color: rgba(10, 26, 92, 0.75);
+    }
+  }
 }
 
-/* error focus */
-.input_user.invalid.ion-focused::part(native),
-.input_pass.invalid.ion-focused::part(native) {
-  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.12);
-}
-
-/* =========================
-   ERROR API
-========================= */
-.error {
-  font-size: 12px;
+// ============================================================
+//  API ERROR
+// ============================================================
+.api-error {
+  font-size: 0.85rem;
   color: #e53935;
-  margin-top: 6px;
-  margin-bottom: 10px;
   text-align: center;
+  margin: 8px 0 12px 0;
+  font-weight: 500;
+  background: rgba(229, 57, 53, 0.06);
+  padding: 10px 16px;
+  border-radius: 12px;
 }
 
-/* =========================
-   GLOBAL BUTTON FIX
-========================= */
-ion-button {
-  --box-shadow: none;
+// ============================================================
+//  LOGIN BUTTON
+// ============================================================
+.login-button {
+  --background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
+  --background-hover: linear-gradient(135deg, $primary-dark 0%, $primary 100%);
+  --background-activated: $primary-dark;
+  --border-radius: 16px;
+  --color: $white;
+  --box-shadow: 0 8px 24px rgba(10, 26, 92, 0.25);
+  height: 52px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  margin-top: 8px;
+  transition: all 0.25s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    --box-shadow: 0 12px 32px rgba(10, 26, 92, 0.35);
+  }
+
+  &.button-disabled {
+    opacity: 0.6;
+    transform: none;
+    --box-shadow: none;
+  }
+
+  ion-spinner {
+    --color: $white;
+  }
 }
 
-/* =========================
-   ANIMATIONS
-========================= */
+// ============================================================
+//  FOOTER
+// ============================================================
+.footer-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  text-align: center;
+  margin-top: 12px;
+  letter-spacing: 0.5px;
+  animation: fadeIn 0.8s ease 0.8s both;
+}
 
+// ============================================================
+//  ANIMATIONS
+// ============================================================
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: scale(0.96);
   }
-
   to {
     opacity: 1;
     transform: scale(1);
@@ -323,11 +436,38 @@ ion-button {
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(30px) scale(0.98);
   }
-
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ============================================================
+//  RESPONSIVE
+// ============================================================
+@media (max-width: 480px) {
+  .login-card ion-card-content {
+    padding: 24px 18px;
+  }
+
+  .brand-name {
+    font-size: 1.4rem;
+  }
+
+  .logo-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+
+  .login-button {
+    height: 48px;
+    font-size: 0.9rem;
+  }
+
+  .form-item {
+    --min-height: 48px;
+    --padding-start: 12px;
   }
 }

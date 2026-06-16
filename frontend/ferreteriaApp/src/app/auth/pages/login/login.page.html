@@ -1,16 +1,26 @@
 <ion-content [fullscreen]="true" class="login-content">
-  <div class="login-bg"></div>
+  <!-- Fondo con efecto de gradiente animado -->
+  <div class="login-bg">
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+  </div>
 
   <div class="login-container">
     <!-- =========================
-         BRAND
+         BRAND SECTION
     ========================= -->
     <div class="brand-section">
-      <img
-        class="logo"
-        src="assets/logo/logo_ferreteria.png"
-        alt="Ferretería July"
-      />
+      <div class="logo-wrapper">
+        <img
+          class="logo"
+          src="assets/logo/logo_ferreteria.png"
+          alt="Ferretería July"
+        />
+        <div class="logo-glow"></div>
+      </div>
+      <h1 class="brand-name">Ferretería July</h1>
+      <p class="brand-tagline">Sistema Corporativo</p>
     </div>
 
     <!-- =========================
@@ -19,141 +29,102 @@
     <ion-card class="login-card">
       <ion-card-content>
         <!-- HEADER -->
-        <div class="header">
-          <h2>Iniciar sesión</h2>
-          <p>Acceso autorizado al sistema</p>
+        <div class="card-header">
+          <h2>Bienvenido</h2>
+          <p>Inicia sesión para acceder al sistema</p>
         </div>
 
         <!-- =========================
              FORM
         ========================= -->
-        <form [formGroup]="form" (ngSubmit)="submitLogin()" class="form">
+        <form [formGroup]="form" (ngSubmit)="submitLogin()" class="login-form">
           <!-- =========================
-               USER
+               USERNAME / EMAIL
           ========================= -->
-          <ion-item
-            class="input_user"
-            lines="none"
-            [class.invalid]="
-              f.identifier.touched &&
-              f.identifier.invalid
-            "
-          >
-            <ion-label position="stacked"> Usuario o correo </ion-label>
-
-            <ion-input
-              formControlName="identifier"
-              type="text"
-              placeholder="usuario@correo.com"
-              autocomplete="username"
+          <div class="input-group">
+            <ion-item
+              class="form-item"
+              lines="none"
+              [class.invalid]="f.identifier.touched && f.identifier.invalid"
             >
-            </ion-input>
-          </ion-item>
-
-          <!-- USER ERROR -->
-          <div
-            class="field-error"
-            *ngIf="
-              f.identifier.touched &&
-              f.identifier.invalid
-            "
-          >
-            <!-- required -->
-            <span
-              *ngIf="
-                f.identifier.errors?.['required']
-              "
+              <ion-icon
+                name="person-outline"
+                slot="start"
+                class="input-icon"
+              ></ion-icon>
+              <ion-input
+                formControlName="identifier"
+                type="text"
+                placeholder="Usuario o correo electrónico"
+                autocomplete="username"
+              ></ion-input>
+            </ion-item>
+            <div
+              class="field-error"
+              *ngIf="f.identifier.touched && f.identifier.invalid"
             >
-              El usuario o correo es obligatorio
-            </span>
-
-            <!-- minlength -->
-            <span
-              *ngIf="
-                f.identifier.errors?.['minlength']
-              "
-            >
-              Debe tener mínimo 3 caracteres
-            </span>
+              <span *ngIf="f.identifier.errors?.['required']">
+                El usuario o correo es obligatorio
+              </span>
+              <span *ngIf="f.identifier.errors?.['minlength']">
+                Mínimo 3 caracteres
+              </span>
+            </div>
           </div>
 
           <!-- =========================
                PASSWORD
           ========================= -->
-          <ion-item
-            class="input_pass"
-            lines="none"
-            [class.invalid]="
-              f.password.touched &&
-              f.password.invalid
-            "
-          >
-            <ion-label position="stacked"> Contraseña </ion-label>
-
-            <ion-input
-              [type]="showPassword ? 'text' : 'password'"
-              formControlName="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-            >
-            </ion-input>
-
-            <!-- TOGGLE PASSWORD -->
-            <ion-button
-              fill="clear"
-              slot="end"
-              type="button"
-              class="toggle-password"
-              (click)="togglePassword()"
+          <div class="input-group">
+            <ion-item
+              class="form-item"
+              lines="none"
+              [class.invalid]="f.password.touched && f.password.invalid"
             >
               <ion-icon
-                class="eye-icon"
-                [name]="
-                  showPassword
-                    ? 'eye-off-outline'
-                    : 'eye-outline'
-                "
+                name="lock-closed-outline"
+                slot="start"
+                class="input-icon"
+              ></ion-icon>
+              <ion-input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="Contraseña"
+                autocomplete="current-password"
+              ></ion-input>
+              <ion-button
+                fill="clear"
+                slot="end"
+                type="button"
+                class="toggle-password"
+                (click)="togglePassword()"
               >
-              </ion-icon>
-            </ion-button>
-          </ion-item>
-
-          <!-- PASSWORD ERROR -->
-          <div
-            class="field-error"
-            *ngIf="
-              f.password.touched &&
-              f.password.invalid
-            "
-          >
-            <!-- required -->
-            <span
-              *ngIf="
-                f.password.errors?.['required']
-              "
+                <ion-icon
+                  class="eye-icon"
+                  [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+                ></ion-icon>
+              </ion-button>
+            </ion-item>
+            <div
+              class="field-error"
+              *ngIf="f.password.touched && f.password.invalid"
             >
-              La contraseña es obligatoria
-            </span>
-
-            <!-- minlength -->
-            <span
-              *ngIf="
-                f.password.errors?.['minlength']
-              "
-            >
-              La contraseña debe tener mínimo 6 caracteres
-            </span>
+              <span *ngIf="f.password.errors?.['required']">
+                La contraseña es obligatoria
+              </span>
+              <span *ngIf="f.password.errors?.['minlength']">
+                Mínimo 6 caracteres
+              </span>
+            </div>
           </div>
 
           <!-- =========================
                OPTIONS
           ========================= -->
-          <div class="options">
-            <!-- REMEMBER -->
-            <ion-item lines="none" class="remember">
-              <ion-checkbox formControlName="remember"> </ion-checkbox>
-
-              <ion-label> Recordarme </ion-label>
+          <div class="options-row">
+            <ion-item lines="none" class="remember-item">
+              <ion-checkbox formControlName="remember"></ion-checkbox>
+              <ion-label>Recordarme</ion-label>
             </ion-item>
           </div>
 
@@ -161,7 +132,7 @@
                API ERROR
           ========================= -->
           <ion-text color="danger" *ngIf="apiError">
-            <p class="error">{{ apiError }}</p>
+            <p class="api-error">{{ apiError }}</p>
           </ion-text>
 
           <!-- =========================
@@ -170,20 +141,19 @@
           <ion-button
             expand="block"
             type="submit"
-            class="btn-primary"
-            [disabled]="
-              form.invalid ||
-              submitting
-            "
+            class="login-button"
+            [disabled]="form.invalid || submitting"
           >
-            <!-- LOADING -->
-            <ion-spinner *ngIf="submitting" name="crescent"> </ion-spinner>
-
-            <!-- TEXT -->
-            <span *ngIf="!submitting"> Iniciar sesión </span>
+            <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
+            <span *ngIf="!submitting">Iniciar sesión</span>
           </ion-button>
         </form>
       </ion-card-content>
     </ion-card>
+
+    <!-- Footer -->
+    <p class="footer-text">
+      © 2026 Ferretería July. Todos los derechos reservados.
+    </p>
   </div>
 </ion-content>
