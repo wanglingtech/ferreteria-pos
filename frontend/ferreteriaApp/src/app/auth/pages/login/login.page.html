@@ -1,15 +1,15 @@
 <ion-content [fullscreen]="true" class="login-content">
-  <!-- Fondo con efecto de gradiente animado -->
+  <!-- Fondo con partículas -->
   <div class="login-bg">
-    <div class="bg-shape shape-1"></div>
-    <div class="bg-shape shape-2"></div>
-    <div class="bg-shape shape-3"></div>
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+    <div class="particle particle-4"></div>
+    <div class="particle particle-5"></div>
   </div>
 
   <div class="login-container">
-    <!-- =========================
-         BRAND SECTION
-    ========================= -->
+    <!-- Brand -->
     <div class="brand-section">
       <div class="logo-wrapper">
         <img
@@ -17,30 +17,22 @@
           src="assets/logo/logo_ferreteria.png"
           alt="Ferretería July"
         />
-        <div class="logo-glow"></div>
+        <div class="logo-ring"></div>
       </div>
       <h1 class="brand-name">Ferretería July</h1>
       <p class="brand-tagline">Sistema Corporativo</p>
     </div>
 
-    <!-- =========================
-         LOGIN CARD
-    ========================= -->
+    <!-- Login Card -->
     <ion-card class="login-card">
       <ion-card-content>
-        <!-- HEADER -->
         <div class="card-header">
-          <h2>Bienvenido</h2>
-          <p>Inicia sesión para acceder al sistema</p>
+          <h2>Bienvenido de nuevo</h2>
+          <p>Ingresa tus credenciales para continuar</p>
         </div>
 
-        <!-- =========================
-             FORM
-        ========================= -->
         <form [formGroup]="form" (ngSubmit)="submitLogin()" class="login-form">
-          <!-- =========================
-               USERNAME / EMAIL
-          ========================= -->
+          <!-- Usuario -->
           <div class="input-group">
             <ion-item
               class="form-item"
@@ -72,9 +64,7 @@
             </div>
           </div>
 
-          <!-- =========================
-               PASSWORD
-          ========================= -->
+          <!-- Contraseña -->
           <div class="input-group">
             <ion-item
               class="form-item"
@@ -98,6 +88,7 @@
                 type="button"
                 class="toggle-password"
                 (click)="togglePassword()"
+                aria-label="Mostrar contraseña"
               >
                 <ion-icon
                   class="eye-icon"
@@ -118,9 +109,7 @@
             </div>
           </div>
 
-          <!-- =========================
-               OPTIONS
-          ========================= -->
+          <!-- Recordarme -->
           <div class="options-row">
             <ion-item lines="none" class="remember-item">
               <ion-checkbox formControlName="remember"></ion-checkbox>
@@ -128,16 +117,12 @@
             </ion-item>
           </div>
 
-          <!-- =========================
-               API ERROR
-          ========================= -->
+          <!-- Error API -->
           <ion-text color="danger" *ngIf="apiError">
             <p class="api-error">{{ apiError }}</p>
           </ion-text>
 
-          <!-- =========================
-               SUBMIT BUTTON
-          ========================= -->
+          <!-- Botón -->
           <ion-button
             expand="block"
             type="submit"
@@ -151,7 +136,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Footer -->
     <p class="footer-text">
       © 2026 Ferretería July. Todos los derechos reservados.
     </p>

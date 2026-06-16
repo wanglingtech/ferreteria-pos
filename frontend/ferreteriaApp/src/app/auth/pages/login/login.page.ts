@@ -65,7 +65,6 @@ export class LoginPage implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
   ) {
-    // Registrar íconos
     addIcons({ personOutline, lockClosedOutline, eyeOutline, eyeOffOutline });
   }
 

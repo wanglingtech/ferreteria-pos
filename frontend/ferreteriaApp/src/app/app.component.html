@@ -10,5 +10,5 @@
     (didDismiss)="onToastDismiss()"
   />
 
-  <app-chatbot></app-chatbot>
+  <app-chatbot *ngIf="!isLoginPage"></app-chatbot>
 </ion-app>
