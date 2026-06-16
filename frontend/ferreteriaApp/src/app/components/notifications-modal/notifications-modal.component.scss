@@ -241,17 +241,16 @@ ion-item {
 
     ion-checkbox {
       --size: 20px;
-      --checkbox-background-checked: $success; // fondo verde al seleccionar
-      --background-checked: $success; // respaldo para algunas versiones
-      --checkmark-color: #0044fd; // el símbolo ✓ en blanco
-      --checkmark-width: 2px; // grosor del check
+      --checkbox-background-checked: $success;
+      --background-checked: $success;
+      --checkmark-color: #02ff2c;
+      --checkmark-width: 2px;
       --border-color: $border-medium;
       --border-color-checked: $success;
       --border-radius: 6px;
       margin-left: 4px;
       transition: $transition-default;
 
-      // Efecto sutil al pasar el mouse
       &:hover {
         transform: scale(1.05);
       }

@@ -22,7 +22,6 @@ export class NotificationService {
   public notifications$ = this.notificationsSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // Polling cada 30 segundos
     interval(30000).subscribe(() => this.cargarNotificaciones());
   }
 
@@ -30,7 +29,10 @@ export class NotificationService {
     this.http
       .get<ApiResponse<Notification[]>>(this.baseUrl)
       .pipe(map((res) => res.data))
-      .subscribe((data) => this.notificationsSubject.next(data));
+      .subscribe({
+        next: (data) => this.notificationsSubject.next(data),
+        error: (err) => console.error('Error cargando notificaciones:', err),
+      });
   }
 
   marcarComoLeida(id: number): Observable<Notification> {
@@ -63,7 +65,7 @@ export class NotificationService {
       .pipe(map((res) => res.data));
   }
 
-  // Método para crear una notificación desde el frontend (usado en reportes)
+  // ✅ Método para crear notificación desde frontend (usado en reportes)
   crearNotificacionFrontend(payload: any): Observable<Notification> {
     return this.http
       .post<ApiResponse<Notification>>(this.baseUrl, payload)

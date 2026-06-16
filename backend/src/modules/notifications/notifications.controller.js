@@ -1,6 +1,7 @@
 const notificationsService = require("./notifications.service");
 const { asyncHandler } = require("../../shared/utils/async-handler");
 const { sendSuccess } = require("../../shared/utils/http-response");
+const { AppError } = require("../../shared/errors/AppError"); // ✅ importación agregada
 
 const listar = asyncHandler(async (req, res) => {
   const data = await notificationsService.listarNotificaciones();
@@ -42,6 +43,12 @@ const eliminarTodas = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, "Todas las notificaciones eliminadas");
 });
 
+// ✅ NUEVO: Crear notificación desde frontend
+const crear = asyncHandler(async (req, res) => {
+  const data = await notificationsService.crearNotificacion(req.body);
+  return sendSuccess(res, data, "Notificación creada", 201);
+});
+
 module.exports = {
   listar,
   marcarLeida,
@@ -49,4 +56,5 @@ module.exports = {
   eliminar,
   eliminarMultiples,
   eliminarTodas,
+  crear,
 };

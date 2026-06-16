@@ -21,5 +21,7 @@ router.post(
   notificationsController.eliminarMultiples,
 );
 router.delete("/", authenticate, notificationsController.eliminarTodas);
+// ✅ NUEVA RUTA: Crear notificación desde frontend
+router.post("/", authenticate, notificationsController.crear);
 
 module.exports = router;
