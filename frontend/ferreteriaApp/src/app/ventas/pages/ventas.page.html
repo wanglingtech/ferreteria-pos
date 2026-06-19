@@ -51,7 +51,7 @@
         (input)="validarCliente()"
         required
       />
-      <!-- ✅ Mensaje de error dinámico (solo visible si hay error) -->
+      <!-- Mensaje de error dinámico -->
       <div *ngIf="clienteError()" class="error-message">
         <ion-icon name="alert-circle-outline"></ion-icon>
         {{ clienteError() }}
@@ -116,11 +116,18 @@
         fill="outline"
         class="save-btn"
         (click)="guardarVenta()"
-        >Guardar</ion-button
+        [disabled]="!isFormValid()"
       >
-      <ion-button expand="block" class="pay-btn" (click)="cobrarVenta()"
-        >Cobrar</ion-button
+        Guardar
+      </ion-button>
+      <ion-button
+        expand="block"
+        class="pay-btn"
+        (click)="cobrarVenta()"
+        [disabled]="!isFormValid()"
       >
+        Cobrar
+      </ion-button>
     </section>
   </div>
 

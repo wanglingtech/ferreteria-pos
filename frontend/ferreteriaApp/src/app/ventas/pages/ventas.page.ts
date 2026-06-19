@@ -203,7 +203,9 @@ export class VentasPage implements OnInit {
     return Number((this.subtotal + this.igv).toFixed(2));
   }
 
-  // Validación del nombre del cliente (en tiempo real)
+  /**
+   * ✅ VALIDACIÓN ESTRICTA DEL NOMBRE DEL CLIENTE
+   */
   validarCliente() {
     const nombre = this.clienteNombre.trim();
     if (nombre.length === 0) {
@@ -211,17 +213,30 @@ export class VentasPage implements OnInit {
       return false;
     }
     if (nombre.length < 3) {
-      this.clienteError.set('Mínimo 3 caracteres');
+      this.clienteError.set('Mínimo 3 caracteres (ej: Ana)');
       return false;
     }
     if (nombre.length > 80) {
       this.clienteError.set('Máximo 80 caracteres');
       return false;
     }
-    const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-\'\.]+$/;
+    // Regex mejorada: comienza y termina con letra, permite separadores entre letras
+    const regex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:[\s\-'\.][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/;
     if (!regex.test(nombre)) {
       this.clienteError.set(
-        'Solo letras, espacios, guiones, apóstrofes y puntos. No use números ni símbolos.',
+        "Nombre inválido. Use solo letras, espacios, guiones, apóstrofes o puntos entre palabras (ej: Juan Pérez, Mª José, D'Angelo). No use números ni símbolos.",
+      );
+      return false;
+    }
+    // Validación adicional: no permitir más de un punto, guion o apóstrofe seguido
+    if (
+      /(\.{2,})/.test(nombre) ||
+      /(\-{2,})/.test(nombre) ||
+      /(\'{2,})/.test(nombre)
+    ) {
+      // ✅ CORREGIDO: escapamos las comillas simples dentro de la cadena con \'
+      this.clienteError.set(
+        'No use caracteres repetidos como "..", "--" o \'\'\'. Use solo uno entre palabras.',
       );
       return false;
     }
@@ -231,10 +246,6 @@ export class VentasPage implements OnInit {
 
   // =================== MÉTODOS PRINCIPALES ===================
 
-  /**
-   * Botón GUARDAR: valida, muestra resumen y al confirmar registra la venta
-   * y luego muestra solo opción COMPARTIR (sin imprimir)
-   */
   async guardarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
@@ -243,14 +254,9 @@ export class VentasPage implements OnInit {
     }
     this.ventaConfirmada = null;
     this.resumenModal.present();
-    // Guardamos en una variable temporal que al confirmar se usará con tipo 'guardar'
     this.tipoVentaPendiente = 'guardar';
   }
 
-  /**
-   * Botón COBRAR: valida, muestra resumen y al confirmar registra la venta
-   * y luego muestra solo opción IMPRIMIR (sin compartir)
-   */
   async cobrarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
@@ -262,13 +268,8 @@ export class VentasPage implements OnInit {
     this.tipoVentaPendiente = 'cobrar';
   }
 
-  // Variable para recordar qué botón se pulsó antes del modal de resumen
   private tipoVentaPendiente: 'guardar' | 'cobrar' = 'guardar';
 
-  /**
-   * Confirmación desde el modal de resumen.
-   * Llama al registro de la venta y luego muestra el menú según el tipo.
-   */
   async confirmarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
@@ -293,7 +294,6 @@ export class VentasPage implements OnInit {
         this.limpiarCarrito();
         this.resumenModal.dismiss();
 
-        // Mostrar opciones post-venta según el tipo de botón pulsado
         if (this.tipoVentaPendiente === 'guardar') {
           this.mostrarOpcionesPostGuardar(venta);
         } else {
@@ -307,41 +307,27 @@ export class VentasPage implements OnInit {
     });
   }
 
-  // Opciones para el botón GUARDAR: solo Compartir y Cerrar
   private mostrarOpcionesPostGuardar(venta: Venta) {
     this.alertCtrl
       .create({
         header: 'Venta registrada',
         message: `Venta N° ${venta.code} registrada con éxito.`,
         buttons: [
-          {
-            text: 'Compartir',
-            handler: () => this.compartirVenta(venta),
-          },
-          {
-            text: 'Cerrar',
-            role: 'cancel',
-          },
+          { text: 'Compartir', handler: () => this.compartirVenta(venta) },
+          { text: 'Cerrar', role: 'cancel' },
         ],
       })
       .then((alert) => alert.present());
   }
 
-  // Opciones para el botón COBRAR: solo Imprimir y Cerrar
   private mostrarOpcionesPostCobrar(venta: Venta) {
     this.alertCtrl
       .create({
         header: 'Venta completada',
         message: `Venta N° ${venta.code} registrada con éxito. ¿Desea imprimir el comprobante?`,
         buttons: [
-          {
-            text: 'Imprimir',
-            handler: () => this.imprimirTicket(venta),
-          },
-          {
-            text: 'Cerrar',
-            role: 'cancel',
-          },
+          { text: 'Imprimir', handler: () => this.imprimirTicket(venta) },
+          { text: 'Cerrar', role: 'cancel' },
         ],
       })
       .then((alert) => alert.present());
@@ -353,7 +339,7 @@ export class VentasPage implements OnInit {
     this.clienteError.set('');
   }
 
-  // =================== MÉTODOS DE IMPRESIÓN Y COMPARTIR (sin cambios) ===================
+  // =================== MÉTODOS DE IMPRESIÓN Y COMPARTIR ===================
   imprimirTicket(venta: Venta) {
     this.ventaConfirmada = venta;
     const qrData = `${window.location.origin}/ventas/detalle/${venta.id}`;
