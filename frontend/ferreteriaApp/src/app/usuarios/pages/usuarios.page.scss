@@ -8,10 +8,12 @@
   --brand-bright: #2754d8;
   --brand-primary: #055eee;
   --brand-hover: #044bc9;
+  --brand-accent: #3b82f6;
   --gray-bg: #f4f7fc;
   --white: #ffffff;
   --text-dark: #0f172a;
   --text-muted: #475569;
+  --text-danger: #dc2626;
   --border-light: #eef2ff;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.06);
@@ -271,7 +273,6 @@
   }
 }
 
-/* Info del usuario */
 .user-info {
   display: flex;
   align-items: center;
@@ -315,7 +316,6 @@
   }
 }
 
-/* Chips */
 .role-chip {
   background: #eef4ff;
   color: var(--brand-mid);
@@ -344,7 +344,6 @@
   }
 }
 
-/* Botón menú */
 .menu-btn {
   --padding-start: 8px;
   --padding-end: 8px;
@@ -504,7 +503,7 @@
 }
 
 /* =====================================================
-   RESPONSIVE (móvil, tablet, escritorio)
+   RESPONSIVE
 ===================================================== */
 @media (max-width: 1024px) {
   .user-card {
@@ -656,7 +655,7 @@
   }
 }
 
-/* Scrollbar personalizado (opcional) */
+/* Scrollbar personalizado */
 .usuarios-content::-webkit-scrollbar {
   width: 6px;
 }
@@ -669,4 +668,8 @@
 .usuarios-content::-webkit-scrollbar-thumb {
   background: var(--brand-mid);
   border-radius: 10px;
+}
+
+.usuarios-content::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-light);
 }

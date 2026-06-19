@@ -94,31 +94,66 @@ export class UsuariosPage implements OnInit {
   protected editingUserId: number | null = null;
 
   // ============================================================
-  // VALIDADORES PERSONALIZADOS
+  // VALIDADORES PERSONALIZADOS (ULTRA ESTRICTOS)
   // ============================================================
 
   /**
-   * Valida username: solo letras, números, guión bajo (_), punto (.), guión (-)
+   * ✅ Valida username: SOLO letras minúsculas y números.
+   * No permite mayúsculas, guiones, puntos, guiones bajos ni espacios.
+   * Ejemplo válido: "juan123", "admin01"
+   * Ejemplo inválido: "Juan_Perez", "juan-perez", "juan.perez"
    */
   private usernameValidator(control: AbstractControl): ValidationErrors | null {
     if (!control.value) return null;
-    const regex = /^[a-zA-Z0-9_.-]+$/;
-    return regex.test(control.value) ? null : { usernameInvalid: true };
+    const value = control.value.trim();
+    if (value.length < 3) return { usernameInvalid: 'Mínimo 3 caracteres.' };
+    if (value.length > 30) return { usernameInvalid: 'Máximo 30 caracteres.' };
+    const regex = /^[a-z0-9]+$/;
+    if (!regex.test(value)) {
+      return {
+        usernameInvalid:
+          'Solo letras minúsculas (a-z) y números (0-9). Sin espacios, mayúsculas ni caracteres especiales.',
+      };
+    }
+    return null;
   }
 
   /**
-   * Valida nombre completo: al menos una letra, permite espacios, guiones, apóstrofes, puntos.
-   * Rechaza "...." o caracteres repetidos sin letras.
+   * ✅ Valida nombre completo: mínimo dos palabras, cada una con mayúscula inicial.
+   * Permite espacios, apóstrofes, guiones y puntos.
+   * Ejemplo válido: "Juan Pérez", "María José", "D'Angelo", "Mª José"
+   * Ejemplo inválido: "juan", "Juan", "Juan Perez" (sin mayúscula en Perez)
    */
   private fullNameValidator(control: AbstractControl): ValidationErrors | null {
     if (!control.value) return null;
-    const regex =
-      /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]+(?:[\s\-'\.][a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]+)*$/;
-    return regex.test(control.value) ? null : { fullNameInvalid: true };
+    const value = control.value.trim();
+    if (value.length < 2) return { fullNameInvalid: 'Mínimo 2 caracteres.' };
+    if (value.length > 100)
+      return { fullNameInvalid: 'Máximo 100 caracteres.' };
+    // Debe tener al menos dos palabras, cada una con mayúscula inicial
+    const words: string[] = value
+      .split(/\s+/)
+      .filter((word: string) => word.length > 0); // ✅ tipado explícito
+    if (words.length < 2) {
+      return {
+        fullNameInvalid: 'Debe contener al menos dos nombres (ej: Juan Pérez).',
+      };
+    }
+    // Cada palabra debe empezar con mayúscula y el resto minúsculas (o apóstrofe/punto)
+    const regex = /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]*([-'\.][A-ZÁÉÍÓÚÑ][a-záéíóúñ]*)?$/;
+    for (const word of words) {
+      if (!regex.test(word)) {
+        return {
+          fullNameInvalid:
+            'Cada palabra debe empezar con mayúscula y continuar con minúsculas (ej: Juan Pérez). Use apóstrofes (D´Angelo) o puntos (Mª José).',
+        };
+      }
+    }
+    return null;
   }
 
   /**
-   * ✅ VALIDADOR DE CONTRASEÑA ROBUSTO (NUEVO)
+   * ✅ VALIDADOR DE CONTRASEÑA ROBUSTO
    * Exige: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número.
    * No permite espacios.
    */
@@ -152,47 +187,37 @@ export class UsuariosPage implements OnInit {
   getUsernameErrorMessage(form: FormGroup): string {
     const control = form.get('username');
     if (control?.hasError('required'))
-      return 'El nombre de usuario es requerido';
-    if (control?.hasError('minlength')) return 'Mínimo 3 caracteres';
-    if (control?.hasError('maxlength')) return 'Máximo 30 caracteres';
+      return 'El nombre de usuario es requerido.';
     if (control?.hasError('usernameInvalid'))
-      return 'Solo letras, números, guion bajo (_), punto (.) o guión (-). Sin espacios.';
+      return control.getError('usernameInvalid');
     return '';
   }
 
   getFullNameErrorMessage(form: FormGroup): string {
     const control = form.get('fullName');
-    if (control?.hasError('required')) return 'El nombre completo es requerido';
-    if (control?.hasError('minlength')) return 'Mínimo 2 caracteres';
-    if (control?.hasError('maxlength')) return 'Máximo 100 caracteres';
+    if (control?.hasError('required'))
+      return 'El nombre completo es requerido.';
     if (control?.hasError('fullNameInvalid'))
-      return 'Use letras, espacios, guiones, apóstrofes o puntos (ej: Juan Pérez, Mª José, D´Angelo).';
+      return control.getError('fullNameInvalid');
     return '';
   }
 
   getEmailErrorMessage(form: FormGroup): string {
     const control = form.get('email');
-    if (control?.hasError('required')) return 'El correo es requerido';
-    if (control?.hasError('email')) return 'Correo electrónico inválido';
-    if (control?.hasError('maxlength')) return 'Máximo 100 caracteres';
+    if (control?.hasError('required')) return 'El correo es requerido.';
+    if (control?.hasError('email'))
+      return 'Correo electrónico inválido (ej: usuario@dominio.com).';
+    if (control?.hasError('maxlength')) return 'Máximo 100 caracteres.';
     return '';
   }
 
-  /**
-   * ✅ Mensajes de error para contraseña (ahora con el nuevo validador)
-   */
   getPasswordErrorMessage(form: FormGroup, isEdit: boolean = false): string {
     const control = form.get('password');
     if (!control) return '';
-    if (!isEdit && control.hasError('required')) {
-      return 'La contraseña es requerida';
-    }
-    if (control.hasError('passwordInvalid')) {
+    if (!isEdit && control.hasError('required'))
+      return 'La contraseña es requerida.';
+    if (control.hasError('passwordInvalid'))
       return control.getError('passwordInvalid');
-    }
-    if (control.hasError('minlength')) {
-      return 'Mínimo 8 caracteres';
-    }
     return '';
   }
 
@@ -221,62 +246,28 @@ export class UsuariosPage implements OnInit {
     // FORMULARIO CREAR
     // ============================
     this.createUserForm = this.formBuilder.group({
-      username: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(30),
-          this.usernameValidator,
-        ],
-      ],
+      username: ['', [Validators.required, this.usernameValidator]],
       email: [
         '',
         [Validators.required, Validators.email, Validators.maxLength(100)],
       ],
-      fullName: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(100),
-          this.fullNameValidator,
-        ],
-      ],
-      // ✅ Contraseña con validador robusto
+      fullName: ['', [Validators.required, this.fullNameValidator]],
       password: ['', [Validators.required, this.passwordValidator]],
       role: ['SELLER', Validators.required],
     });
 
     // ============================
-    // FORMULARIO EDITAR (contraseña opcional)
+    // FORMULARIO EDITAR
     // ============================
     this.editUserForm = this.formBuilder.group({
-      username: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(30),
-          this.usernameValidator,
-        ],
-      ],
+      username: ['', [Validators.required, this.usernameValidator]],
       email: [
         '',
         [Validators.required, Validators.email, Validators.maxLength(100)],
       ],
-      fullName: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(100),
-          this.fullNameValidator,
-        ],
-      ],
+      fullName: ['', [Validators.required, this.fullNameValidator]],
       role: ['SELLER', Validators.required],
-      // ✅ Contraseña opcional, pero si se llena debe cumplir
-      password: ['', [this.passwordValidator]],
+      password: ['', [this.passwordValidator]], // opcional
     });
   }
 
@@ -285,7 +276,7 @@ export class UsuariosPage implements OnInit {
   }
 
   // ============================================================
-  // CRUD
+  // CRUD (sin cambios, se mantiene igual)
   // ============================================================
   protected cargarUsuarios(): void {
     this.isLoading = true;
