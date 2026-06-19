@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonButton,
@@ -49,8 +55,23 @@ import {
 })
 export class LoginPage implements OnInit {
   protected form = this.fb.nonNullable.group({
-    identifier: ['', [Validators.required, Validators.minLength(3)]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    identifier: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(50),
+        this.identifierValidator, // ✅ validador personalizado
+      ],
+    ],
+    password: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(6),
+        this.passwordValidator, // ✅ validador personalizado (evita espacios)
+      ],
+    ],
     remember: [false],
   });
 
@@ -68,6 +89,49 @@ export class LoginPage implements OnInit {
     addIcons({ personOutline, lockClosedOutline, eyeOutline, eyeOffOutline });
   }
 
+  // ============================================================
+  // VALIDADORES PERSONALIZADOS
+  // ============================================================
+
+  /**
+   * Valida que el identifier sea email válido O username válido.
+   * Usa regex para evitar caracteres extraños.
+   */
+  private identifierValidator(
+    control: AbstractControl,
+  ): ValidationErrors | null {
+    const value = control.value?.trim();
+    if (!value) return null;
+
+    // Validar como email (formato básico)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (emailRegex.test(value)) return null;
+
+    // Validar como username (solo letras, números, guiones, puntos, guion bajo)
+    const usernameRegex = /^[a-zA-Z0-9_.-]+$/;
+    if (usernameRegex.test(value)) return null;
+
+    return {
+      identifierInvalid:
+        'Ingresa un email válido o un nombre de usuario (solo letras, números, guiones, puntos, guion bajo). Sin espacios.',
+    };
+  }
+
+  /**
+   * Valida que la contraseña no contenga espacios y tenga al menos 6 caracteres.
+   */
+  private passwordValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+    if (value.includes(' ')) {
+      return { passwordInvalid: 'La contraseña no puede contener espacios.' };
+    }
+    return null;
+  }
+
+  // ============================================================
+  // GETTERS
+  // ============================================================
   get f() {
     return this.form.controls;
   }

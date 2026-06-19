@@ -12,6 +12,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
 
   const isLoginRequest = req.url.includes('/auth/login');
+  const isNotificationRequest = req.url.includes('/notificaciones');
 
   return next(req).pipe(
     catchError((error: unknown) => {
@@ -20,14 +21,26 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
+      // ✅ 401: manejo especial
       if (error.status === 401 || error.status === 403) {
+        // Si es login, solo notificar (no redirigir)
         if (isLoginRequest) {
-          errorService.notify(error.error?.message || 'Credenciales inválidas.');
+          errorService.notify(
+            error.error?.message || 'Credenciales inválidas.',
+          );
           return throwError(() => error);
         }
 
+        // Si es notificaciones, no mostrar toast ni redirigir (se maneja en el servicio)
+        if (isNotificationRequest) {
+          return throwError(() => error);
+        }
+
+        // Para otras peticiones, limpiar sesión y redirigir
         authSession.clearSession();
-        errorService.notify('Tu sesión expiró o no tienes permisos. Inicia sesión nuevamente.');
+        errorService.notify(
+          'Tu sesión expiró o no tienes permisos. Inicia sesión nuevamente.',
+        );
 
         if (!router.url.startsWith('/auth/login')) {
           void router.navigate(['/auth/login'], {
@@ -39,6 +52,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
+      // Otros errores HTTP
       const message =
         error.error?.message ||
         mapStatusToMessage(error.status) ||
@@ -59,6 +73,5 @@ function mapStatusToMessage(status: number): string | null {
     422: 'No se pudo procesar la solicitud.',
     500: 'El servidor encontró un error inesperado.',
   };
-
   return map[status] || null;
 }

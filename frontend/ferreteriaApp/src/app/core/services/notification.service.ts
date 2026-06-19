@@ -4,6 +4,7 @@ import { Observable, BehaviorSubject, interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../../shared/interfaces/api-response.interface';
+import { AuthSessionService } from './auth-session.service'; // ✅ importar
 
 export interface Notification {
   id: number;
@@ -21,11 +22,26 @@ export class NotificationService {
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
   public notifications$ = this.notificationsSubject.asObservable();
 
-  constructor(private http: HttpClient) {
-    interval(30000).subscribe(() => this.cargarNotificaciones());
+  constructor(
+    private http: HttpClient,
+    private authSession: AuthSessionService, // ✅ inyectar
+  ) {
+    // ✅ Solo iniciar polling si hay sesión activa
+    if (this.authSession.isAuthenticated()) {
+      interval(30000).subscribe(() => {
+        if (this.authSession.isAuthenticated()) {
+          this.cargarNotificaciones();
+        }
+      });
+      this.cargarNotificaciones(); // carga inicial
+    }
   }
 
   cargarNotificaciones(): void {
+    // ✅ Verificar sesión antes de hacer la petición
+    if (!this.authSession.isAuthenticated()) {
+      return;
+    }
     this.http
       .get<ApiResponse<Notification[]>>(this.baseUrl)
       .pipe(map((res) => res.data))
@@ -65,7 +81,6 @@ export class NotificationService {
       .pipe(map((res) => res.data));
   }
 
-  // ✅ Método para crear notificación desde frontend (usado en reportes)
   crearNotificacionFrontend(payload: any): Observable<Notification> {
     return this.http
       .post<ApiResponse<Notification>>(this.baseUrl, payload)
