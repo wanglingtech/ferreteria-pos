@@ -66,7 +66,8 @@ import html2canvas from 'html2canvas';
 export class VentasPage implements OnInit {
   @ViewChild('resumenModal') resumenModal!: IonModal;
 
-  clienteNombre = '';
+  // ✅ clienteNombre ahora es una señal para reactividad
+  clienteNombre = signal<string>('');
   searchTerm = '';
   productos = signal<ProductoParaVenta[]>([]);
   filteredProducts = signal<ProductoParaVenta[]>([]);
@@ -78,13 +79,10 @@ export class VentasPage implements OnInit {
   // Señal para el mensaje de error del cliente
   clienteError = signal<string>('');
 
-  // Computado que indica si el formulario es válido
+  // Computado que indica si el formulario es válido (se reevalúa automáticamente)
   isFormValid = computed(() => {
-    return (
-      this.clienteNombre.trim().length > 0 &&
-      !this.clienteError() &&
-      this.cart().length > 0
-    );
+    const nombre = this.clienteNombre().trim();
+    return nombre.length > 0 && !this.clienteError() && this.cart().length > 0;
   });
 
   private productosApi = inject(ProductosApiService);
@@ -207,7 +205,7 @@ export class VentasPage implements OnInit {
    * ✅ VALIDACIÓN ESTRICTA DEL NOMBRE DEL CLIENTE
    */
   validarCliente() {
-    const nombre = this.clienteNombre.trim();
+    const nombre = this.clienteNombre().trim();
     if (nombre.length === 0) {
       this.clienteError.set('El nombre del cliente es obligatorio');
       return false;
@@ -220,7 +218,6 @@ export class VentasPage implements OnInit {
       this.clienteError.set('Máximo 80 caracteres');
       return false;
     }
-    // Regex mejorada: comienza y termina con letra, permite separadores entre letras
     const regex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:[\s\-'\.][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/;
     if (!regex.test(nombre)) {
       this.clienteError.set(
@@ -228,13 +225,11 @@ export class VentasPage implements OnInit {
       );
       return false;
     }
-    // Validación adicional: no permitir más de un punto, guion o apóstrofe seguido
     if (
       /(\.{2,})/.test(nombre) ||
       /(\-{2,})/.test(nombre) ||
       /(\'{2,})/.test(nombre)
     ) {
-      // ✅ CORREGIDO: escapamos las comillas simples dentro de la cadena con \'
       this.clienteError.set(
         'No use caracteres repetidos como "..", "--" o \'\'\'. Use solo uno entre palabras.',
       );
@@ -278,7 +273,7 @@ export class VentasPage implements OnInit {
     }
 
     const payload: CreateVentaRequest = {
-      clienteNombre: this.clienteNombre.trim(),
+      clienteNombre: this.clienteNombre().trim(),
       items: this.cart().map((item) => ({
         productoId: item.id,
         cantidad: item.cantidad,
@@ -335,7 +330,7 @@ export class VentasPage implements OnInit {
 
   limpiarCarrito() {
     this.cart.set([]);
-    this.clienteNombre = '';
+    this.clienteNombre.set('');
     this.clienteError.set('');
   }
 

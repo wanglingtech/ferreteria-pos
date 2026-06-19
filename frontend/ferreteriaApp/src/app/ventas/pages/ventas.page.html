@@ -43,15 +43,15 @@
     <!-- CLIENTE (requerido) -->
     <section class="client-card">
       <div class="card-title">Cliente <span class="required">*</span></div>
+      <!-- ✅ Usamos [ngModel] y (ngModelChange) con la señal clienteNombre -->
       <input
         class="client-input"
         type="text"
         placeholder="Nombre del cliente (solo letras y espacios)"
-        [(ngModel)]="clienteNombre"
-        (input)="validarCliente()"
+        [ngModel]="clienteNombre()"
+        (ngModelChange)="clienteNombre.set($event); validarCliente()"
         required
       />
-      <!-- Mensaje de error dinámico -->
       <div *ngIf="clienteError()" class="error-message">
         <ion-icon name="alert-circle-outline"></ion-icon>
         {{ clienteError() }}
@@ -150,7 +150,7 @@
       <ion-content class="modal-content">
         <div class="resumen-container">
           <div class="cliente-info">
-            <strong>Cliente:</strong> {{ clienteNombre }}
+            <strong>Cliente:</strong> {{ clienteNombre() }}
           </div>
           <div class="tabla-productos">
             <table>
