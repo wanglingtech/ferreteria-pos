@@ -61,16 +61,12 @@ export class LoginPage implements OnInit {
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(50),
-        this.identifierValidator, // ✅ validador personalizado
+        this.identifierValidator,
       ],
     ],
     password: [
       '',
-      [
-        Validators.required,
-        Validators.minLength(6),
-        this.passwordValidator, // ✅ validador personalizado (evita espacios)
-      ],
+      [Validators.required, Validators.minLength(8), this.passwordValidator],
     ],
     remember: [false],
   });
@@ -89,49 +85,46 @@ export class LoginPage implements OnInit {
     addIcons({ personOutline, lockClosedOutline, eyeOutline, eyeOffOutline });
   }
 
-  // ============================================================
-  // VALIDADORES PERSONALIZADOS
-  // ============================================================
-
-  /**
-   * Valida que el identifier sea email válido O username válido.
-   * Usa regex para evitar caracteres extraños.
-   */
+  // Valida identifier: email válido o username permitido (sin espacios)
   private identifierValidator(
     control: AbstractControl,
   ): ValidationErrors | null {
     const value = control.value?.trim();
     if (!value) return null;
-
-    // Validar como email (formato básico)
+    // Email
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (emailRegex.test(value)) return null;
-
-    // Validar como username (solo letras, números, guiones, puntos, guion bajo)
+    // Username permitido
     const usernameRegex = /^[a-zA-Z0-9_.-]+$/;
     if (usernameRegex.test(value)) return null;
-
     return {
       identifierInvalid:
         'Ingresa un email válido o un nombre de usuario (solo letras, números, guiones, puntos, guion bajo). Sin espacios.',
     };
   }
 
-  /**
-   * Valida que la contraseña no contenga espacios y tenga al menos 6 caracteres.
-   */
+  // Valida contraseña: min 8, mayúscula, minúscula, número, sin espacios
   private passwordValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (!value) return null;
-    if (value.includes(' ')) {
+    if (value.includes(' '))
       return { passwordInvalid: 'La contraseña no puede contener espacios.' };
+    if (value.length < 8)
+      return {
+        passwordInvalid: 'La contraseña debe tener al menos 8 caracteres.',
+      };
+    const hasUpper = /[A-Z]/.test(value);
+    const hasLower = /[a-z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    if (!hasUpper || !hasLower || !hasNumber) {
+      return {
+        passwordInvalid:
+          'La contraseña debe tener al menos una mayúscula, una minúscula y un número.',
+      };
     }
     return null;
   }
 
-  // ============================================================
-  // GETTERS
-  // ============================================================
   get f() {
     return this.form.controls;
   }
@@ -149,20 +142,19 @@ export class LoginPage implements OnInit {
   submitLogin(): void {
     this.apiError = '';
     this.form.markAllAsTouched();
-
     if (this.form.invalid || this.submitting) return;
-
     this.submitting = true;
-
     this.authApi
       .login(this.form.getRawValue())
       .pipe(finalize(() => (this.submitting = false)))
       .subscribe({
         next: () => {
           const redirect = this.route.snapshot.queryParamMap.get('redirect');
-          void this.router.navigateByUrl(redirect || '/app/dashboard', {
-            replaceUrl: true,
-          });
+          // Evitar navegar a la misma ruta
+          const targetUrl = redirect || '/app/dashboard';
+          if (this.router.url !== targetUrl) {
+            void this.router.navigateByUrl(targetUrl, { replaceUrl: true });
+          }
         },
         error: (err) => {
           this.apiError = err?.error?.message || 'Error al iniciar sesión';

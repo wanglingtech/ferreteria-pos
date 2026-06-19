@@ -75,27 +75,28 @@ import {
 })
 export class UsuariosPage implements OnInit {
   // ============================================================
-  // Referencias a modales y action sheet del template
+  // REFERENCIAS A MODALES Y ACTION SHEET
   // ============================================================
   @ViewChild('createModal') createModal!: IonModal;
   @ViewChild('editModal') editModal!: IonModal;
   @ViewChild('actionSheet') actionSheet!: IonActionSheet;
 
   // ============================================================
-  // Datos y estado de la página
+  // ESTADO Y DATOS
   // ============================================================
-  protected search = ''; // Término de búsqueda
-  protected usuarios: Usuario[] = []; // Lista completa de usuarios
-  protected createUserForm: FormGroup; // Formulario de creación
-  protected editUserForm: FormGroup; // Formulario de edición
-  protected isLoading = false; // Indicador de carga
-  protected selectedUser: Usuario | null = null; // Usuario seleccionado para acciones
-  protected showActionSheet = false; // Muestra/oculta action sheet
-  protected editingUserId: number | null = null; // ID del usuario en edición
+  protected search = '';
+  protected usuarios: Usuario[] = [];
+  protected createUserForm: FormGroup;
+  protected editUserForm: FormGroup;
+  protected isLoading = false;
+  protected selectedUser: Usuario | null = null;
+  protected showActionSheet = false;
+  protected editingUserId: number | null = null;
 
   // ============================================================
-  // VALIDADORES PERSONALIZADOS (expresiones regulares)
+  // VALIDADORES PERSONALIZADOS
   // ============================================================
+
   /**
    * Valida username: solo letras, números, guión bajo (_), punto (.), guión (-)
    */
@@ -116,9 +117,38 @@ export class UsuariosPage implements OnInit {
     return regex.test(control.value) ? null : { fullNameInvalid: true };
   }
 
+  /**
+   * ✅ VALIDADOR DE CONTRASEÑA ROBUSTO (NUEVO)
+   * Exige: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número.
+   * No permite espacios.
+   */
+  private passwordValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+    if (value.includes(' ')) {
+      return { passwordInvalid: 'La contraseña no puede contener espacios.' };
+    }
+    if (value.length < 8) {
+      return {
+        passwordInvalid: 'La contraseña debe tener al menos 8 caracteres.',
+      };
+    }
+    const hasUpper = /[A-Z]/.test(value);
+    const hasLower = /[a-z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    if (!hasUpper || !hasLower || !hasNumber) {
+      return {
+        passwordInvalid:
+          'La contraseña debe tener al menos una mayúscula, una minúscula y un número.',
+      };
+    }
+    return null;
+  }
+
   // ============================================================
   // MÉTODOS PARA OBTENER MENSAJES DE ERROR LEGIBLES
   // ============================================================
+
   getUsernameErrorMessage(form: FormGroup): string {
     const control = form.get('username');
     if (control?.hasError('required'))
@@ -148,17 +178,26 @@ export class UsuariosPage implements OnInit {
     return '';
   }
 
+  /**
+   * ✅ Mensajes de error para contraseña (ahora con el nuevo validador)
+   */
   getPasswordErrorMessage(form: FormGroup, isEdit: boolean = false): string {
     const control = form.get('password');
     if (!control) return '';
-    if (!isEdit && control.hasError('required'))
+    if (!isEdit && control.hasError('required')) {
       return 'La contraseña es requerida';
-    if (control.hasError('minlength')) return 'Mínimo 6 caracteres';
+    }
+    if (control.hasError('passwordInvalid')) {
+      return control.getError('passwordInvalid');
+    }
+    if (control.hasError('minlength')) {
+      return 'Mínimo 8 caracteres';
+    }
     return '';
   }
 
   // ============================================================
-  // CONSTRUCTOR: inicializa formularios e iconos
+  // CONSTRUCTOR
   // ============================================================
   constructor(
     private readonly usuariosApiService: UsuariosApiService,
@@ -166,7 +205,6 @@ export class UsuariosPage implements OnInit {
     private readonly toastController: ToastController,
     private readonly alertController: AlertController,
   ) {
-    // Registrar iconos utilizados en el template
     addIcons({
       searchOutline,
       personAddOutline,
@@ -179,7 +217,9 @@ export class UsuariosPage implements OnInit {
       lockClosedOutline,
     });
 
-    // Formulario de creación
+    // ============================
+    // FORMULARIO CREAR
+    // ============================
     this.createUserForm = this.formBuilder.group({
       username: [
         '',
@@ -203,11 +243,14 @@ export class UsuariosPage implements OnInit {
           this.fullNameValidator,
         ],
       ],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      // ✅ Contraseña con validador robusto
+      password: ['', [Validators.required, this.passwordValidator]],
       role: ['SELLER', Validators.required],
     });
 
-    // Formulario de edición (contraseña opcional)
+    // ============================
+    // FORMULARIO EDITAR (contraseña opcional)
+    // ============================
     this.editUserForm = this.formBuilder.group({
       username: [
         '',
@@ -232,7 +275,8 @@ export class UsuariosPage implements OnInit {
         ],
       ],
       role: ['SELLER', Validators.required],
-      password: ['', [Validators.minLength(6)]], // opcional
+      // ✅ Contraseña opcional, pero si se llena debe cumplir
+      password: ['', [this.passwordValidator]],
     });
   }
 
@@ -241,7 +285,7 @@ export class UsuariosPage implements OnInit {
   }
 
   // ============================================================
-  // CRUD: Cargar usuarios desde el backend
+  // CRUD
   // ============================================================
   protected cargarUsuarios(): void {
     this.isLoading = true;
@@ -257,9 +301,6 @@ export class UsuariosPage implements OnInit {
     });
   }
 
-  // ============================================================
-  // Búsqueda local (filtra por nombre, email o username)
-  // ============================================================
   protected get filteredUsers(): Usuario[] {
     const term = this.search.trim().toLowerCase();
     if (!term) return this.usuarios;
@@ -271,7 +312,6 @@ export class UsuariosPage implements OnInit {
     );
   }
 
-  // Obtener iniciales para el avatar
   protected getInitials(fullName: string): string {
     return (
       fullName
@@ -297,7 +337,6 @@ export class UsuariosPage implements OnInit {
 
   protected guardarUsuario(): void {
     if (!this.createUserForm.valid) {
-      // Marcar todos los campos como "tocados" para mostrar errores
       Object.keys(this.createUserForm.controls).forEach((key) =>
         this.createUserForm.get(key)?.markAsTouched(),
       );
@@ -309,7 +348,7 @@ export class UsuariosPage implements OnInit {
     this.usuariosApiService.crear(payload).subscribe({
       next: (nuevo) => {
         this.isLoading = false;
-        this.usuarios.unshift(nuevo); // Añadir al inicio de la lista
+        this.usuarios.unshift(nuevo);
         this.createModal.dismiss();
         this.mostrarExito('Usuario creado exitosamente');
       },
@@ -321,7 +360,7 @@ export class UsuariosPage implements OnInit {
   }
 
   // ============================================================
-  // MENÚ DE OPCIONES (action sheet)
+  // MENÚ DE OPCIONES
   // ============================================================
   protected openUserMenu(user: Usuario): void {
     this.selectedUser = user;
@@ -333,7 +372,7 @@ export class UsuariosPage implements OnInit {
   }
 
   // ============================================================
-  // CAMBIAR ESTADO (activar / desactivar)
+  // CAMBIAR ESTADO
   // ============================================================
   protected async toggleUserStatus(): Promise<void> {
     if (!this.selectedUser) return;
@@ -379,7 +418,7 @@ export class UsuariosPage implements OnInit {
   }
 
   // ============================================================
-  // EDITAR USUARIO (cargar datos en el formulario)
+  // EDITAR USUARIO
   // ============================================================
   protected async editarUsuario(): Promise<void> {
     if (!this.selectedUser) return;
@@ -412,7 +451,6 @@ export class UsuariosPage implements OnInit {
     }
     this.isLoading = true;
     const payload: UpdateUsuarioRequest = this.editUserForm.value;
-    // Si la contraseña está vacía, no la enviamos (no se actualizará)
     if (!payload.password) delete payload.password;
 
     this.usuariosApiService.actualizar(this.editingUserId, payload).subscribe({
@@ -432,7 +470,7 @@ export class UsuariosPage implements OnInit {
   }
 
   // ============================================================
-  // ELIMINAR FÍSICAMENTE (PERMANENTE)
+  // ELIMINAR PERMANENTEMENTE
   // ============================================================
   protected async eliminarUsuarioFisicamente(): Promise<void> {
     if (!this.selectedUser) return;
@@ -470,11 +508,10 @@ export class UsuariosPage implements OnInit {
   }
 
   // ============================================================
-  // CONSTRUCCIÓN DE BOTONES DEL ACTION SHEET
+  // BOTONES DEL ACTION SHEET
   // ============================================================
   protected getActionButtons(): any[] {
     if (!this.selectedUser) return [{ text: 'Cancelar', role: 'cancel' }];
-    // Texto e icono dinámicos según el estado actual
     const statusText = this.selectedUser.isActive ? 'Desactivar' : 'Activar';
     const statusIcon = this.selectedUser.isActive
       ? 'lock-closed-outline'
@@ -502,7 +539,7 @@ export class UsuariosPage implements OnInit {
   }
 
   // ============================================================
-  // NOTIFICACIONES (toasts)
+  // TOASTS
   // ============================================================
   private async mostrarError(titulo: string, mensaje?: string): Promise<void> {
     const toast = await this.toastController.create({

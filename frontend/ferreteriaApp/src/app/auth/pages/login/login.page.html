@@ -3,7 +3,6 @@
   <div class="login-bg">
     <div class="bg-image"></div>
     <div class="bg-overlay"></div>
-    <!-- Partículas decorativas -->
     <div class="particle particle-1"></div>
     <div class="particle particle-2"></div>
     <div class="particle particle-3"></div>
@@ -58,12 +57,18 @@
               class="field-error"
               *ngIf="f.identifier.touched && f.identifier.invalid"
             >
-              <span *ngIf="f.identifier.errors?.['required']">
-                El usuario o correo es obligatorio
-              </span>
-              <span *ngIf="f.identifier.errors?.['minlength']">
-                Mínimo 3 caracteres
-              </span>
+              <span *ngIf="f.identifier.errors?.['required']"
+                >El usuario o correo es obligatorio</span
+              >
+              <span *ngIf="f.identifier.errors?.['minlength']"
+                >Mínimo 3 caracteres</span
+              >
+              <span *ngIf="f.identifier.errors?.['maxlength']"
+                >Máximo 50 caracteres</span
+              >
+              <span *ngIf="f.identifier.errors?.['identifierInvalid']"
+                >{{ f.identifier.errors?.['identifierInvalid'] }}</span
+              >
             </div>
           </div>
 
@@ -103,12 +108,15 @@
               class="field-error"
               *ngIf="f.password.touched && f.password.invalid"
             >
-              <span *ngIf="f.password.errors?.['required']">
-                La contraseña es obligatoria
-              </span>
-              <span *ngIf="f.password.errors?.['minlength']">
-                Mínimo 6 caracteres
-              </span>
+              <span *ngIf="f.password.errors?.['required']"
+                >La contraseña es obligatoria</span
+              >
+              <span *ngIf="f.password.errors?.['minlength']"
+                >Mínimo 8 caracteres</span
+              >
+              <span *ngIf="f.password.errors?.['passwordInvalid']"
+                >{{ f.password.errors?.['passwordInvalid'] }}</span
+              >
             </div>
           </div>
 
@@ -139,7 +147,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Footer con mejor contraste -->
     <p class="footer-text">
       &copy; 2026 Ferretería July. Todos los derechos reservados.
     </p>

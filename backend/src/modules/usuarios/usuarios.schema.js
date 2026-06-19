@@ -1,42 +1,28 @@
 const { z } = require("zod");
 
-// ============================================================
-// EXPRESIONES REGULARES ESTRICTAS
-// ============================================================
-// Username: letras, números, guion bajo, punto, guion. Sin espacios.
 const usernameRegex = /^[a-zA-Z0-9_.-]+$/;
-
-// Nombre completo: comienza con letra, luego puede contener espacios, guiones, apóstrofes o puntos
-// pero siempre debe haber al menos una letra entre ellos. Rechaza "....." o caracteres repetidos sin letras.
 const fullNameRegex =
   /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]+(?:[\s\-'\.][a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]+)*$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
 
-// ============================================================
-// ESQUEMAS
-// ============================================================
 const createUsuarioSchema = z.object({
-  username: z
+  username: z.string().min(3).max(30).regex(usernameRegex, {
+    message:
+      "Solo letras, números, guion bajo (_), punto (.) o guión (-). Sin espacios.",
+  }),
+  email: z.string().email({ message: "Correo electrónico inválido" }).max(100),
+  fullName: z.string().min(2).max(100).regex(fullNameRegex, {
+    message:
+      "Nombre inválido. Use letras, espacios, guiones, apóstrofes o puntos (ej: Juan Pérez, Mª José, D'Angelo).",
+  }),
+  password: z
     .string()
-    .min(3, { message: "Mínimo 3 caracteres" })
-    .max(30, { message: "Máximo 30 caracteres" })
-    .regex(usernameRegex, {
+    .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
+    .regex(passwordRegex, {
       message:
-        "Solo letras, números, guion bajo (_), punto (.) o guión (-). Sin espacios.",
+        "La contraseña debe contener al menos una mayúscula, una minúscula y un número. Solo caracteres ASCII comunes.",
     }),
-  email: z
-    .string()
-    .email({ message: "Correo electrónico inválido" })
-    .max(100, { message: "Máximo 100 caracteres" }),
-  fullName: z
-    .string()
-    .min(2, { message: "Mínimo 2 caracteres" })
-    .max(100, { message: "Máximo 100 caracteres" })
-    .regex(fullNameRegex, {
-      message:
-        "Nombre inválido. Use letras, espacios, guiones, apóstrofes o puntos (ej: Juan Pérez, Mª José, D'Angelo).",
-    }),
-  password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
-  role: z.enum(["ADMIN", "SELLER"], { message: "Rol debe ser ADMIN o SELLER" }),
+  role: z.enum(["ADMIN", "SELLER"]),
 });
 
 const updateStatusSchema = z.object({

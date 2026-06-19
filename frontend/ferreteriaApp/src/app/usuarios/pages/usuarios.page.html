@@ -1,7 +1,7 @@
 <ion-content class="usuarios-content">
   <div class="usuarios-shell">
     <!-- =====================================================
-         HEADER CORPORATIVO (Hero)
+         HEADER CORPORATIVO
     ===================================================== -->
     <section class="hero-header">
       <div class="hero-content">
@@ -48,7 +48,6 @@
         <p>Usuarios disponibles en el sistema corporativo.</p>
       </div>
 
-      <!-- Indicador de carga -->
       <div
         class="loading-state"
         *ngIf="isLoading && filteredUsers.length === 0"
@@ -57,10 +56,8 @@
         <p>Cargando usuarios...</p>
       </div>
 
-      <!-- Lista de usuarios (grid de tarjetas) -->
       <div class="users-list" *ngIf="!isLoading && filteredUsers.length > 0">
         <div class="user-card" *ngFor="let user of filteredUsers">
-          <!-- Datos del usuario -->
           <div class="user-info">
             <div class="avatar">{{ getInitials(user.fullName) }}</div>
             <div class="user-data">
@@ -68,11 +65,9 @@
               <span class="email">{{ user.email }}</span>
             </div>
           </div>
-          <!-- Rol -->
           <div class="role-chip">
             {{ user.role === 'ADMIN' ? 'Administrador' : 'Vendedor' }}
           </div>
-          <!-- Estado (activo/inactivo) -->
           <div
             class="status-chip"
             [class.active]="user.isActive"
@@ -80,7 +75,6 @@
           >
             {{ user.isActive ? 'Activo' : 'Inactivo' }}
           </div>
-          <!-- Botón menú (3 puntos) -->
           <ion-button
             fill="clear"
             class="menu-btn"
@@ -94,7 +88,6 @@
         </div>
       </div>
 
-      <!-- Estado vacío -->
       <div class="empty-state" *ngIf="!isLoading && filteredUsers.length === 0">
         <ion-icon name="people-outline"></ion-icon>
         <h3>No hay usuarios registrados</h3>
@@ -175,13 +168,13 @@
               {{ getFullNameErrorMessage(createUserForm) }}
             </ion-text>
 
-            <!-- CONTRASEÑA -->
+            <!-- CONTRASEÑA (con validador robusto) -->
             <ion-item class="form-item">
               <ion-label position="floating">Contraseña *</ion-label>
               <ion-input
                 formControlName="password"
                 type="password"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres, mayúscula, minúscula, número"
               ></ion-input>
             </ion-item>
             <ion-text
@@ -203,7 +196,6 @@
               </ion-select>
             </ion-item>
 
-            <!-- BOTONES -->
             <div class="form-actions">
               <ion-button expand="block" fill="outline" (click)="closeModal()">
                 Cancelar
@@ -239,7 +231,7 @@
   ></ion-action-sheet>
 
   <!-- =====================================================
-       MODAL EDITAR USUARIO
+       MODAL EDITAR USUARIO (SIN EL BLOQUE DE ERROR SUELTO)
   ===================================================== -->
   <ion-modal
     #editModal
@@ -340,7 +332,6 @@
               </ion-select>
             </ion-item>
 
-            <!-- BOTONES -->
             <div class="form-actions">
               <ion-button
                 expand="block"
