@@ -89,12 +89,24 @@ export class HeaderComponent {
     });
   }
 
+  /**
+   * Obtiene las iniciales del usuario a partir del nombre completo.
+   * @returns Iniciales (máximo 2 letras) o 'US' si no hay nombre.
+   */
   get userInitials(): string {
     const fullName = this.user?.fullName?.trim();
     if (!fullName) return 'US';
     const words = fullName.split(/\s+/);
     if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
     return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  /**
+   * Traduce el rol del usuario a un formato legible en español.
+   */
+  get userRoleLabel(): string {
+    if (!this.user) return '';
+    return this.user.role === 'ADMIN' ? 'Administrador' : 'Vendedor';
   }
 
   onMenuClick(): void {

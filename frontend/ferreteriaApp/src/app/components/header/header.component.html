@@ -1,63 +1,88 @@
 <ion-header class="dashboard-header">
   <ion-toolbar>
     <div class="toolbar-container">
+      <!-- SECCIÓN IZQUIERDA -->
       <div class="toolbar-left">
         <ion-button
           fill="clear"
           class="toolbar-icon-btn menu-btn"
           (click)="onMenuClick()"
+          aria-label="Abrir menú"
         >
           <ion-icon name="menu-outline"></ion-icon>
         </ion-button>
+
         <div class="brand-wrapper">
-          <div class="brand-badge"><div class="brand-dot"></div></div>
+          <div class="brand-badge">
+            <div class="brand-dot"></div>
+          </div>
           <div class="toolbar-text">
-            <h1>{{ title }}</h1>
-            <p>{{ subtitle }}</p>
+            <h1 class="page-title">{{ title }}</h1>
+            <p class="page-subtitle">{{ subtitle }}</p>
           </div>
         </div>
       </div>
 
+      <!-- SECCIÓN DERECHA -->
       <div class="toolbar-right">
+        <!-- BOTÓN NOTIFICACIONES -->
         <ion-button
           fill="clear"
           class="toolbar-icon-btn notification-btn"
           (click)="onNotificationClick()"
+          aria-label="Notificaciones"
         >
           <ion-icon name="notifications-outline"></ion-icon>
           <div class="notification-dot"></div>
         </ion-button>
 
+        <!-- CHIP DE USUARIO -->
         <ion-button
           fill="clear"
           class="user-chip"
           (click)="openUserMenu($event)"
           *ngIf="user"
+          aria-label="Menú de usuario"
         >
           <ion-avatar class="user-avatar" slot="start">
-            <img *ngIf="user.imageUrl" [src]="user.imageUrl" />
+            <img
+              *ngIf="user.imageUrl"
+              [src]="user.imageUrl"
+              [alt]="user.fullName"
+            />
             <span *ngIf="!user.imageUrl">{{ userInitials }}</span>
           </ion-avatar>
           <div class="user-meta">
             <span class="user-name">{{ user.fullName }}</span>
-            <span class="user-role">{{ user.role }}</span>
+            <span class="user-role">{{ userRoleLabel }}</span>
           </div>
         </ion-button>
-        <ion-popover alignment="end">
+
+        <!-- POPOVER DE USUARIO -->
+        <ion-popover alignment="end" class="user-popover">
           <ng-template>
             <ion-content>
-              <ion-list>
-                <ion-item button (click)="openProfile()">
+              <ion-list lines="none">
+                <ion-item button (click)="openProfile()" detail="false">
                   <ion-icon slot="start" name="person-outline"></ion-icon>
-                  <ion-label>Perfil</ion-label>
+                  <ion-label>Mi Perfil</ion-label>
                 </ion-item>
-                <ion-item button (click)="openSettings()">
+                <ion-item button (click)="openSettings()" detail="false">
                   <ion-icon slot="start" name="settings-outline"></ion-icon>
                   <ion-label>Configuración</ion-label>
                 </ion-item>
-                <ion-item button (click)="logout()">
-                  <ion-icon slot="start" name="log-out-outline"></ion-icon>
-                  <ion-label>Cerrar sesión</ion-label>
+                <ion-item
+                  button
+                  (click)="logout()"
+                  detail="false"
+                  class="logout-item"
+                >
+                  <ion-icon
+                    slot="start"
+                    name="log-out-outline"
+                    color="danger"
+                  ></ion-icon>
+                  <ion-label color="danger">Cerrar sesión</ion-label>
                 </ion-item>
               </ion-list>
             </ion-content>
@@ -68,7 +93,7 @@
   </ion-toolbar>
 </ion-header>
 
-<!-- Modales (se declaran aquí para que estén disponibles en el template) -->
+<!-- MODALES (declarados aquí para estar disponibles) -->
 <app-notifications-modal></app-notifications-modal>
 <app-profile-modal></app-profile-modal>
 <app-settings-modal></app-settings-modal>
