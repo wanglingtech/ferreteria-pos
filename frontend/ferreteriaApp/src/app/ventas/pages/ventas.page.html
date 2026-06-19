@@ -43,13 +43,12 @@
     <!-- CLIENTE (requerido) -->
     <section class="client-card">
       <div class="card-title">Cliente <span class="required">*</span></div>
-      <!-- ✅ Usamos [ngModel] y (ngModelChange) con la señal clienteNombre -->
       <input
         class="client-input"
         type="text"
         placeholder="Nombre del cliente (solo letras y espacios)"
         [ngModel]="clienteNombre()"
-        (ngModelChange)="clienteNombre.set($event); validarCliente()"
+        (ngModelChange)="clienteNombre.set($event)"
         required
       />
       <div *ngIf="clienteError()" class="error-message">

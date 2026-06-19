@@ -6,6 +6,7 @@ import {
   inject,
   signal,
   computed,
+  effect,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -66,7 +67,7 @@ import html2canvas from 'html2canvas';
 export class VentasPage implements OnInit {
   @ViewChild('resumenModal') resumenModal!: IonModal;
 
-  // ✅ clienteNombre ahora es una señal para reactividad
+  // ✅ clienteNombre como señal
   clienteNombre = signal<string>('');
   searchTerm = '';
   productos = signal<ProductoParaVenta[]>([]);
@@ -76,13 +77,17 @@ export class VentasPage implements OnInit {
   isAdmin = signal(false);
   ventaConfirmada: Venta | null = null;
 
-  // Señal para el mensaje de error del cliente
+  // ✅ Señal para mensaje de error
   clienteError = signal<string>('');
 
-  // Computado que indica si el formulario es válido (se reevalúa automáticamente)
+  // ✅ Computed que indica si el formulario es válido
   isFormValid = computed(() => {
     const nombre = this.clienteNombre().trim();
-    return nombre.length > 0 && !this.clienteError() && this.cart().length > 0;
+    const isValid =
+      nombre.length > 0 && !this.clienteError() && this.cart().length > 0;
+    // Para depuración (opcional)
+    // console.log('isFormValid:', isValid, 'nombre:', nombre, 'error:', this.clienteError(), 'cart:', this.cart().length);
+    return isValid;
   });
 
   private productosApi = inject(ProductosApiService);
@@ -103,12 +108,28 @@ export class VentasPage implements OnInit {
       closeOutline,
       alertCircleOutline,
     });
+
+    // ✅ effect para validar automáticamente cuando el nombre o el carrito cambian
+    effect(() => {
+      // Leer las señales para que Angular se suscriba a ellas
+      const nombre = this.clienteNombre();
+      const cartLength = this.cart().length;
+      // Solo validar si hay nombre (evita validación en cada tecla)
+      if (nombre.length > 0) {
+        this.validarCliente();
+      } else {
+        // Si el nombre está vacío, mostrar error
+        this.clienteError.set('El nombre del cliente es obligatorio');
+      }
+    });
   }
 
   ngOnInit() {
     const user = this.authSession.getCurrentUser();
     this.isAdmin.set(user?.role === 'ADMIN');
     this.cargarProductos();
+    // Validación inicial para deshabilitar botones
+    this.clienteError.set('El nombre del cliente es obligatorio');
   }
 
   cargarProductos() {
@@ -218,10 +239,11 @@ export class VentasPage implements OnInit {
       this.clienteError.set('Máximo 80 caracteres');
       return false;
     }
-    const regex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:[\s\-'\.][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/;
+    // Regex: al menos dos palabras
+    const regex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:[\s\-'\.][A-Za-zÁÉÍÓÚÑáéíóúñ]+)+$/;
     if (!regex.test(nombre)) {
       this.clienteError.set(
-        "Nombre inválido. Use solo letras, espacios, guiones, apóstrofes o puntos entre palabras (ej: Juan Pérez, Mª José, D'Angelo). No use números ni símbolos.",
+        "Ingrese al menos dos palabras (nombre y apellido). Use solo letras, espacios, guiones, apóstrofes o puntos. Ej: Juan Pérez, Mª José, D'Angelo.",
       );
       return false;
     }
@@ -331,7 +353,7 @@ export class VentasPage implements OnInit {
   limpiarCarrito() {
     this.cart.set([]);
     this.clienteNombre.set('');
-    this.clienteError.set('');
+    this.clienteError.set('El nombre del cliente es obligatorio');
   }
 
   // =================== MÉTODOS DE IMPRESIÓN Y COMPARTIR ===================
