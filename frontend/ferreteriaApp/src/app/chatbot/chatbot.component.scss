@@ -283,3 +283,38 @@ ion-buttons {
     transform: translateY(0);
   }
 }
+// Estilos para mensajes del bot con HTML enriquecido
+.bubble {
+  p {
+    margin: 0;
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin: 8px 0;
+    th,
+    td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+  }
+  ul,
+  ol {
+    margin: 4px 0 4px 16px;
+    padding-left: 4px;
+    li {
+      margin: 2px 0;
+    }
+  }
+  b,
+  strong {
+    color: #0a1a5c;
+  }
+}

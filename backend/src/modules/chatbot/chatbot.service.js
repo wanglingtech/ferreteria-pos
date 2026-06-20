@@ -1,82 +1,141 @@
 const { prisma } = require("../../config/database");
 
-// Lista de patrones y acciones
+// ============================================================
+//  VALIDACIÓN DE ENTRADA (seguridad)
+// ============================================================
+function sanitizeInput(input) {
+  if (!input) return "";
+  // Solo permite letras (incluye tildes y ñ), números, espacios, guiones, apóstrofes, puntos
+  return input.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s\-'\.]/g, "").trim();
+}
+
+// ============================================================
+//  INTENTS (prioridad: los más específicos primero)
+// ============================================================
 const intents = [
+  // GRÁFICO VENTAS (muy específico)
   {
     patterns: [
-      /venta\s*(\w+)/i,
-      /detalles? de venta\s*(\w+)/i,
-      /mostrar venta\s*(\w+)/i,
-    ],
-    action: "getSaleByCode",
-  },
-  {
-    patterns: [/cliente\s*(.+)/i, /buscar cliente\s*(.+)/i, /quién es\s*(.+)/i],
-    action: "getCustomerByName",
-  },
-  {
-    patterns: [
-      /productos? más vendidos?/i,
-      /top productos/i,
-      /mejores productos/i,
-    ],
-    action: "getTopProducts",
-  },
-  {
-    patterns: [/ventas? totales?/i, /resumen ventas/i, /reporte general/i],
-    action: "getSalesSummary",
-  },
-  { patterns: [/ayuda/i, /help/i, /qué puedes hacer/i], action: "help" },
-  {
-    patterns: [
-      /gráfico ventas/i,
-      /grafico ventas/i,
-      /evolución ventas/i,
-      /ventas por día/i,
+      /^gráfico ventas$/i,
+      /^grafico ventas$/i,
+      /^evolución ventas$/i,
+      /^ventas por día$/i,
     ],
     action: "getSalesChart",
   },
-  {
-    patterns: [/top vendedores/i, /ranking vendedores/i, /mejores vendedores/i],
-    action: "getTopSellers",
-  },
-  {
-    patterns: [/stock bajo/i, /productos bajo stock/i, /inventario crítico/i],
-    action: "getLowStockProducts",
-  },
+  // TOP VENDEDORES
   {
     patterns: [
-      /notificaciones no leídas/i,
-      /notificaciones pendientes/i,
-      /mis notificaciones/i,
+      /^top vendedores$/i,
+      /^ranking vendedores$/i,
+      /^mejores vendedores$/i,
+    ],
+    action: "getTopSellers",
+  },
+  // STOCK BAJO
+  {
+    patterns: [
+      /^stock bajo$/i,
+      /^productos bajo stock$/i,
+      /^inventario crítico$/i,
+    ],
+    action: "getLowStockProducts",
+  },
+  // NOTIFICACIONES NO LEÍDAS
+  {
+    patterns: [
+      /^notificaciones no leídas$/i,
+      /^notificaciones pendientes$/i,
+      /^mis notificaciones$/i,
     ],
     action: "getUnreadNotifications",
   },
+  // EXPORTAR REPORTE
   {
-    patterns: [/exportar reporte/i, /descargar reporte/i, /reporte csv/i],
+    patterns: [/^exportar reporte$/i, /^descargar reporte$/i, /^reporte csv$/i],
     action: "getExportReportLink",
   },
+  // SUGERENCIAS
   {
-    patterns: [/sugerencias/i, /qué puedo hacer/i, /opciones/i],
+    patterns: [/^sugerencias$/i, /^qué puedo hacer$/i, /^opciones$/i],
     action: "getQuickSuggestions",
   },
+  // VENTAS ÚLTIMA SEMANA
   {
-    patterns: [/ventas última semana/i, /ventas últimos 7 días/i],
+    patterns: [/^ventas última semana$/i, /^ventas últimos 7 días$/i],
     action: "getLastWeekSales",
+  },
+  // TOP PRODUCTOS
+  {
+    patterns: [
+      /^productos más vendidos$/i,
+      /^top productos$/i,
+      /^mejores productos$/i,
+    ],
+    action: "getTopProducts",
+  },
+  // RESUMEN VENTAS
+  {
+    patterns: [/^ventas totales$/i, /^resumen ventas$/i, /^reporte general$/i],
+    action: "getSalesSummary",
+  },
+  // AYUDA
+  {
+    patterns: [/^ayuda$/i, /^help$/i, /^qué puedes hacer$/i],
+    action: "help",
+  },
+  // BUSCAR VENTA POR CÓDIGO (general)
+  {
+    patterns: [
+      /^venta\s+([a-zA-Z0-9\-]+)$/i,
+      /^detalles? de venta\s+([a-zA-Z0-9\-]+)$/i,
+      /^mostrar venta\s+([a-zA-Z0-9\-]+)$/i,
+    ],
+    action: "getSaleByCode",
+  },
+  // BUSCAR CLIENTE
+  {
+    patterns: [
+      /^cliente\s+(.+)$/i,
+      /^buscar cliente\s+(.+)$/i,
+      /^quién es\s+(.+)$/i,
+    ],
+    action: "getCustomerByName",
   },
 ];
 
-// ========== ACCIONES EXISTENTES (no cambian) ==========
+// ============================================================
+//  ACCIONES (respuestas enriquecidas con HTML)
+// ============================================================
+
 async function getSaleByCode(code) {
   const sale = await prisma.sale.findFirst({
     where: { code: { contains: code, mode: "insensitive" } },
     include: { seller: true, items: { include: { product: true } } },
   });
-  if (!sale) return { text: `No encontré ninguna venta con código "${code}".` };
-  return {
-    text: `✅ **Venta ${sale.code}**\n📅 Fecha: ${sale.createdAt.toLocaleDateString()}\n👤 Cliente: ${sale.customerName || "Consumidor Final"}\n💵 Total: S/ ${sale.total.toFixed(2)}\n🛒 Productos: ${sale.items.length} ítems.`,
-    saleData: sale,
-  };
+  if (!sale) {
+    return {
+      text: `⚠️ No encontré ninguna venta con código <b>"${code}"</b>. Verifica que el código sea correcto.`,
+    };
+  }
+  // Construir tabla de productos en HTML
+  let itemsHtml = `<table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:8px;">
+    <tr style="background:#f1f5f9;"><th style="padding:4px 8px; text-align:left;">Producto</th><th style="padding:4px 8px; text-align:center;">Cant</th><th style="padding:4px 8px; text-align:right;">Precio</th><th style="padding:4px 8px; text-align:right;">Subtotal</th></tr>`;
+  sale.items.forEach((item) => {
+    itemsHtml += `<tr><td style="padding:4px 8px; border-bottom:1px solid #e2e8f0;">${item.product.name}</td>
+      <td style="padding:4px 8px; text-align:center; border-bottom:1px solid #e2e8f0;">${item.quantity}</td>
+      <td style="padding:4px 8px; text-align:right; border-bottom:1px solid #e2e8f0;">S/ ${Number(item.unitPrice).toFixed(2)}</td>
+      <td style="padding:4px 8px; text-align:right; border-bottom:1px solid #e2e8f0;">S/ ${Number(item.lineTotal).toFixed(2)}</td></tr>`;
+  });
+  itemsHtml += `</table>`;
+
+  const text = `<b>✅ Venta ${sale.code}</b><br>
+    📅 <b>Fecha:</b> ${sale.createdAt.toLocaleDateString("es-PE")}<br>
+    👤 <b>Cliente:</b> ${sale.customerName || "Consumidor Final"}<br>
+    💵 <b>Total:</b> S/ ${Number(sale.total).toFixed(2)}<br>
+    🛒 <b>Productos (${sale.items.length} ítems):</b><br>
+    ${itemsHtml}`;
+  return { text, saleData: sale };
 }
 
 async function getCustomerByName(name) {
@@ -85,10 +144,13 @@ async function getCustomerByName(name) {
     distinct: ["customerName"],
     take: 5,
   });
-  if (!customers.length)
-    return { text: `No encontré clientes con nombre "${name}".` };
-  const lista = customers.map((c) => c.customerName).join(", ");
-  return { text: `📋 Clientes que coinciden: ${lista}` };
+  if (!customers.length) {
+    return {
+      text: `⚠️ No encontré clientes con nombre <b>"${name}"</b>. Intenta con otro nombre.`,
+    };
+  }
+  const list = customers.map((c) => `• ${c.customerName}`).join("<br>");
+  return { text: `📋 <b>Clientes que coinciden con "${name}":</b><br>${list}` };
 }
 
 async function getTopProducts(limit = 5) {
@@ -102,30 +164,42 @@ async function getTopProducts(limit = 5) {
   const products = await prisma.product.findMany({
     where: { id: { in: ids } },
   });
-  const result = top
-    .map((t) => {
-      const p = products.find((p) => p.id === t.productId);
-      return `${p?.name} (${t._sum.quantity} unidades)`;
+  const productMap = new Map(products.map((p) => [p.id, p]));
+  let list = top
+    .map((t, idx) => {
+      const p = productMap.get(t.productId);
+      return `${idx + 1}. <b>${p?.name || "Producto"}</b> – ${t._sum.quantity} unidades`;
     })
-    .join("\n");
-  return { text: `🏆 **Productos más vendidos:**\n${result}` };
+    .join("<br>");
+  return { text: `🏆 <b>Productos más vendidos:</b><br>${list}` };
 }
 
 async function getSalesSummary() {
   const totalSales = await prisma.sale.count();
   const totalRevenue = await prisma.sale.aggregate({ _sum: { total: true } });
   return {
-    text: `📊 **Resumen de ventas:**\nTotal de ventas: ${totalSales}\nIngresos totales: S/ ${totalRevenue._sum.total?.toFixed(2) || 0}`,
+    text: `📊 <b>Resumen de ventas:</b><br>
+    • Total de ventas: <b>${totalSales}</b><br>
+    • Ingresos totales: <b>S/ ${Number(totalRevenue._sum.total || 0).toFixed(2)}</b>`,
   };
 }
 
 async function help() {
   return {
-    text: "🤖 Puedo ayudarte con:\n- Buscar venta (ej: 'venta V-20260608-12345')\n- Buscar cliente ('cliente Juan')\n- Top productos ('productos más vendidos')\n- Resumen ventas ('reporte general')\n- Gráfico de ventas ('gráfico ventas')\n- Ranking vendedores ('top vendedores')\n- Bajo stock ('stock bajo')\n- Notificaciones ('notificaciones no leídas')\n- Exportar reporte ('exportar reporte')\n- Sugerencias ('sugerencias')",
+    text: `🤖 <b>Comandos disponibles:</b><br>
+    • <b>venta [código]</b> – Muestra detalle de una venta.<br>
+    • <b>cliente [nombre]</b> – Busca clientes por nombre.<br>
+    • <b>productos más vendidos</b> – Top 5 productos.<br>
+    • <b>reporte general</b> – Resumen de ventas.<br>
+    • <b>gráfico ventas</b> – Gráfico de últimos 7 días.<br>
+    • <b>top vendedores</b> – Ranking de vendedores.<br>
+    • <b>stock bajo</b> – Productos con bajo inventario.<br>
+    • <b>notificaciones no leídas</b> – Tus notificaciones.<br>
+    • <b>exportar reporte</b> – Enlace para descargar.<br>
+    • <b>sugerencias</b> – Muestra opciones rápidas.`,
   };
 }
 
-// ========== NUEVAS FUNCIONALIDADES ==========
 async function getSalesChart() {
   const today = new Date();
   const sevenDaysAgo = new Date();
@@ -147,7 +221,7 @@ async function getSalesChart() {
     const d = new Date();
     d.setDate(today.getDate() - i);
     const dateStr = d.toISOString().split("T")[0];
-    labels.push(dateStr.slice(5)); // "MM-DD"
+    labels.push(dateStr.slice(5));
     data.push(dailyMap.get(dateStr) || 0);
   }
   return {
@@ -156,7 +230,7 @@ async function getSalesChart() {
     title: "📈 Ventas últimos 7 días (S/.)",
     labels,
     data,
-    backgroundColor: "rgba(10, 26, 92, 0.2)",
+    backgroundColor: "rgba(10,26,92,0.2)",
     borderColor: "#0a1a5c",
   };
 }
@@ -175,13 +249,13 @@ async function getTopSellers() {
     select: { id: true, fullName: true },
   });
   const userMap = new Map(users.map((u) => [u.id, u.fullName]));
-  const rankingText = sellers
+  const ranking = sellers
     .map(
       (s, idx) =>
-        `${idx + 1}. ${userMap.get(s.sellerId) || "Desconocido"} – S/ ${Number(s._sum.total).toFixed(2)}`,
+        `${idx + 1}. <b>${userMap.get(s.sellerId) || "Desconocido"}</b> – S/ ${Number(s._sum.total).toFixed(2)}`,
     )
-    .join("\n");
-  return { text: `🏆 **Top Vendedores por monto vendido:**\n${rankingText}` };
+    .join("<br>");
+  return { text: `🏆 <b>Top Vendedores por monto vendido:</b><br>${ranking}` };
 }
 
 async function getLowStockProducts() {
@@ -196,11 +270,11 @@ async function getLowStockProducts() {
     .slice(0, 10)
     .map(
       (p) =>
-        `• ${p.name} (SKU: ${p.sku}) – Stock: ${p.stock} / Mín: ${p.minStock || 5}`,
+        `• <b>${p.name}</b> (SKU: ${p.sku}) – Stock: ${p.stock} / Mín: ${p.minStock || 5}`,
     )
-    .join("\n");
+    .join("<br>");
   return {
-    text: `⚠️ **Productos con bajo stock (${lowStock.length}):**\n${list}${lowStock.length > 10 ? "\n... y más." : ""}`,
+    text: `⚠️ <b>Productos con bajo stock (${lowStock.length}):</b><br>${list}${lowStock.length > 10 ? "<br>... y más." : ""}`,
   };
 }
 
@@ -216,17 +290,17 @@ async function getUnreadNotifications(user) {
   const list = notifications
     .map(
       (n) =>
-        `• ${n.title}: ${n.message} (${new Date(n.createdAt).toLocaleString()})`,
+        `• <b>${n.title}</b>: ${n.message} (${new Date(n.createdAt).toLocaleString()})`,
     )
-    .join("\n");
+    .join("<br>");
   return {
-    text: `🔔 **Notificaciones no leídas (${notifications.length}):**\n${list}`,
+    text: `🔔 <b>Notificaciones no leídas (${notifications.length}):</b><br>${list}`,
   };
 }
 
 async function getExportReportLink() {
   return {
-    text: "📊 Puedes descargar el reporte completo de ventas desde la pestaña 'Exportar' del módulo de reportes.",
+    text: "📊 Puedes descargar el reporte completo de ventas desde la pestaña <b>'Exportar'</b> del módulo de reportes.",
     actions: [{ label: "Ir a Reportes", action: "go_to_reports" }],
   };
 }
@@ -257,15 +331,28 @@ async function getLastWeekSales() {
   const total = sales.reduce((acc, s) => acc + Number(s.total), 0);
   const avg = sales.length ? total / sales.length : 0;
   return {
-    text: `📆 **Ventas última semana:**\nTotal: S/ ${total.toFixed(2)}\nPromedio diario: S/ ${avg.toFixed(2)}\nNúmero de ventas: ${sales.length}`,
+    text: `📆 <b>Ventas última semana:</b><br>
+    • Total: S/ ${total.toFixed(2)}<br>
+    • Promedio diario: S/ ${avg.toFixed(2)}<br>
+    • Número de ventas: ${sales.length}`,
   };
 }
 
-// ========== PROCESADOR PRINCIPAL ==========
+// ============================================================
+//  PROCESADOR PRINCIPAL CON VALIDACIÓN
+// ============================================================
 async function processMessage(message, user = null) {
+  // Sanitizar entrada
+  const cleanMessage = sanitizeInput(message);
+  if (!cleanMessage) {
+    return {
+      text: "⚠️ Por favor, escribe un mensaje válido (letras, números, espacios, guiones, apóstrofes y puntos).",
+    };
+  }
+
   for (const intent of intents) {
     for (const pattern of intent.patterns) {
-      const match = message.match(pattern);
+      const match = cleanMessage.match(pattern);
       if (match) {
         const param = match[1] || null;
         switch (intent.action) {
@@ -299,7 +386,9 @@ async function processMessage(message, user = null) {
       }
     }
   }
-  return { text: "No entendí tu consulta. Escribe 'ayuda'." };
+  return {
+    text: "No entendí tu consulta. Escribe 'ayuda' para ver comandos disponibles.",
+  };
 }
 
 module.exports = { processMessage };
