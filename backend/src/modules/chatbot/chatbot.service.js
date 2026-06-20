@@ -1,12 +1,13 @@
 const { prisma } = require("../../config/database");
 
 // ============================================================
-//  VALIDACIÓN DE ENTRADA (seguridad)
+//  VALIDACIÓN DE ENTRADA (seguridad mejorada)
 // ============================================================
 function sanitizeInput(input) {
   if (!input) return "";
-  // Solo permite letras (incluye tildes y ñ), números, espacios, guiones, apóstrofes, puntos
-  return input.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s\-'\.]/g, "").trim();
+  // Permite letras (con acentos y ñ), números, espacios, y puntuación común
+  // También permite guiones, apóstrofes, puntos, paréntesis, signos de interrogación/exclamación
+  return input.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s\-'\.()?!,;:]/g, "").trim();
 }
 
 // ============================================================
@@ -118,7 +119,6 @@ async function getSaleByCode(code) {
       text: `⚠️ No encontré ninguna venta con código <b>"${code}"</b>. Verifica que el código sea correcto.`,
     };
   }
-  // Construir tabla de productos en HTML
   let itemsHtml = `<table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:8px;">
     <tr style="background:#f1f5f9;"><th style="padding:4px 8px; text-align:left;">Producto</th><th style="padding:4px 8px; text-align:center;">Cant</th><th style="padding:4px 8px; text-align:right;">Precio</th><th style="padding:4px 8px; text-align:right;">Subtotal</th></tr>`;
   sale.items.forEach((item) => {
@@ -278,15 +278,23 @@ async function getLowStockProducts() {
   };
 }
 
+/**
+ * ✅ CORREGIDO: Busca notificaciones no leídas del usuario Y globales (userId: null)
+ */
 async function getUnreadNotifications(user) {
   if (!user) return { text: "⚠️ No se pudo identificar al usuario." };
+  // Buscar notificaciones no leídas del usuario o globales
   const notifications = await prisma.notification.findMany({
-    where: { userId: user.sub, isRead: false },
+    where: {
+      isRead: false,
+      OR: [{ userId: user.sub }, { userId: null }],
+    },
     orderBy: { createdAt: "desc" },
-    take: 5,
+    take: 10,
   });
-  if (notifications.length === 0)
+  if (notifications.length === 0) {
     return { text: "📭 No tienes notificaciones sin leer." };
+  }
   const list = notifications
     .map(
       (n) =>
@@ -342,7 +350,6 @@ async function getLastWeekSales() {
 //  PROCESADOR PRINCIPAL CON VALIDACIÓN
 // ============================================================
 async function processMessage(message, user = null) {
-  // Sanitizar entrada
   const cleanMessage = sanitizeInput(message);
   if (!cleanMessage) {
     return {
