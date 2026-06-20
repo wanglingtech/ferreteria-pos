@@ -11,16 +11,14 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
 
 // Botón flotante animado
 .chat-fab {
-  margin-bottom: 50px; /* Ajusta según necesites (más arriba = más px) */
+  margin-bottom: 50px;
   z-index: 1200;
   animation: fadeInUp 0.3s ease-out;
 }
-
 .chat-fab-button {
   --background: linear-gradient(135deg, #0a1a5c, #1e3a8a);
   --background-activated: #0f2a6e;
   transition: transform 0.2s ease;
-
   &:hover {
     transform: scale(1.05);
   }
@@ -36,7 +34,6 @@ ion-modal {
 .chat-header ion-toolbar {
   --background: linear-gradient(135deg, #0a1a5c, #1e3a8a);
   --color: white;
-
   .header-icon {
     margin-right: 8px;
     font-size: 1.2rem;
@@ -48,7 +45,6 @@ ion-modal {
   --background: #f8fafc;
   padding: 16px;
 }
-
 .messages-container {
   display: flex;
   flex-direction: column;
@@ -61,7 +57,6 @@ ion-modal {
   opacity: 0;
   transform: translateY(10px);
 }
-
 @keyframes slideIn {
   to {
     opacity: 1;
@@ -72,10 +67,8 @@ ion-modal {
 // Burbujas
 .message {
   display: flex;
-
   &.user {
     justify-content: flex-end;
-
     .bubble {
       background: $user-bubble;
       color: white;
@@ -83,15 +76,12 @@ ion-modal {
         $border-radius-bubble;
       box-shadow: $shadow-md;
     }
-
     .message-header {
       display: none;
     }
   }
-
   &.bot {
     justify-content: flex-start;
-
     .bubble {
       background: $bot-bubble;
       color: $text-dark;
@@ -100,7 +90,6 @@ ion-modal {
       box-shadow: $shadow-sm;
       border: 1px solid #e2e8f0;
     }
-
     .message-header {
       display: flex;
       align-items: center;
@@ -109,25 +98,48 @@ ion-modal {
       font-size: 0.75rem;
       font-weight: 600;
       color: $primary-color;
-
       .bot-icon {
         font-size: 1rem;
       }
     }
   }
-
   .bubble {
     max-width: 80%;
     padding: 10px 14px;
     word-wrap: break-word;
     transition: transform 0.1s ease;
-
     p {
       margin: 0;
       white-space: pre-wrap;
-      line-height: 1.4;
+      line-height: 1.5;
     }
-
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin: 8px 0;
+      th,
+      td {
+        padding: 4px 6px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      th {
+        background: #f1f5f9;
+        font-weight: 600;
+      }
+    }
+    ul,
+    ol {
+      margin: 4px 0 4px 16px;
+      padding-left: 4px;
+      li {
+        margin: 2px 0;
+      }
+    }
+    b,
+    strong {
+      color: #0a1a5c;
+    }
     .message-footer {
       margin-top: 6px;
       display: flex;
@@ -135,17 +147,14 @@ ion-modal {
       align-items: center;
       font-size: 0.65rem;
       opacity: 0.7;
-
       .timestamp {
         font-family: monospace;
       }
     }
-
     .action-buttons {
       display: flex;
       gap: 8px;
       margin-left: 8px;
-
       ion-button {
         --padding-start: 6px;
         --padding-end: 6px;
@@ -156,23 +165,20 @@ ion-modal {
   }
 }
 
-// Indicador de escritura (typing)
+// Indicador de escritura
 .typing-indicator {
   .bubble {
     padding: 12px 16px;
   }
-
   .typing-dots {
     display: flex;
     gap: 6px;
-
     span {
       width: 8px;
       height: 8px;
       background: $text-light;
       border-radius: 50%;
       animation: typing 1.2s infinite ease-in-out;
-
       &:nth-child(1) {
         animation-delay: 0s;
       }
@@ -185,7 +191,6 @@ ion-modal {
     }
   }
 }
-
 @keyframes typing {
   0%,
   60%,
@@ -199,25 +204,42 @@ ion-modal {
   }
 }
 
-// Footer del chat
+// Footer
 .chat-footer ion-toolbar {
   --padding-start: 12px;
   --padding-end: 8px;
   --background: white;
   border-top: 1px solid #e2e8f0;
   --min-height: 56px;
-
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   ion-input {
     --padding-start: 8px;
     --padding-end: 8px;
     --background: #f1f5f9;
     --border-radius: 24px;
     --color: $text-dark;
+    flex: 1;
   }
-
   .send-button {
     --color: $primary-color;
     --color-activated: $primary-light;
+  }
+  .input-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: #dc2626;
+    padding: 4px 12px;
+    background: #fef2f2;
+    border-radius: 8px;
+    margin: 4px 0 0 0;
+    width: 100%;
+    ion-icon {
+      font-size: 1rem;
+    }
   }
 }
 
@@ -227,11 +249,9 @@ ion-modal {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
-
   ion-chip {
     cursor: pointer;
     transition: transform 0.1s ease;
-
     &:hover {
       transform: scale(1.02);
     }
@@ -248,27 +268,54 @@ canvas {
   margin-top: 8px;
 }
 
-// Botones en el header
-ion-buttons {
-  ion-button {
-    margin: 0 4px;
-  }
+// Botones en header
+ion-buttons ion-button {
+  margin: 0 4px;
 }
 
 // Responsive
 @media (max-width: 576px) {
   .chat-fab {
-    margin-bottom: 100px;
+    margin-bottom: 45px;
   }
-
   .message .bubble {
     max-width: 90%;
   }
-
   .message-footer {
     flex-direction: column;
     align-items: flex-start !important;
     gap: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .chat-fab {
+    margin-bottom: 35px;
+  }
+  .chat-content {
+    padding: 10px;
+  }
+  .message .bubble {
+    max-width: 95%;
+    padding: 6px 10px;
+  }
+  .chat-footer ion-toolbar {
+    --min-height: 48px;
+    ion-input {
+      font-size: 0.8rem;
+    }
+    .send-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+    }
+  }
+  .input-error {
+    font-size: 0.6rem;
+    padding: 2px 8px;
+  }
+  .suggestions-row ion-chip {
+    font-size: 0.7rem;
+    height: 28px;
   }
 }
 
@@ -281,40 +328,5 @@ ion-buttons {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-// Estilos para mensajes del bot con HTML enriquecido
-.bubble {
-  p {
-    margin: 0;
-    white-space: pre-wrap;
-    line-height: 1.5;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.8rem;
-    margin: 8px 0;
-    th,
-    td {
-      padding: 4px 6px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    th {
-      background: #f1f5f9;
-      font-weight: 600;
-    }
-  }
-  ul,
-  ol {
-    margin: 4px 0 4px 16px;
-    padding-left: 4px;
-    li {
-      margin: 2px 0;
-    }
-  }
-  b,
-  strong {
-    color: #0a1a5c;
   }
 }

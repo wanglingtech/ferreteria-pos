@@ -5,6 +5,8 @@ import {
   AfterViewChecked,
   OnInit,
   OnDestroy,
+  computed,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +24,7 @@ import {
   IonFabButton,
   IonChip,
   IonLabel,
-  IonButtons, // ✅ IMPORTANTE: agregado
+  IonButtons,
   ModalController,
   ToastController,
   AlertController,
@@ -42,7 +44,8 @@ import {
   notificationsOutline,
   cloudDownloadOutline,
   flashOutline,
-  trashOutline, // ✅ para el botón limpiar
+  trashOutline,
+  alertCircleOutline,
 } from 'ionicons/icons';
 import { ChatbotApiService } from './services/chatbot-api.service';
 import html2canvas from 'html2canvas';
@@ -83,7 +86,7 @@ interface Message {
     IonFabButton,
     IonChip,
     IonLabel,
-    IonButtons, // ✅ agregado
+    IonButtons,
   ],
 })
 export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
@@ -92,10 +95,33 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
 
   isOpen = false;
   messages: Message[] = [];
-  newMessage = '';
+  newMessage = signal<string>(''); // ✅ Convertido a señal
   isLoading = false;
   isTyping = false;
   private chartInstances: Map<number, Chart> = new Map();
+
+  // ✅ Validación en tiempo real (depende de la señal)
+  isInputValid = computed(() => {
+    const msg = this.newMessage().trim();
+    if (!msg || msg.length < 2) return false;
+    const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s\-'\.()?!,;:]+$/;
+    return regex.test(msg) && !/^[0-9\s]+$/.test(msg);
+  });
+
+  // ✅ Mensaje de error para el usuario
+  getInputError(): string | null {
+    const msg = this.newMessage().trim();
+    if (!msg) return null;
+    if (msg.length < 2) return 'El mensaje debe tener al menos 2 caracteres.';
+    const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s\-'\.()?!,;:]+$/;
+    if (!regex.test(msg)) {
+      return 'Caracteres no permitidos: solo letras, números, espacios y puntuación básica (.,!?;:-).';
+    }
+    if (/^[0-9\s]+$/.test(msg)) {
+      return 'El mensaje no puede ser solo números y espacios.';
+    }
+    return null;
+  }
 
   constructor(
     private chatbotApi: ChatbotApiService,
@@ -118,6 +144,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
       cloudDownloadOutline,
       flashOutline,
       trashOutline,
+      alertCircleOutline,
     });
   }
 
@@ -181,11 +208,11 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
   }
 
   async sendMessage() {
-    const msg = this.newMessage.trim();
-    if (!msg || this.isLoading) return;
+    if (!this.isInputValid() || this.isLoading) return;
 
+    const msg = this.newMessage().trim();
     this.addUserMessage(msg);
-    this.newMessage = '';
+    this.newMessage.set(''); // ✅ Limpiar señal
     this.isLoading = true;
     this.isTyping = true;
 
@@ -222,7 +249,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
   }
 
   async onSuggestionClick(suggestion: string) {
-    this.newMessage = suggestion;
+    this.newMessage.set(suggestion); // ✅ Actualizar señal
     await this.sendMessage();
   }
 
@@ -367,11 +394,10 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
             ${venta.items
               .map(
                 (item: any) => `
-              <td><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${item.product.name}</td>
+              <tr><td style="padding:8px; border-bottom:1px solid #e2e8f0;">${item.product.name}</td>
               <td style="padding:8px;">${item.quantity}</td>
               <td style="padding:8px;">S/ ${Number(item.unitPrice).toFixed(2)}</td>
-              <td style="padding:8px;">S/ ${Number(item.lineTotal).toFixed(2)}</td>
-            </tr>
+              <td style="padding:8px;">S/ ${Number(item.lineTotal).toFixed(2)}</td></tr>
             `,
               )
               .join('')}

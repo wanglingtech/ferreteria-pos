@@ -32,11 +32,9 @@
           Asistente Ferretería
         </ion-title>
         <ion-buttons slot="end">
-          <!-- Botón limpiar chat -->
           <ion-button fill="clear" (click)="confirmClearChat()">
             <ion-icon name="trash-outline"></ion-icon>
           </ion-button>
-          <!-- Botón cerrar -->
           <ion-button fill="clear" (click)="closeChat()">
             <ion-icon name="close-outline"></ion-icon>
           </ion-button>
@@ -46,6 +44,7 @@
 
     <ion-content class="chat-content" #chatContent>
       <div class="messages-container">
+        <!-- Mensajes -->
         <div
           *ngFor="let msg of messages; let i = index"
           [class.user]="msg.isUser"
@@ -59,7 +58,6 @@
               <span class="bot-name">Asistente</span>
             </div>
             <p [innerHTML]="msg.text"></p>
-            <!-- Gráfico -->
             <canvas
               *ngIf="msg.chartData"
               [id]="'chart-' + i"
@@ -67,7 +65,6 @@
               height="200"
               style="max-width: 100%; margin-top: 8px"
             ></canvas>
-            <!-- Sugerencias rápidas -->
             <div *ngIf="msg.suggestions" class="suggestions-row">
               <ion-chip
                 *ngFor="let sug of msg.suggestions"
@@ -101,6 +98,7 @@
             </div>
           </div>
         </div>
+        <!-- Typing indicator -->
         <div *ngIf="isTyping" class="message bot typing-indicator">
           <div class="bubble">
             <div class="typing-dots">
@@ -116,10 +114,19 @@
         <ion-input
           #messageInput
           placeholder="Escribe tu consulta aquí..."
-          [(ngModel)]="newMessage"
-          (keyup.enter)="sendMessage()"
+          [ngModel]="newMessage()"
+          (ngModelChange)="newMessage.set($event)"
+          (keyup.enter)="isInputValid() && sendMessage()"
           [disabled]="isLoading"
         ></ion-input>
+        <!-- Mensaje de error debajo del input -->
+        <div
+          class="input-error"
+          *ngIf="newMessage().trim().length > 0 && !isInputValid()"
+        >
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ getInputError() }}
+        </div>
         <ion-button
           slot="end"
           fill="clear"
@@ -132,7 +139,7 @@
           slot="end"
           fill="clear"
           (click)="sendMessage()"
-          [disabled]="!newMessage.trim() || isLoading"
+          [disabled]="!isInputValid() || isLoading"
           class="send-button"
         >
           <ion-icon name="send-outline"></ion-icon>
