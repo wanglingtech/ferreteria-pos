@@ -1,13 +1,23 @@
 const { prisma } = require("../../config/database");
 
 // ============================================================
-//  VALIDACIÓN DE ENTRADA (seguridad mejorada)
+//  VALIDACIÓN DE ENTRADA (ultra estricta)
 // ============================================================
 function sanitizeInput(input) {
-  if (!input) return "";
-  // Permite letras (con acentos y ñ), números, espacios, y puntuación común
-  // También permite guiones, apóstrofes, puntos, paréntesis, signos de interrogación/exclamación
-  return input.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s\-'\.()?!,;:]/g, "").trim();
+  if (!input) return null;
+  // Recortar espacios y limitar longitud
+  let cleaned = input.trim().slice(0, 200);
+  // Solo permite: letras (con acentos y ñ), números, espacios y puntuación básica.
+  // Los caracteres prohibidos incluyen: #, &, <, >, {, }, [, ], |, \, ", etc.
+  const allowedRegex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s\-'\.()?!,;:]+$/;
+  if (!allowedRegex.test(cleaned)) {
+    // Si contiene caracteres no permitidos, devolver null
+    return null;
+  }
+  // Si solo quedan números o menos de 2 caracteres, también rechazar
+  if (cleaned.length < 2) return null;
+  if (/^[0-9\s]+$/.test(cleaned)) return null; // solo números y espacios
+  return cleaned;
 }
 
 // ============================================================
@@ -85,7 +95,7 @@ const intents = [
     patterns: [/^ayuda$/i, /^help$/i, /^qué puedes hacer$/i],
     action: "help",
   },
-  // BUSCAR VENTA POR CÓDIGO (general)
+  // BUSCAR VENTA POR CÓDIGO
   {
     patterns: [
       /^venta\s+([a-zA-Z0-9\-]+)$/i,
@@ -106,7 +116,7 @@ const intents = [
 ];
 
 // ============================================================
-//  ACCIONES (respuestas enriquecidas con HTML)
+//  ACCIONES (respuestas enriquecidas)
 // ============================================================
 
 async function getSaleByCode(code) {
@@ -278,12 +288,8 @@ async function getLowStockProducts() {
   };
 }
 
-/**
- * ✅ CORREGIDO: Busca notificaciones no leídas del usuario Y globales (userId: null)
- */
 async function getUnreadNotifications(user) {
   if (!user) return { text: "⚠️ No se pudo identificar al usuario." };
-  // Buscar notificaciones no leídas del usuario o globales
   const notifications = await prisma.notification.findMany({
     where: {
       isRead: false,
@@ -347,16 +353,24 @@ async function getLastWeekSales() {
 }
 
 // ============================================================
-//  PROCESADOR PRINCIPAL CON VALIDACIÓN
+//  PROCESADOR PRINCIPAL CON VALIDACIÓN ESTRICTA
 // ============================================================
 async function processMessage(message, user = null) {
   const cleanMessage = sanitizeInput(message);
-  if (!cleanMessage) {
+
+  // Rechazar mensajes inválidos
+  if (cleanMessage === null) {
     return {
-      text: "⚠️ Por favor, escribe un mensaje válido (letras, números, espacios, guiones, apóstrofes y puntos).",
+      text: `⚠️ Tu mensaje contiene caracteres no permitidos. Solo se permiten letras, números, espacios y puntuación básica (.,!?;:-). Evita símbolos como #, &, <, >, [, ], {, }, etc.`,
+    };
+  }
+  if (cleanMessage === "") {
+    return {
+      text: "⚠️ Por favor, escribe un mensaje con al menos 2 caracteres.",
     };
   }
 
+  // Buscar coincidencia con intents
   for (const intent of intents) {
     for (const pattern of intent.patterns) {
       const match = cleanMessage.match(pattern);
