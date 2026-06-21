@@ -1,8 +1,8 @@
 <ion-modal
   [isOpen]="isOpen"
   (didDismiss)="close()"
-  [initialBreakpoint]="0.8"
-  [breakpoints]="[0, 0.5, 0.8, 1]"
+  [initialBreakpoint]="0.9"
+  [breakpoints]="[0, 0.5, 0.9, 1]"
 >
   <ng-template>
     <ion-header class="modal-header">
@@ -20,6 +20,15 @@
           <ion-avatar class="profile-avatar">
             <img [src]="previewImage || 'assets/default-avatar.png'" />
           </ion-avatar>
+          <!-- Botón subir imagen (flotante sobre el avatar) -->
+          <ion-button
+            class="upload-btn"
+            fill="clear"
+            (click)="uploadImage()"
+            aria-label="Subir imagen"
+          >
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+          </ion-button>
         </div>
 
         <!-- NOMBRE COMPLETO -->
@@ -46,10 +55,9 @@
           <span *ngIf="f.fullName.errors?.['maxlength']"
             >Máximo 100 caracteres.</span
           >
-          <span *ngIf="f.fullName.errors?.['pattern']">
-            Solo letras, espacios, guiones, apóstrofes y puntos. Ej: Juan Pérez,
-            Mª José.
-          </span>
+          <span *ngIf="f.fullName.errors?.['pattern']">{{
+            f.fullName.errors?.["pattern"]
+          }}</span>
         </div>
 
         <!-- CORREO -->
@@ -95,13 +103,44 @@
           class="error-message"
           *ngIf="f.imageUrl.touched && f.imageUrl.invalid"
         >
-          <span *ngIf="f.imageUrl.errors?.['pattern']">
-            URL inválida. Debe ser https://... y terminar en .jpg, .jpeg, .png,
-            .gif, .webp, .svg o .bmp.
-          </span>
-          <span *ngIf="f.imageUrl.errors?.['invalidUrl']">
-            La URL debe comenzar con https://
-          </span>
+          <span *ngIf="f.imageUrl.errors?.['invalidUrl']">{{
+            f.imageUrl.errors?.["invalidUrl"]
+          }}</span>
+          <span *ngIf="f.imageUrl.errors?.['blacklisted']">{{
+            f.imageUrl.errors?.["blacklisted"]
+          }}</span>
+        </div>
+
+        <!-- SELECCIONAR AVATAR -->
+        <div class="avatar-selector">
+          <p class="avatar-selector-title">
+            <ion-icon name="image-outline"></ion-icon>
+            Elige un avatar predeterminado
+          </p>
+          <ion-grid class="avatar-grid">
+            <ion-row>
+              <ion-col
+                size="3"
+                size-sm="2"
+                *ngFor="let avatar of defaultAvatars"
+              >
+                <div
+                  class="avatar-option"
+                  [class.selected]="previewImage === avatar"
+                  (click)="selectAvatar(avatar)"
+                >
+                  <ion-avatar>
+                    <img [src]="avatar" />
+                  </ion-avatar>
+                  <ion-icon
+                    *ngIf="previewImage === avatar"
+                    name="checkmark-circle-outline"
+                    class="selected-badge"
+                  ></ion-icon>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </div>
 
         <!-- BOTÓN GUARDAR -->

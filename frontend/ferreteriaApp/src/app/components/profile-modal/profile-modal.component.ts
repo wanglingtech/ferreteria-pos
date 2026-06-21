@@ -21,6 +21,9 @@ import {
   IonTitle,
   IonContent,
   IonSpinner,
+  IonGrid,
+  IonRow,
+  IonCol,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -29,11 +32,58 @@ import {
   saveOutline,
   imageOutline,
   alertCircleOutline,
+  checkmarkCircleOutline,
+  cloudUploadOutline,
 } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../core/services/auth-session.service';
 import { UsuariosApiService } from '../../usuarios/services/usuarios-api.service';
 import { UpdateUsuarioRequest } from '../../usuarios/interfaces/usuario.interface';
+
+// ✅ Avatares predeterminados (imágenes de Unsplash - seguras y gratuitas)
+const DEFAULT_AVATARS = [
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+];
+
+// ✅ Lista negra de palabras para contenido inapropiado (se mantiene)
+const BLACKLIST_WORDS = [
+  'porn',
+  'xxx',
+  'sex',
+  'nude',
+  'desnudo',
+  'gore',
+  'blood',
+  'violencia',
+  'drogas',
+  'narcotrafico',
+  'terror',
+  'asesinato',
+  'muerte',
+  'sangre',
+  'puta',
+  'zorra',
+  'pene',
+  'vagina',
+  'coito',
+  'orgia',
+  'bestialidad',
+  'pedofilia',
+  'pederasta',
+  'violacion',
+  'esclavitud',
+  'tortura',
+  'swastika',
+  'nazi',
+  'kkk',
+  'racismo',
+  'homofobia',
+];
 
 @Component({
   selector: 'app-profile-modal',
@@ -55,6 +105,9 @@ import { UpdateUsuarioRequest } from '../../usuarios/interfaces/usuario.interfac
     IonTitle,
     IonContent,
     IonSpinner,
+    IonGrid,
+    IonRow,
+    IonCol,
   ],
 })
 export class ProfileModalComponent implements OnInit {
@@ -63,8 +116,11 @@ export class ProfileModalComponent implements OnInit {
   profileForm: FormGroup;
   currentUser: any = null;
   previewImage: string | null = null;
+  defaultAvatars = DEFAULT_AVATARS;
 
-  // ✅ Tipado fuerte para los controles del formulario
+  // Referencia al input file oculto
+  private fileInput?: HTMLInputElement;
+
   get f(): {
     fullName: AbstractControl;
     email: AbstractControl;
@@ -82,51 +138,95 @@ export class ProfileModalComponent implements OnInit {
   private usuariosApi = inject(UsuariosApiService);
   private toastCtrl = inject(ToastController);
 
-  // ✅ Validadores personalizados
+  /**
+   * ✅ Validador de nombre completo: mínimo dos palabras, sin caracteres repetidos sin sentido.
+   */
   private fullNameValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value?.trim();
     if (!value) return null;
     if (value.length < 2) return { minlength: true };
     if (value.length > 100) return { maxlength: true };
-    // Solo letras, espacios, guiones, apóstrofes, puntos (sin números ni símbolos)
-    const regex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:[\s\-'\.][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/;
-    if (!regex.test(value)) return { pattern: true };
+
+    const words = value.split(/\s+/).filter((word: string) => word.length > 0);
+    if (words.length < 2) {
+      return {
+        pattern: 'Debe contener al menos dos palabras (nombre y apellido).',
+      };
+    }
+
+    const wordRegex =
+      /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:[\-'\.][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/;
+    for (const word of words) {
+      if (!wordRegex.test(word) || word.length < 2) {
+        return {
+          pattern: "Cada palabra debe ser válida (ej: Juan, María, D'Angelo).",
+        };
+      }
+    }
+
+    // No permitir caracteres repetidos sin sentido (ej: "zxczxczxc")
+    const repeatedPattern = /^(.)\1{4,}/;
+    if (repeatedPattern.test(value.replace(/\s/g, ''))) {
+      return {
+        pattern: 'Nombre inválido. No use caracteres repetidos sin sentido.',
+      };
+    }
+
     return null;
   }
 
+  /**
+   * ✅ Validador de URL de imagen (flexible pero con lista negra)
+   * - Permite URLs de avatares predeterminados (https)
+   * - Permite imágenes locales (data:image/...)
+   * - Permite cualquier URL que comience con http/https y no contenga palabras prohibidas
+   * - No exige extensión de imagen (para compatibilidad con servicios como Google Images)
+   */
   private imageUrlValidator(control: AbstractControl): ValidationErrors | null {
     const url = control.value?.trim();
     if (!url) return null;
-    // Debe ser https
-    if (!url.startsWith('https://')) {
-      return { invalidUrl: true };
+
+    const lowerUrl = url.toLowerCase();
+
+    // 1. Permitir avatares locales (assets) y data URLs (imágenes subidas)
+    if (lowerUrl.startsWith('assets/') || lowerUrl.startsWith('data:image/')) {
+      return null;
     }
-    // Extensiones de imagen permitidas
-    const validExtensions = [
-      '.jpg',
-      '.jpeg',
-      '.png',
-      '.gif',
-      '.webp',
-      '.svg',
-      '.bmp',
-    ];
-    const hasValidExtension = validExtensions.some((ext) =>
-      url.toLowerCase().endsWith(ext),
+
+    // 2. Debe ser una URL válida (http o https)
+    if (!lowerUrl.startsWith('http://') && !lowerUrl.startsWith('https://')) {
+      return { invalidUrl: 'La URL debe comenzar con http:// o https://' };
+    }
+
+    // 3. Lista negra de palabras prohibidas
+    const hasBlacklistedWord = BLACKLIST_WORDS.some((word) =>
+      lowerUrl.includes(word),
     );
-    if (!hasValidExtension) {
-      return { pattern: true };
+    if (hasBlacklistedWord) {
+      return {
+        blacklisted:
+          'La URL contiene contenido inapropiado. Elige otra imagen.',
+      };
     }
-    // Validación básica de URL
-    const urlRegex = /^https:\/\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=]+$/;
+
+    // 4. Validación básica de URL (seguridad)
+    const urlRegex = /^https?:\/\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=]+$/;
     if (!urlRegex.test(url)) {
-      return { invalidUrl: true };
+      return { invalidUrl: 'URL inválida. Formato incorrecto.' };
     }
+
     return null;
   }
 
   constructor() {
-    addIcons({ closeOutline, saveOutline, imageOutline, alertCircleOutline });
+    addIcons({
+      closeOutline,
+      saveOutline,
+      imageOutline,
+      alertCircleOutline,
+      checkmarkCircleOutline,
+      cloudUploadOutline,
+    });
     this.profileForm = this.fb.group({
       fullName: ['', [Validators.required, this.fullNameValidator]],
       email: [
@@ -166,6 +266,39 @@ export class ProfileModalComponent implements OnInit {
   onImageUrlChange() {
     const url = this.profileForm.get('imageUrl')?.value;
     this.previewImage = url || null;
+  }
+
+  selectAvatar(url: string) {
+    this.profileForm.patchValue({ imageUrl: url });
+    this.previewImage = url;
+    this.f.imageUrl.markAsTouched();
+  }
+
+  /**
+   * Abre el selector de archivos para subir una imagen desde el dispositivo.
+   */
+  uploadImage() {
+    // Crear input file si no existe
+    if (!this.fileInput) {
+      this.fileInput = document.createElement('input');
+      this.fileInput.type = 'file';
+      this.fileInput.accept = 'image/*';
+      this.fileInput.onchange = (event: any) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            const dataUrl = e.target.result;
+            this.profileForm.patchValue({ imageUrl: dataUrl });
+            this.previewImage = dataUrl;
+            this.f.imageUrl.markAsTouched();
+            this.mostrarMensaje('Imagen cargada correctamente', 'success');
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+    }
+    this.fileInput.click();
   }
 
   async save() {
