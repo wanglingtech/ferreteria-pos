@@ -1,8 +1,8 @@
 <ion-modal
   [isOpen]="isOpen"
   (didDismiss)="close()"
-  [initialBreakpoint]="0.7"
-  [breakpoints]="[0, 0.5, 0.7]"
+  [initialBreakpoint]="0.8"
+  [breakpoints]="[0, 0.5, 0.8, 1]"
 >
   <ng-template>
     <ion-header class="modal-header">
@@ -15,35 +15,110 @@
     </ion-header>
     <ion-content class="modal-content">
       <form [formGroup]="profileForm" (ngSubmit)="save()">
+        <!-- AVATAR -->
         <div class="avatar-container">
           <ion-avatar class="profile-avatar">
             <img [src]="previewImage || 'assets/default-avatar.png'" />
           </ion-avatar>
         </div>
-        <ion-item>
-          <ion-label position="floating">Nombre completo</ion-label>
-          <ion-input formControlName="fullName"></ion-input>
+
+        <!-- NOMBRE COMPLETO -->
+        <ion-item
+          class="form-item"
+          [class.invalid]="f.fullName.touched && f.fullName.invalid"
+        >
+          <ion-label position="floating">Nombre completo *</ion-label>
+          <ion-input
+            formControlName="fullName"
+            placeholder="Ej: Juan Pérez Martínez"
+          ></ion-input>
         </ion-item>
-        <ion-item>
-          <ion-label position="floating">Correo electrónico</ion-label>
-          <ion-input formControlName="email" type="email"></ion-input>
+        <div
+          class="error-message"
+          *ngIf="f.fullName.touched && f.fullName.invalid"
+        >
+          <span *ngIf="f.fullName.errors?.['required']"
+            >El nombre es obligatorio.</span
+          >
+          <span *ngIf="f.fullName.errors?.['minlength']"
+            >Mínimo 2 caracteres.</span
+          >
+          <span *ngIf="f.fullName.errors?.['maxlength']"
+            >Máximo 100 caracteres.</span
+          >
+          <span *ngIf="f.fullName.errors?.['pattern']">
+            Solo letras, espacios, guiones, apóstrofes y puntos. Ej: Juan Pérez,
+            Mª José.
+          </span>
+        </div>
+
+        <!-- CORREO -->
+        <ion-item
+          class="form-item"
+          [class.invalid]="f.email.touched && f.email.invalid"
+        >
+          <ion-label position="floating">Correo electrónico *</ion-label>
+          <ion-input
+            formControlName="email"
+            type="email"
+            placeholder="ejemplo@dominio.com"
+          ></ion-input>
         </ion-item>
-        <ion-item>
+        <div class="error-message" *ngIf="f.email.touched && f.email.invalid">
+          <span *ngIf="f.email.errors?.['required']"
+            >El correo es obligatorio.</span
+          >
+          <span *ngIf="f.email.errors?.['email']"
+            >Correo electrónico inválido.</span
+          >
+          <span *ngIf="f.email.errors?.['maxlength']"
+            >Máximo 100 caracteres.</span
+          >
+        </div>
+
+        <!-- URL DE IMAGEN -->
+        <ion-item
+          class="form-item"
+          [class.invalid]="f.imageUrl.touched && f.imageUrl.invalid"
+        >
           <ion-label position="floating">URL de imagen (avatar)</ion-label>
           <ion-input
             formControlName="imageUrl"
             (ionInput)="onImageUrlChange()"
-            placeholder="https://..."
+            placeholder="https://ejemplo.com/avatar.jpg"
           ></ion-input>
+          <ion-button slot="end" fill="clear" (click)="onImageUrlChange()">
+            <ion-icon name="image-outline"></ion-icon>
+          </ion-button>
         </ion-item>
+        <div
+          class="error-message"
+          *ngIf="f.imageUrl.touched && f.imageUrl.invalid"
+        >
+          <span *ngIf="f.imageUrl.errors?.['pattern']">
+            URL inválida. Debe ser https://... y terminar en .jpg, .jpeg, .png,
+            .gif, .webp, .svg o .bmp.
+          </span>
+          <span *ngIf="f.imageUrl.errors?.['invalidUrl']">
+            La URL debe comenzar con https://
+          </span>
+        </div>
+
+        <!-- BOTÓN GUARDAR -->
         <div class="form-actions">
           <ion-button
             expand="block"
             type="submit"
-            [disabled]="profileForm.invalid"
+            [disabled]="profileForm.invalid || isLoading"
+            class="save-btn"
           >
+            <ion-spinner
+              *ngIf="isLoading"
+              name="crescent"
+              slot="start"
+            ></ion-spinner>
             <ion-icon slot="start" name="save-outline"></ion-icon>
-            Guardar cambios
+            {{ isLoading ? "Guardando..." : "Guardar cambios" }}
           </ion-button>
         </div>
       </form>
