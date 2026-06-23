@@ -133,7 +133,7 @@ No olvides darle una ⭐ al proyecto si te fue útil.
 
 <p align="center">
   <br>
-  <img src="frontend/ferreteriaApp/src/assets/icon/wangling.jpg" alt="Foto de perfil" width="120" style="border-radius: 50%;">
+  <img src="/frontend/ferreteriaApp/src/assets/icon/wangling.jpg" alt="Foto de perfil" width="120" style="border-radius: 50%;">
   <br>
   <strong>WangLing</strong>
   <br>
