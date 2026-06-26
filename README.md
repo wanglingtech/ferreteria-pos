@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Estado-Proyecto-Académico-brightgreen" alt="Estado: Proyecto Académico">
+  <img src="https://img.shields.io/badge/Estado-Académico%20(Activo)-blue" alt="Estado: Proyecto Académico (Activo)">
   <img src="https://img.shields.io/badge/versión-1.0.0-blue" alt="Versión 1.0.0">
   <img src="https://img.shields.io/badge/Licencia-MIT-green" alt="Licencia MIT">
 </p>
