@@ -123,11 +123,18 @@ ionic serve
 
 El sistema está construido bajo una Screaming Architecture y Clean Architecture Simplificada, separando el código en capas bien definidas para garantizar mantenibilidad y escalabilidad. Mientras que Clean Architecture provee las reglas técnicas de desacoplamiento y dirección de dependencias, Screaming Architecture define cómo debe organizarse visualmente el proyecto para que la estructura de carpetas refleje el negocio (las intenciones del sistema) y no las herramientas técnicas.
 
-# 🤝 Contribuciones
+## 🤝 Contribuciones
 
-Las contribuciones son lo que hacen a la comunidad de código abierto un lugar increíble para aprender, inspirar y crear. ¡Cualquier contribución que hagas será muy apreciada! Si tienes una sugerencia para mejorar esto, por favor, haz un fork del repositorio y crea un pull request. También puedes abrir un issue con la etiqueta "enhancement".
+¡Gracias por tu interés en este proyecto!
 
-No olvides darle una ⭐ al proyecto si te fue útil.
+Si encuentras un error, tienes una sugerencia o deseas proponer una mejora, puedes:
+
+- Abrir un **Issue** describiendo el problema o la idea.
+- Hacer un **Fork** del repositorio y enviar un **Pull Request** con tus cambios.
+
+Todas las contribuciones serán revisadas antes de ser integradas al proyecto.
+
+Si este proyecto te resultó útil o te sirvió como referencia, considera darle una ⭐ al repositorio. ¡Gracias por tu apoyo!
 
 ## 👨‍💻 **Desarrollador**
 
