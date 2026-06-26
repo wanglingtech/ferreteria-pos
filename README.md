@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Estado-Producción-brightgreen" alt="Estado: Producción">
+  <img src="https://img.shields.io/badge/Estado-Producción-brightgreen" alt="Estado: Proyecto Académico">
   <img src="https://img.shields.io/badge/versión-1.0.0-blue" alt="Versión 1.0.0">
   <img src="https://img.shields.io/badge/Licencia-MIT-green" alt="Licencia MIT">
 </p>
@@ -22,7 +22,7 @@
 
 ## 📖 **Descripción General**
 
-**Ferretería July** es un sistema empresarial completo, diseñado para optimizar la gestión de ventas, inventario y operaciones de una ferretería. Nacido de una colaboración freelance con un negocio real, este software resuelve problemas cotidianos como la falta de control de stock, la gestión manual de ventas y la ausencia de métricas en tiempo real.
+**Ferretería July** es un sistema empresarial completo, diseñado para optimizar la gestión de ventas, inventario y operaciones de una ferretería. Es un proyecto académico desarrollado como parte del curso de Programación de Aplicaciones Móviles, tomando como caso de estudio una ferretería para diseñar e implementar una solución integral de gestión empresarial, este software busca resolver problemas cotidianos como la falta de control de stock, la gestión manual de ventas y la ausencia de métricas en tiempo real.
 
 El sistema ofrece una experiencia unificada: desde un **Punto de Venta (POS)** ágil e intuitivo hasta un potente **panel de control** con gráficos y alertas automatizadas, todo construido sobre una arquitectura moderna y escalable.
 
