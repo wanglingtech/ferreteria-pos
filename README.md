@@ -35,7 +35,7 @@ El sistema ofrece una experiencia unificada: desde un **Punto de Venta (POS)** �
 - **🏷️ Gestión de Inventario**: Controla el stock con alertas automáticas de bajo inventario, gestiona categorías y productos, y lleva un historial de movimientos.
 - **👥 Gestión de Usuarios y Roles**: Sistema de autenticación seguro con roles de `Administrador` y `Vendedor`, permitiendo control granular de accesos y permisos.
 - **📊 Centro de Reportes y Análisis**: Genera reportes de ventas por fechas, visualiza gráficos de evolución, exporta a CSV/PDF y consulta los productos más vendidos.
-- **🤖 Asistente Inteligente (Chatbot)**: Integración con OpenAI para un chatbot que responde preguntas sobre ventas, inventario, genera gráficos y ofrece sugerencias, mejorando la experiencia de usuario y el soporte.
+- **🤖 Asistente Inteligente (Chatbot)**: Desarrollo de un chatbot basado en reglas y procesamiento de comandos, capaz de responder consultas relacionadas con ventas, inventario, clientes, reportes y métricas del sistema utilizando información almacenada en la base de datos.
 - **🔄 Actualizaciones en Tiempo Real**: La información de inventario, ventas y reportes se actualiza de manera automática, reflejando cambios sin necesidad de recargar la página.
 
 ---
