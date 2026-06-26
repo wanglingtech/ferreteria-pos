@@ -145,7 +145,7 @@ No olvides darle una ⭐ al proyecto si te fue útil.
     <img src="https://img.shields.io/badge/GitHub-wangling941-181717?style=for-the-badge&logo=github" alt="GitHub">
   </a>
   &nbsp;
-  <a href="mailto:kevinvillegassolisxd@gmail.com">
+  <a href="mailto:kevinvillegas.dev@gmail.com">
     <img src="https://img.shields.io/badge/Email-Contacto-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
   </a>
   &nbsp;
