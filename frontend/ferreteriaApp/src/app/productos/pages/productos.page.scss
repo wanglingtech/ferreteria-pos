@@ -436,14 +436,14 @@
     font-size: 22px;
   }
 
-  /* --- Toolbar: botones a la derecha, búsqueda centrada --- */
+  /* --- Toolbar: búsqueda más ancha, botones a la derecha --- */
   .toolbar-section {
     gap: 14px;
   }
   .search-box {
+    flex: 1; /* Ocupa todo el espacio disponible */
+    max-width: 1200px; /* Límite razonable para no estirarse demasiado */
     height: 48px;
-    max-width: 500px;
-    flex: 0 1 auto;
   }
   .filter-btn,
   .category-btn,
@@ -514,7 +514,6 @@
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 2px;
-    /* Línea de corte con compatibilidad */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2; /* Propiedad estándar para futuro */
