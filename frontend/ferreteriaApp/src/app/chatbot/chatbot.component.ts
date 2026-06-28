@@ -7,6 +7,7 @@ import {
   OnDestroy,
   computed,
   signal,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -52,6 +53,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { firstValueFrom } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
+import { AuthSessionService } from '../core/services/auth-session.service'; // <--- agregado
 
 Chart.register(...registerables);
 
@@ -93,12 +95,21 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
   @ViewChild('chatContent') chatContent!: ElementRef;
   @ViewChild('messageInput', { read: IonInput }) messageInput!: IonInput;
 
+  // Inyección del servicio de autenticación
+  private authService = inject(AuthSessionService); // <--- agregado
+
   isOpen = false;
   messages: Message[] = [];
-  newMessage = signal<string>(''); // ✅ Convertido a señal
+  newMessage = signal<string>('');
   isLoading = false;
   isTyping = false;
   private chartInstances: Map<number, Chart> = new Map();
+
+  // Método para verificar si es administrador
+  isAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'ADMIN';
+  }
 
   // ✅ Validación en tiempo real (depende de la señal)
   isInputValid = computed(() => {
@@ -212,7 +223,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
 
     const msg = this.newMessage().trim();
     this.addUserMessage(msg);
-    this.newMessage.set(''); // ✅ Limpiar señal
+    this.newMessage.set('');
     this.isLoading = true;
     this.isTyping = true;
 
@@ -249,7 +260,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
   }
 
   async onSuggestionClick(suggestion: string) {
-    this.newMessage.set(suggestion); // ✅ Actualizar señal
+    this.newMessage.set(suggestion);
     await this.sendMessage();
   }
 

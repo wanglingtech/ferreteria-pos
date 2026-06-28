@@ -18,7 +18,7 @@
   <!-- MENU -->
   <div class="sidebar-menu">
     <ion-list lines="none">
-      <ion-menu-toggle auto-hide="true" *ngFor="let item of items">
+      <ion-menu-toggle auto-hide="true" *ngFor="let item of items()">
         <ion-item
           [routerLink]="item.path"
           routerDirection="root"
@@ -28,7 +28,6 @@
           (click)="onNavigate()"
         >
           <ion-icon slot="start" [name]="item.icon"></ion-icon>
-
           <ion-label>
             {{ item.label }}
           </ion-label>

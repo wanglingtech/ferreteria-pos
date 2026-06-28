@@ -1,6 +1,6 @@
-<!-- Botón flotante animado -->
+<!-- Botón flotante animado - solo visible para ADMIN -->
 <ion-fab
-  *ngIf="!isOpen"
+  *ngIf="!isOpen && isAdmin()"
   slot="fixed"
   vertical="bottom"
   horizontal="end"
@@ -12,7 +12,7 @@
   </ion-fab-button>
 </ion-fab>
 
-<!-- Modal del chat -->
+<!-- Modal del chat (sin cambios) -->
 <ion-modal
   [isOpen]="isOpen"
   [breakpoints]="[0, 0.5, 0.9, 1]"
@@ -119,7 +119,6 @@
           (keyup.enter)="isInputValid() && sendMessage()"
           [disabled]="isLoading"
         ></ion-input>
-        <!-- Mensaje de error debajo del input -->
         <div
           class="input-error"
           *ngIf="newMessage().trim().length > 0 && !isInputValid()"

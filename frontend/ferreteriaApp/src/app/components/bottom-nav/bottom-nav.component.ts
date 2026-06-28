@@ -1,13 +1,15 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  computed,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { RouterLink, RouterLinkActive } from '@angular/router';
-
 import { IonFooter, IonIcon } from '@ionic/angular/standalone';
-
 import { addIcons } from 'ionicons';
-
 import {
   barChartOutline,
   basketOutline,
@@ -16,6 +18,7 @@ import {
   layersOutline,
   peopleOutline,
 } from 'ionicons/icons';
+import { AuthSessionService } from '../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-bottom-nav',
@@ -28,38 +31,29 @@ export class BottomNavComponent implements AfterViewInit {
   @ViewChild('scrollContainer')
   scrollContainer!: ElementRef<HTMLDivElement>;
 
-  protected readonly items = [
-    {
-      label: 'Inicio',
-      path: '/app/dashboard',
-      icon: 'grid-outline',
-    },
-    {
-      label: 'Productos',
-      path: '/app/productos',
-      icon: 'cube-outline',
-    },
-    {
-      label: 'Ventas',
-      path: '/app/ventas',
-      icon: 'basket-outline',
-    },
-    {
-      label: 'Inventario',
-      path: '/app/inventario',
-      icon: 'layers-outline',
-    },
-    {
-      label: 'Usuarios',
-      path: '/app/usuarios',
-      icon: 'people-outline',
-    },
-    {
-      label: 'Reportes',
-      path: '/app/reportes',
-      icon: 'bar-chart-outline',
-    },
+  private authService = inject(AuthSessionService);
+
+  private allItems = [
+    { label: 'Inicio', path: '/app/dashboard', icon: 'grid-outline' },
+    { label: 'Productos', path: '/app/productos', icon: 'cube-outline' },
+    { label: 'Ventas', path: '/app/ventas', icon: 'basket-outline' },
+    { label: 'Inventario', path: '/app/inventario', icon: 'layers-outline' },
+    { label: 'Usuarios', path: '/app/usuarios', icon: 'people-outline' },
+    { label: 'Reportes', path: '/app/reportes', icon: 'bar-chart-outline' },
   ];
+
+  protected readonly items = computed(() => {
+    const user = this.authService.getCurrentUser();
+    const role = user?.role;
+    if (role === 'ADMIN') {
+      return this.allItems;
+    } else {
+      // SELLER: solo productos y ventas
+      return this.allItems.filter(
+        (item) => item.path === '/app/productos' || item.path === '/app/ventas',
+      );
+    }
+  });
 
   constructor() {
     addIcons({
@@ -74,7 +68,6 @@ export class BottomNavComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     const slider = this.scrollContainer.nativeElement;
-
     let isDown = false;
     let startX = 0;
     let scrollLeft = 0;
@@ -95,12 +88,9 @@ export class BottomNavComponent implements AfterViewInit {
 
     slider.addEventListener('mousemove', (e) => {
       if (!isDown) return;
-
       e.preventDefault();
-
       const x = e.pageX - slider.offsetLeft;
       const walk = (x - startX) * 2;
-
       slider.scrollLeft = scrollLeft - walk;
     });
   }
