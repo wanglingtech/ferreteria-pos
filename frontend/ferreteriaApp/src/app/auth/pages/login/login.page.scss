@@ -429,11 +429,11 @@ $blue: #0a1a5c;
 //  LOGIN BUTTON
 // ============================================================
 .login-button {
-  --background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
+  --background: linear-gradient(135deg, $primary 40%, $primary-light 100%);
   --background-hover: linear-gradient(135deg, $primary-dark 0%, $primary 100%);
   --background-activated: $primary-dark;
   --border-radius: 16px;
-  --color: $white;
+  --color: $primary;
   --box-shadow: 0 8px 24px rgba(10, 26, 92, 0.25);
   height: 54px;
   font-weight: 700;
@@ -456,7 +456,7 @@ $blue: #0a1a5c;
   }
 
   ion-spinner {
-    --color: $white;
+    --color: $primary;
   }
 }
 
