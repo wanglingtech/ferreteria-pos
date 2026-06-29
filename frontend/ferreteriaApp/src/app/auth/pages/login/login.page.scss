@@ -354,14 +354,15 @@ $transition: 0.25s ease;
 
     ion-checkbox {
       --size: 18px;
-      --checkbox-background: white;
-      --checkbox-background-checked: $primary;
-      --border-color: $gray-mid;
-      --border-color-checked: $primary;
-      --checkmark-color: $white;
+      --checkbox-background: #ffffff; // fondo sin marcar (blanco)
+      --checkbox-background-checked: $primary; // fondo marcado (azul #0a1a5c)
+      --border-color: $gray-mid; // borde sin marcar
+      --border-color-checked: $primary; // borde marcado (azul)
+      --checkmark-color: #1900ff; // check azul
       --checkmark-width: 2px;
       margin-right: 10px;
     }
+
     ion-label {
       font-weight: 500;
       color: rgba(10, 26, 92, 0.75);
@@ -384,38 +385,63 @@ $transition: 0.25s ease;
 }
 
 // ============================================================
-// 11. BOTÓN PRINCIPAL
+// 11. BOTÓN PRINCIPAL (con fill="clear" + fondo propio)
 // ============================================================
-.login-button {
-  --background: linear-gradient(135deg, $primary 40%, $primary-light 100%);
-  --background-hover: linear-gradient(135deg, $primary-dark 0%, $primary 100%);
-  --background-activated: $primary-dark;
-  --border-radius: 16px;
-  --color: $white;
-  --box-shadow: 0 8px 24px rgba(10, 26, 92, 0.25);
+ion-button.login-button {
+  // Eliminamos cualquier fondo por defecto de Ionic
+  --background: transparent !important;
+  --background-hover: transparent !important;
+  --background-activated: transparent !important;
+  --background-focused: transparent !important;
+
+  // Ahora aplicamos nuestro propio fondo mediante CSS
+  background: linear-gradient(
+    135deg,
+    $primary 40%,
+    $primary-light 100%
+  ) !important;
+  color: $white !important;
+
+  border-radius: 16px;
   height: clamp(48px, 6vh, 60px);
   font-weight: 700;
   font-size: clamp(0.9rem, 1.2vw, 1.05rem);
   text-transform: none;
   letter-spacing: 0.3px;
   margin-top: 6px;
+  box-shadow: 0 8px 24px rgba(10, 26, 92, 0.25);
   transition:
     transform $transition,
     box-shadow $transition;
 
+  // Aseguramos que el texto y el spinner sean blancos
+  color: $white !important;
+
   &:hover:not(.button-disabled) {
     transform: translateY(-2px);
-    --box-shadow: 0 12px 32px rgba(10, 26, 92, 0.35);
+    box-shadow: 0 12px 32px rgba(10, 26, 92, 0.35);
+    background: linear-gradient(
+      135deg,
+      $primary-dark 0%,
+      $primary 100%
+    ) !important;
   }
 
   &.button-disabled {
     opacity: 0.6;
     transform: none;
-    --box-shadow: none;
+    box-shadow: none;
+    background: linear-gradient(
+      135deg,
+      $primary 40%,
+      $primary-light 100%
+    ) !important;
+    pointer-events: none;
   }
 
+  // Spinner blanco
   ion-spinner {
-    --color: $white;
+    --color: $white !important;
   }
 }
 
