@@ -1,46 +1,62 @@
 // ============================================================
-//  VARIABLES
+// 1. VARIABLES
 // ============================================================
 $primary: #0a1a5c;
 $primary-light: #1e3a8a;
 $primary-dark: #071447;
-$accent: #3b82f6;
 $white: #ffffff;
 $gray-light: #f0f4ff;
 $gray-mid: #8a9bb5;
-$shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 $radius: 28px;
-$blue: #0a1a5c;
+$shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$transition: 0.25s ease;
 
 // ============================================================
-//  CONTENEDOR PRINCIPAL
+// 2. MIXINS
+// ============================================================
+@mixin glass($bg: rgba(255, 255, 255, 0.85), $blur: 20px) {
+  background: $bg;
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ============================================================
+// 3. BASE – ION-CONTENT
 // ============================================================
 .login-content {
   --background: transparent;
-  height: 100%;
   position: relative;
+  height: 100%;
   overflow: hidden;
 }
 
 // ============================================================
-//  FONDO CON IMAGEN Y OVERLAY
+// 4. FONDO FIJO (NUNCA SE ROMPE CON ESCALADO)
 // ============================================================
 .login-bg {
-  position: absolute;
-  inset: 0;
+  position: fixed; // ← CLAVE: fijo respecto a la ventana
+  top: 0;
+  left: 0;
+  width: 100dvw; // usa el ancho de la ventana
+  height: 100dvh; // usa el alto de la ventana
   z-index: 0;
   overflow: hidden;
+  pointer-events: none; // para que no bloquee clics
 
   .bg-image {
     position: absolute;
     inset: 0;
-    background-image: url("https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=1600&q=80");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    transform: scale(1.05);
-    transition: transform 0.3s ease;
-    filter: brightness(0.6) saturate(1.1);
+    background: url("/assets/backgrounds/fondo1.webp") center / cover no-repeat;
+    background-color: $primary; // fallback
+    filter: brightness(0.55) saturate(1.2);
+    transform: scale(1.02); // evita bordes blancos por subpíxeles
   }
 
   .bg-overlay {
@@ -48,94 +64,48 @@ $blue: #0a1a5c;
     inset: 0;
     background: linear-gradient(
       135deg,
-      rgba(10, 26, 92, 0.85) 0%,
-      rgba(30, 58, 138, 0.75) 40%,
-      rgba(59, 130, 246, 0.55) 100%
+      rgba(10, 26, 92, 0.8) 0%,
+      rgba(30, 58, 138, 0.7) 40%,
+      rgba(59, 130, 246, 0.5) 100%
     );
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
   }
 
-  .bg-pattern {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    pointer-events: none;
-  }
-
+  // Partículas (solo 3, optimizadas)
   .particle {
     position: absolute;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    animation: floatParticle 12s ease-in-out infinite alternate;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.08),
+      transparent 70%
+    );
+    animation: floatParticle 14s ease-in-out infinite alternate;
+    will-change: transform; // GPU
     pointer-events: none;
   }
 
   .particle-1 {
-    width: 400px;
-    height: 400px;
-    top: -150px;
-    right: -100px;
-    background: radial-gradient(
-      circle,
-      rgba(59, 130, 246, 0.25),
-      transparent 70%
-    );
-    animation-duration: 14s;
+    width: 350px;
+    height: 350px;
+    top: -120px;
+    right: -80px;
+    animation-duration: 16s;
   }
   .particle-2 {
-    width: 300px;
-    height: 300px;
-    bottom: -80px;
-    left: -120px;
-    background: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.08),
-      transparent 60%
-    );
-    animation-duration: 10s;
+    width: 250px;
+    height: 250px;
+    bottom: -60px;
+    left: -100px;
+    animation-duration: 12s;
     animation-delay: 1s;
   }
   .particle-3 {
-    width: 200px;
-    height: 200px;
-    top: 40%;
-    left: 10%;
-    background: radial-gradient(
-      circle,
-      rgba(59, 130, 246, 0.15),
-      transparent 70%
-    );
-    animation-duration: 16s;
-    animation-delay: 2s;
-  }
-  .particle-4 {
-    width: 150px;
-    height: 150px;
-    bottom: 20%;
-    right: 15%;
-    background: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.05),
-      transparent 60%
-    );
-    animation-duration: 12s;
-    animation-delay: 3s;
-  }
-  .particle-5 {
-    width: 250px;
-    height: 250px;
-    top: 10%;
-    right: 30%;
-    background: radial-gradient(
-      circle,
-      rgba(59, 130, 246, 0.1),
-      transparent 70%
-    );
+    width: 180px;
+    height: 180px;
+    top: 30%;
+    left: 15%;
     animation-duration: 18s;
-    animation-delay: 0.5s;
+    animation-delay: 2s;
   }
 }
 
@@ -144,51 +114,49 @@ $blue: #0a1a5c;
     transform: translate(0, 0) scale(1);
   }
   100% {
-    transform: translate(30px, -30px) scale(1.05);
+    transform: translate(25px, -25px) scale(1.06);
   }
 }
 
 // ============================================================
-//  CONTENEDOR LOGIN
+// 5. CONTENEDOR DEL LOGIN (encima del fondo)
 // ============================================================
 .login-container {
   position: relative;
   z-index: 2;
   min-height: 100dvh;
-  display: flex;
+  @include flex-center;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
-  gap: 28px;
+  padding: 24px clamp(16px, 5vw, 48px);
+  gap: clamp(20px, 4vh, 40px);
 }
 
 // ============================================================
-//  BRAND SECTION
+// 6. BRAND
 // ============================================================
 .brand-section {
   text-align: center;
-  display: flex;
+  @include flex-center;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .logo-wrapper {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: clamp(80px, 15vw, 160px);
+  height: clamp(80px, 15vw, 160px);
 
   .logo {
     width: 100%;
     height: 100%;
     object-fit: contain;
     border-radius: 24px;
-    position: relative;
-    z-index: 2;
     filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
     animation: fadeIn 0.8s ease;
+    position: relative;
+    z-index: 2;
   }
+
   .logo-ring {
     position: absolute;
     inset: -6px;
@@ -209,108 +177,105 @@ $blue: #0a1a5c;
 }
 
 @keyframes spinRing {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
 .brand-name {
-  font-size: 2rem;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
   font-weight: 800;
   color: $white;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
   margin: 0;
   letter-spacing: -0.5px;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
   animation: fadeIn 0.8s ease 0.2s both;
 }
+
 .brand-tagline {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(0.65rem, 1.2vw, 1rem);
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
   font-weight: 400;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
   animation: fadeIn 0.8s ease 0.4s both;
 }
 
 // ============================================================
-//  LOGIN CARD
+// 7. LOGIN CARD (Glassmorphism)
 // ============================================================
 .login-card {
   width: 100%;
-  max-width: 420px;
+  max-width: min(420px, 92%);
   border-radius: $radius;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: $shadow;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  @include glass(rgba(255, 255, 255, 0.92), 20px);
+  box-shadow: $shadow-card;
   animation: slideUp 0.6s ease 0.3s both;
-  overflow: hidden;
   margin: 0;
+  overflow: hidden;
+
   ion-card-content {
-    padding: 36px 30px;
+    padding: clamp(24px, 5vw, 44px) clamp(20px, 4vw, 36px);
   }
 }
 
 .card-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: clamp(24px, 4vh, 36px);
+
   h2 {
-    font-size: 1.7rem;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
     font-weight: 700;
     color: $primary;
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
     letter-spacing: -0.3px;
   }
   p {
-    font-size: 0.95rem;
+    font-size: clamp(0.8rem, 1.2vw, 1rem);
     color: $gray-mid;
     margin: 0;
   }
 }
 
 // ============================================================
-//  FORM
+// 8. FORM & INPUTS
 // ============================================================
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .input-group {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
-// ============================================================
-//  INPUTS
-// ============================================================
 .form-item {
   --background: rgba(248, 250, 255, 0.7);
   --color: $primary;
   --placeholder-color: $gray-mid;
   --border-radius: 16px;
-  --min-height: 56px;
-  --padding-start: 16px;
+  --min-height: clamp(48px, 6vh, 60px);
+  --padding-start: 14px;
   --padding-end: 12px;
-  margin-bottom: 6px;
-  border: 1.5px solid rgba(10, 26, 92, 0.12);
+  margin-bottom: 4px;
+  border: 1.5px solid rgba(10, 26, 92, 0.15);
   border-radius: 16px;
-  transition: all 0.3s ease;
+  transition:
+    border-color $transition,
+    box-shadow $transition;
   background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(4px);
 
   &:hover {
-    border-color: rgba(10, 26, 92, 0.25);
-    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(10, 26, 92, 0.3);
   }
+
   &.ion-focused {
     border-color: $primary;
     box-shadow: 0 0 0 4px rgba(10, 26, 92, 0.08);
   }
+
   &.invalid {
     border-color: #e53935;
     box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.1);
@@ -320,8 +285,9 @@ $blue: #0a1a5c;
     color: $gray-mid;
     font-size: 1.2rem;
     margin-right: 8px;
-    transition: color 0.2s ease;
+    transition: color $transition;
   }
+
   &.ion-focused .input-icon {
     color: $primary;
   }
@@ -330,77 +296,69 @@ $blue: #0a1a5c;
   }
 
   ion-input {
-    --padding-top: 8px;
-    --padding-bottom: 8px;
-    font-size: 0.95rem;
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+    font-size: clamp(0.85rem, 1.2vw, 1rem);
     font-weight: 500;
   }
 }
 
-// ============================================================
-//  TOGGLE PASSWORD
-// ============================================================
+// Botón mostrar contraseña
 .toggle-password {
   --background: transparent !important;
-  --background-hover: transparent !important;
-  --background-activated: transparent !important;
   --box-shadow: none !important;
   --color: $gray-mid;
   height: 100%;
   margin: 0;
   padding: 0 4px;
-  --padding-start: 4px;
-  --padding-end: 4px;
 
   .eye-icon {
     font-size: 1.2rem;
-    transition: all 0.2s ease;
     color: $gray-mid;
+    transition: color $transition;
   }
   &:hover .eye-icon {
     color: $primary;
   }
 }
 
-// ============================================================
-//  FIELD ERRORS
-// ============================================================
+// Errores
 .field-error {
-  font-size: 0.75rem;
+  font-size: clamp(0.65rem, 0.9vw, 0.75rem);
   color: #e53935;
-  padding-left: 16px;
-  margin: -4px 0 10px 0;
+  padding-left: 14px;
+  margin: -2px 0 8px 0;
   font-weight: 500;
-  min-height: 20px;
+  min-height: 18px;
   span {
     display: block;
   }
 }
 
 // ============================================================
-//  OPTIONS ROW (CHECKBOX RECORDARME)
+// 9. CHECKBOX (Recordarme)
 // ============================================================
 .options-row {
   display: flex;
   align-items: center;
-  margin: 10px 0 18px 0;
-  padding-left: 4px;
+  margin: 8px 0 16px 0;
+  padding-left: 2px;
 
   .remember-item {
     --background: transparent;
     --padding-start: 0;
     --inner-padding-end: 0;
     --min-height: 32px;
-    font-size: 0.85rem;
-    color: $blue;
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: $primary;
 
     ion-checkbox {
       --size: 18px;
       --checkbox-background: white;
-      --checkbox-background-checked: $primary; // ✅ fondo azul cuando marcado
+      --checkbox-background-checked: $primary;
       --border-color: $gray-mid;
       --border-color-checked: $primary;
-      --checkmark-color: $white; // ✅ check BLANCO sobre fondo azul
+      --checkmark-color: $white;
       --checkmark-width: 2px;
       margin-right: 10px;
     }
@@ -412,80 +370,77 @@ $blue: #0a1a5c;
 }
 
 // ============================================================
-//  API ERROR
+// 10. API ERROR
 // ============================================================
 .api-error {
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 1vw, 0.9rem);
   color: #e53935;
   text-align: center;
-  margin: 6px 0 14px 0;
+  margin: 4px 0 12px 0;
   font-weight: 500;
   background: rgba(229, 57, 53, 0.06);
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 12px;
 }
 
 // ============================================================
-//  LOGIN BUTTON
+// 11. BOTÓN PRINCIPAL
 // ============================================================
 .login-button {
   --background: linear-gradient(135deg, $primary 40%, $primary-light 100%);
   --background-hover: linear-gradient(135deg, $primary-dark 0%, $primary 100%);
   --background-activated: $primary-dark;
   --border-radius: 16px;
-  --color: $primary;
+  --color: $white;
   --box-shadow: 0 8px 24px rgba(10, 26, 92, 0.25);
-  height: 54px;
+  height: clamp(48px, 6vh, 60px);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
   text-transform: none;
   letter-spacing: 0.3px;
-  margin-top: 8px;
-  transition: all 0.25s ease;
+  margin-top: 6px;
+  transition:
+    transform $transition,
+    box-shadow $transition;
 
-  &:hover {
+  &:hover:not(.button-disabled) {
     transform: translateY(-2px);
     --box-shadow: 0 12px 32px rgba(10, 26, 92, 0.35);
   }
 
   &.button-disabled {
-    opacity: 0.65; // ✅ mantiene el azul pero más pálido
+    opacity: 0.6;
     transform: none;
     --box-shadow: none;
-    --background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
   }
 
   ion-spinner {
-    --color: $primary;
+    --color: $white;
   }
 }
 
 // ============================================================
-//  FOOTER
+// 12. FOOTER
 // ============================================================
 .footer-text {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.75rem;
+  font-size: clamp(0.6rem, 0.9vw, 0.8rem);
   text-align: center;
-  margin-top: 8px;
+  margin-top: 4px;
   letter-spacing: 0.5px;
-  animation: fadeIn 0.8s ease 0.8s both;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  padding: 8px 20px;
+  padding: 6px 16px;
   border-radius: 30px;
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  @include glass(rgba(0, 0, 0, 0.15), 6px);
+  border-color: rgba(255, 255, 255, 0.08);
   width: 100%;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: min(420px, 90%);
   box-sizing: border-box;
+  animation: fadeIn 0.8s ease 0.8s both;
 }
 
 // ============================================================
-//  ANIMATIONS
+// 13. ANIMACIONES
 // ============================================================
 @keyframes fadeIn {
   from {
@@ -497,6 +452,7 @@ $blue: #0a1a5c;
     transform: scale(1);
   }
 }
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -509,24 +465,22 @@ $blue: #0a1a5c;
 }
 
 // ============================================================
-//  RESPONSIVE (incluye iPhone 5 y pantallas muy pequeñas)
+// 14. RESPONSIVE EXTRA (para pantallas muy pequeñas)
 // ============================================================
-
-// Pantallas EXTRA PEQUEÑAS (iPhone 5/SE: 320px de ancho)
-@media (max-width: 360px) {
+@media (max-width: 380px) {
   .login-card ion-card-content {
-    padding: 16px 12px !important;
+    padding: 14px 10px !important;
   }
   .brand-name {
     font-size: 1.2rem !important;
   }
   .brand-tagline {
-    font-size: 0.6rem !important;
+    font-size: 0.55rem !important;
     letter-spacing: 1px !important;
   }
   .logo-wrapper {
-    width: 70px !important;
-    height: 70px !important;
+    width: 60px !important;
+    height: 60px !important;
   }
   .login-button {
     height: 40px !important;
@@ -537,111 +491,16 @@ $blue: #0a1a5c;
     --padding-start: 8px !important;
   }
   .card-header h2 {
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
   }
   .card-header p {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important;
   }
   .footer-text {
     font-size: 0.5rem !important;
-    padding: 4px 8px !important;
-    max-width: 100% !important;
+    padding: 4px 10px !important;
   }
-  .login-container {
-    padding: 12px !important;
-    gap: 16px !important;
-  }
-  .field-error {
-    font-size: 0.6rem !important;
-  }
-  .options-row .remember-item ion-label {
+  .options-row .remember-item {
     font-size: 0.7rem !important;
-  }
-}
-
-// MÓVILES PEQUEÑOS (hasta 480px)
-@media (max-width: 480px) {
-  .login-card ion-card-content {
-    padding: 20px 16px;
-  }
-  .brand-name {
-    font-size: 1.3rem;
-  }
-  .brand-tagline {
-    font-size: 0.7rem;
-    letter-spacing: 1.5px;
-  }
-  .logo-wrapper {
-    width: 85px;
-    height: 85px;
-  }
-  .login-button {
-    height: 46px;
-    font-size: 0.85rem;
-  }
-  .form-item {
-    --min-height: 44px;
-    --padding-start: 10px;
-  }
-  .card-header h2 {
-    font-size: 1.3rem;
-  }
-  .card-header p {
-    font-size: 0.8rem;
-  }
-  .footer-text {
-    font-size: 0.6rem;
-    padding: 6px 12px;
-    max-width: 100%;
-  }
-  .login-container {
-    padding: 16px;
-    gap: 20px;
-  }
-}
-
-// TABLET Y ESCRITORIO
-@media (min-width: 768px) {
-  .brand-name {
-    font-size: 2.4rem;
-  }
-  .logo-wrapper {
-    width: 160px;
-    height: 160px;
-  }
-  .login-card {
-    max-width: 450px;
-    ion-card-content {
-      padding: 40px 36px;
-    }
-  }
-  .card-header h2 {
-    font-size: 2rem;
-  }
-  .footer-text {
-    max-width: 450px;
-  }
-}
-
-// ESCRITORIO GRANDE
-@media (min-width: 1024px) {
-  .login-container {
-    padding: 40px;
-  }
-  .login-card {
-    max-width: 480px;
-  }
-  .footer-text {
-    max-width: 480px;
-  }
-}
-
-// ============================================================
-//  FALLBACK: Si la imagen no carga
-// ============================================================
-@supports not (background-image: url("")) {
-  .login-bg .bg-image {
-    background: linear-gradient(135deg, #0a1a5c 0%, #1e3a8a 40%, #3b82f6 100%);
-    filter: none;
   }
 }

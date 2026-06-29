@@ -114,7 +114,7 @@ npm install
 # Iniciar el backend:
 
 ```bash
-bash
+
 cd backend
 npm run dev
 ```
@@ -122,7 +122,6 @@ npm run dev
 # Iniciar el frontend:
 
 ```bash
-bash
 cd frontend/ferreteriaApp
 ionic serve
 ```
