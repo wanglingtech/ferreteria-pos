@@ -95,29 +95,37 @@ bash
 
 # Instalar dependencias del backend
 
+```bash
 cd backend
 npm install
 npx prisma generate
 npx prisma migrate dev --name init
+```
 
 # Instalar dependencias del frontend
 
+```bash
 cd ../frontend/ferreteriaApp
 npm install
+```
 
 # 3.Iniciar la Aplicación
 
--Iniciar el backend:
+# Iniciar el backend:
 
+```bash
 bash
 cd backend
 npm run dev
+```
 
--Iniciar el frontend:
+# Iniciar el frontend:
 
+```bash
 bash
 cd frontend/ferreteriaApp
 ionic serve
+```
 
 # 🏗️ Arquitectura del Proyecto
 
