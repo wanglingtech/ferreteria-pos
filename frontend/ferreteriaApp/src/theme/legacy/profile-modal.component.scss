@@ -1,0 +1,348 @@
+@use "../brand" as *;
+
+// -------------------------------------------------------------------------
+//  VARIABLES (azul corporativo)
+// -------------------------------------------------------------------------
+$modal-bg: #ffffff;
+$modal-header-bg: #ffffff;
+$border-light: #eef2f6;
+$border-medium: #e2e8f0;
+$text-primary: #0f172a;
+$text-secondary: #475569;
+$text-muted: #94a3b8;
+$brand-blue: #055eee;
+$brand-blue-hover: #044bc9;
+$danger: #dc2626;
+$danger-light: #fef2f2;
+$transition-default: all 0.2s ease;
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+
+// -------------------------------------------------------------------------
+//  MODAL (scroll y fondo)
+// -------------------------------------------------------------------------
+ion-modal {
+  --border-radius: $border-radius-lg;
+  --box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+
+  .modal-header {
+    flex-shrink: 0;
+    box-shadow: $shadow-sm;
+
+    .modal-toolbar {
+      --background: $modal-header-bg;
+      --border-style: none;
+      --min-height: 56px;
+      --padding-start: 16px;
+      --padding-end: 12px;
+
+      ion-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: $text-primary;
+        letter-spacing: -0.3px;
+      }
+
+      ion-button {
+        --color: $text-secondary;
+        --color-hover: $text-primary;
+        --padding-start: 8px;
+        --padding-end: 8px;
+        margin: 0;
+        height: 40px;
+
+        ion-icon {
+          font-size: 1.4rem;
+        }
+      }
+    }
+  }
+
+  .modal-content {
+    --background: $modal-bg;
+    --padding-bottom: 24px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+// -------------------------------------------------------------------------
+//  AVATAR (circular con borde azul)
+// -------------------------------------------------------------------------
+.avatar-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 20px 0;
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid $brand-blue;
+    box-shadow: $shadow-md;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+
+// -------------------------------------------------------------------------
+//  INPUTS (ion-item)
+// -------------------------------------------------------------------------
+.form-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  --border-color: $border-light;
+  --background: $modal-bg;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  border-radius: $border-radius-md;
+  transition: $transition-default;
+
+  ion-label {
+    font-weight: 500;
+    color: $text-secondary;
+    font-size: 0.85rem;
+  }
+
+  ion-input {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --color: $text-primary;
+    font-size: 0.95rem;
+
+    &::placeholder {
+      color: $text-muted;
+      font-size: 0.85rem;
+    }
+  }
+
+  &.invalid {
+    border-color: $danger;
+    background: $danger-light;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+
+  ion-input.item-has-focus {
+    --highlight-color-focused: $brand-blue;
+  }
+}
+
+ion-item:last-of-type {
+  --border-style: none;
+}
+
+// Etiquetas flotantes mejoradas
+ion-label[position="floating"] {
+  transform: translateY(8px);
+  transition: $transition-default;
+}
+
+ion-item.item-has-value ion-label[position="floating"],
+ion-item.item-has-focus ion-label[position="floating"] {
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: $brand-blue;
+}
+
+// -------------------------------------------------------------------------
+//  MENSAJES DE ERROR
+// -------------------------------------------------------------------------
+.error-message {
+  font-size: 0.75rem;
+  color: $danger;
+  padding: 4px 16px 12px 16px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    &::before {
+      content: "•";
+      font-weight: 700;
+    }
+  }
+}
+
+// -------------------------------------------------------------------------
+//  BOTÓN GUARDAR
+// -------------------------------------------------------------------------
+.form-actions {
+  margin-top: 24px;
+  padding: 0 16px 24px 16px;
+
+  .save-btn {
+    --background: $brand-blue !important;
+    --background-hover: $brand-blue-hover !important;
+    --color: #ffffff !important;
+    --border-radius: $border-radius-md !important;
+    --padding-top: 14px !important;
+    --padding-bottom: 14px !important;
+    --box-shadow: $shadow-sm;
+    background: $brand-blue !important;
+    border-radius: $border-radius-md !important;
+    margin: 0;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 1rem;
+    transition: $transition-default;
+
+    ion-icon {
+      font-size: 1.2rem;
+      margin-right: 8px;
+      color: #ffffff !important;
+    }
+
+    &:hover:not([disabled]) {
+      transform: translateY(-2px);
+      --box-shadow: $shadow-md;
+    }
+
+    &[disabled] {
+      --background: $text-muted !important;
+      opacity: 0.6;
+      transform: none !important;
+      --box-shadow: none !important;
+    }
+
+    ion-spinner {
+      --color: #ffffff;
+    }
+  }
+}
+
+// -------------------------------------------------------------------------
+//  RESPONSIVE
+// -------------------------------------------------------------------------
+@media (max-width: 576px) {
+  .avatar-container .profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-width: 2px;
+  }
+
+  .form-item {
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+
+  .form-actions {
+    padding: 0 12px 20px 12px;
+  }
+
+  .error-message {
+    font-size: 0.65rem;
+    padding: 2px 12px 10px 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .avatar-container {
+    margin: 28px 0 24px;
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-width: 4px;
+    }
+  }
+
+  .form-item {
+    --padding-start: 20px;
+    --padding-end: 20px;
+    margin-bottom: 8px;
+  }
+
+  .form-actions {
+    padding: 0 20px 28px 20px;
+    .save-btn {
+      --padding-top: 16px;
+      --padding-bottom: 16px;
+      font-size: 1.05rem;
+    }
+  }
+}
+
+// -------------------------------------------------------------------------
+//  BACKDROP Y ANIMACIONES
+// -------------------------------------------------------------------------
+ion-modal::part(backdrop) {
+  backdrop-filter: blur(6px);
+  transition: $transition-default;
+}
+
+ion-item {
+  animation: fadeSlideUp 0.25s ease-out;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// -------------------------------------------------------------------------
+//  SELECTOR DE AVATARES PREDETERMINADOS
+// -------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------
+//  AVATAR CON BOTÓN DE SUBIDA
+// -------------------------------------------------------------------------
+.avatar-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 20px 0;
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid $brand-blue;
+    box-shadow: $shadow-md;
+    overflow: hidden;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .upload-btn {
+    position: absolute;
+    bottom: 0;
+    right: calc(50% - 60px);
+    --background: $brand-blue;
+    --border-radius: 50%;
+    --color: white;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    box-shadow: $shadow-sm;
+    ion-icon {
+      font-size: 1.2rem;
+    }
+    &:hover {
+      --background: $brand-blue-hover;
+    }
+  }
+}

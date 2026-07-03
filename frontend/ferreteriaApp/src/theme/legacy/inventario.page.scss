@@ -1,0 +1,420 @@
+@use "../brand" as *;
+
+/* =====================================================
+   INVENTARIO PAGE - ESTILOS PROFESIONALES
+   Incluye: Hero, KPIs con iconos, tarjeta de alertas,
+   lista de productos críticos, responsividad.
+===================================================== */
+
+/* -------------------- CONTENEDOR PRINCIPAL -------------------- */
+.inventario-content {
+  --background: #f4f7fc; /* Fondo general de la página */
+}
+
+.inventario-shell {
+  max-width: 1400px; /* Ancho máximo para escritorio */
+  margin: 0 auto; /* Centrado horizontal */
+  padding-top: 95px; /* Espacio para el header superior (topbar) */
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 110px; /* Espacio para el menú inferior (bottom-nav) */
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* Separación entre secciones */
+}
+
+/* -------------------- HERO HEADER (encabezado de página) -------------------- */
+.hero-header {
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+  border-radius: 28px;
+  color: white;
+  /* Gradiente azul con un toque radial */
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 255, 255, 0.12),
+      transparent 40%
+    ),
+    linear-gradient(135deg, #071447 0%, #0a1a5c 40%, #17317f 80%);
+  box-shadow: 0 20px 45px rgba(10, 26, 92, 0.25);
+}
+.hero-header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+.hero-header p {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 700px;
+  line-height: 1.5;
+}
+.hero-badge {
+  display: inline-flex;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+/* -------------------- TARJETAS KPI -------------------- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+}
+.kpi-card {
+  position: relative; /* Necesario para posicionar el icono dentro */
+  border-radius: 24px;
+  padding: 24px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-4px); /* Pequeño efecto elevación */
+}
+.kpi-card span {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.kpi-card strong {
+  font-size: 2rem;
+  font-weight: 800;
+}
+/* Icono flotante en esquina superior derecha */
+.kpi-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 2.2rem;
+  opacity: 0.25;
+  z-index: 1;
+}
+/* Colores específicos para cada KPI */
+.kpi-total {
+  background: linear-gradient(135deg, #071447, #0a1a5c, #2754d8);
+}
+.kpi-warning {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+.kpi-danger {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+}
+.kpi-success {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+/* -------------------- TARJETA DE ALERTAS Y BÚSQUEDA -------------------- */
+.filters-card {
+  background: white;
+  border-radius: 24px;
+  border: 1px solid #dce8fa;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0a1a5c;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #dce8fa;
+  border-radius: 40px;
+  padding: 6px 16px;
+  min-width: 240px;
+}
+.search-box ion-icon {
+  color: #6b7a90;
+  font-size: 18px;
+}
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+}
+.subtitle {
+  font-size: 13px;
+  color: #4d6485;
+  margin-bottom: 20px;
+}
+
+/* -------------------- LISTA DE PRODUCTOS CRÍTICOS -------------------- */
+ion-list {
+  background: transparent;
+}
+.alert-item {
+  --background: #fff;
+  --border-radius: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #eef2ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+/* Resalta los productos sin stock con borde rojo izquierdo */
+.alert-item.critical {
+  border-left: 5px solid #ef4444;
+}
+.product-image {
+  width: 60px;
+  height: 60px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.product-info {
+  flex: 1;
+  padding: 8px 0;
+}
+.product-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+.sku {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0;
+}
+.stock-detail {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.stock-value {
+  font-weight: 600;
+  color: #334155;
+}
+.min-stock {
+  color: #6b7280;
+}
+.category {
+  font-size: 12px;
+  color: #4b5563;
+  margin-top: 4px;
+}
+ion-badge {
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 40px;
+  font-size: 12px;
+}
+
+/* -------------------- ESTADOS VACÍO Y CARGA -------------------- */
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+}
+.empty-state ion-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+.loading-state ion-spinner {
+  --color: #0a1a5c;
+  margin-bottom: 10px;
+}
+
+/* =====================================================
+   NUEVO DISEÑO PARA MÓVILES (max-width: 768px)
+   - KPIs en fila horizontal con scroll
+   - Tarjetas de alerta más compactas
+   - Hero reducido
+===================================================== */
+@media (max-width: 768px) {
+  /* HERO MÁS COMPACTO */
+  .hero-header {
+    padding: 16px 20px;
+  }
+  .hero-header h1 {
+    font-size: 1.5rem;
+  }
+  .hero-header p {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-top: 6px;
+  }
+  .hero-badge {
+    font-size: 11px;
+    padding: 5px 12px;
+    margin-bottom: 8px;
+  }
+
+  /* KPIs: diseño de "píldoras" horizontales que se envuelven */
+  .kpi-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+  }
+  .kpi-card {
+    flex: 1 1 calc(50% - 10px); /* dos columnas, con espacio */
+    min-width: 140px;
+    padding: 14px 12px;
+    border-radius: 20px;
+  }
+  .kpi-card .kpi-icon {
+    font-size: 1.5rem;
+    top: 10px;
+    right: 10px;
+  }
+  .kpi-card span {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .kpi-card strong {
+    font-size: 1.2rem;
+  }
+
+  /* Alternativa: si quieres una sola columna vertical (más ancha), descomenta esto y comenta el bloque anterior */
+  /*
+  .kpi-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .kpi-card {
+    width: 100%;
+    padding: 16px;
+  }
+  */
+
+  /* TARJETA DE ALERTAS */
+  .filters-card {
+    padding: 18px;
+  }
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .card-title {
+    font-size: 16px;
+  }
+  .search-box {
+    width: 100%;
+    padding: 4px 12px;
+  }
+  .search-box input {
+    font-size: 13px;
+  }
+  .subtitle {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* LISTA DE PRODUCTOS CRÍTICOS */
+  .alert-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .product-image {
+    width: 48px;
+    height: 48px;
+    margin-right: 12px;
+    margin-bottom: 0;
+  }
+  .product-info {
+    padding: 0;
+  }
+  .product-info h3 {
+    font-size: 0.9rem;
+  }
+  .sku {
+    font-size: 10px;
+  }
+  .stock-detail {
+    gap: 12px;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+  .category {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+  ion-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    margin-left: auto;
+    align-self: center;
+  }
+}
+/* =====================================================
+   MÓVILES MUY PEQUEÑOS (max-width: 480px)
+   - KPIs aún más compactos
+   - Badge puede bajar si es necesario
+===================================================== */
+@media (max-width: 480px) {
+  .hero-header h1 {
+    font-size: 1.2rem;
+  }
+  .kpi-grid {
+    gap: 10px;
+  }
+  .kpi-card {
+    padding: 12px;
+  }
+  .kpi-card .kpi-icon {
+    font-size: 1.3rem;
+    top: 8px;
+    right: 8px;
+  }
+  .kpi-card strong {
+    font-size: 1rem;
+  }
+  .alert-item {
+    flex-wrap: wrap;
+  }
+  .product-image {
+    width: 44px;
+    height: 44px;
+  }
+  .product-info {
+    flex: 1 1 auto;
+  }
+  ion-badge {
+    margin-top: 8px;
+    margin-left: 0;
+    width: fit-content;
+  }
+  .stock-detail {
+    gap: 8px;
+  }
+}

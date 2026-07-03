@@ -1,0 +1,21 @@
+$primary: #0a1a5c;
+$primary-light: #1e3a8a;
+$primary-dark: #071447;
+$white: #ffffff;
+$gray-mid: #8a9bb5;
+$radius: 28px;
+$shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$transition: 0.25s ease;
+
+@mixin glass($bg: rgba(255, 255, 255, 0.86), $blur: 20px) {
+  background: $bg;
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
