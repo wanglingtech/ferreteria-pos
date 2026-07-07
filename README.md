@@ -143,6 +143,44 @@ Todas las contribuciones serán revisadas antes de ser integradas al proyecto.
 
 Si este proyecto te resultó útil o te sirvió como referencia, considera darle una ⭐ al repositorio. ¡Gracias por tu apoyo!
 
+### **📸 Capturas de Pantalla**
+
+<div align="center">
+
+Login Principal
+
+<img src="frontend\ferreteriaApp\src\assets\screenshots\login.webp" width="800" alt="Login principal">
+
+Dashboard Principal de la Ferreteria
+
+<img src="frontend\ferreteriaApp\src\assets\screenshots\dashboard.webp" width="800" alt="Dashboard principal">
+
+Siderbar
+
+<img src="frontend\ferreteriaApp\src\assets\screenshots\siderbar.webp" width="800" alt="Interfaz Reportes">
+
+Chatbot Ferreteria
+
+<img src="frontend\ferreteriaApp\src\assets\screenshots\chatbot.webp" width="800" alt="ChatBot">
+
+Interfaz Inventario
+
+<img src="frontend\ferreteriaApp\src\assets\screenshots\inventario.webp" width="800" alt="Interfaz Inventario">
+
+Interfaz Productos
+
+<img src="frontend\ferreteriaApp\src\assets\screenshots\productos.webp" width="800" alt="Interfaz Productos">
+
+Interfaz Reportes
+
+<img src="frontend\ferreteriaApp\src\assets\screenshots\reportes.webp" width="800" alt="Interfaz Reportes">
+
+Interfaz Venta
+
+<img src="frontend\ferreteriaApp\src\assets\screenshots\reportes.webp" width="800" alt="Interfaz Reportes">
+
+</div>
+
 ## 👨‍💻 **Desarrollador**
 
 <p align="center">
