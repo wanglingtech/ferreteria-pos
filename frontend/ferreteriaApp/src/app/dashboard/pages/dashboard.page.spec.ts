@@ -1,16 +1,52 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule, RefresherCustomEvent } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { DashboardPage } from './dashboard.page';
+import { DashboardApiService } from '../services/dashboard-api.service';
+import { AuthSessionService } from '../../core/services/auth-session.service';
+import { of, throwError } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { Router } from '@angular/router';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 describe('DashboardPage', () => {
   let component: DashboardPage;
   let fixture: ComponentFixture<DashboardPage>;
+  let mockDashboardApi: jasmine.SpyObj<DashboardApiService>;
+  let mockAuthSession: jasmine.SpyObj<AuthSessionService>;
+  let mockRouter: jasmine.SpyObj<Router>;
+
+  const mockData = {
+    kpis: {
+      ventasDia: 100,
+      ordenesDia: 5,
+      productosTotales: 50,
+      productosStockBajo: 3,
+    },
+    salesLast7Days: [{ date: '2026-01-01', total: 20 }],
+    topProducts: [{ name: 'Producto A', quantity: 10 }],
+    recentActivity: [],
+    lowStockAlerts: [],
+  };
 
   beforeEach(waitForAsync(() => {
+    mockDashboardApi = jasmine.createSpyObj('DashboardApiService', [
+      'getDashboard',
+    ]);
+    mockDashboardApi.getDashboard.and.returnValue(of(mockData));
+    mockAuthSession = jasmine.createSpyObj('AuthSessionService', [
+      'getCurrentUser',
+    ]);
+    mockAuthSession.getCurrentUser.and.returnValue({ fullName: 'Admin' });
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
     TestBed.configureTestingModule({
-      declarations: [DashboardPage],
-      imports: [IonicModule.forRoot(), HttpClientTestingModule],
+      imports: [IonicModule.forRoot(), HttpClientTestingModule, DashboardPage],
+      providers: [
+        { provide: DashboardApiService, useValue: mockDashboardApi },
+        { provide: AuthSessionService, useValue: mockAuthSession },
+        { provide: Router, useValue: mockRouter },
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardPage);
@@ -21,53 +57,37 @@ describe('DashboardPage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load dashboard data on init', () => {
-    spyOn(component, 'cargarDatos');
-    component.ngOnInit?.();
-    expect(component.cargarDatos).toHaveBeenCalled();
+  it('should load dashboard on init', () => {
+    spyOn(component, 'cargarDashboard').and.callThrough();
+    component.ngOnInit();
+    expect(component.cargarDashboard).toHaveBeenCalled();
+    expect(component.dashboardData).toEqual(mockData);
   });
 
-  it('should handle refresh event', async () => {
-    spyOn(component, 'cargarDatos');
-
-    const refresher = jasmine.createSpyObj('RefresherCustomEvent', ['detail']);
-    refresher.detail = { complete: jasmine.createSpy('complete') };
-
-    await component.onRefresh?.(refresher as any);
-
-    expect(component.cargarDatos).toHaveBeenCalled();
-    expect(refresher.detail.complete).toHaveBeenCalled();
+  it('should update charts when data loads', () => {
+    component.dashboardData = mockData;
+    component.actualizarGraficos();
+    expect(component.lineChartData).toBeDefined();
+    expect(component.barChartData).toBeDefined();
+    expect(component.doughnutChartData).toBeDefined();
   });
 
-  it('should display dashboard title', () => {
-    fixture.detectChanges();
-    const title = fixture.nativeElement.querySelector('h1');
-    expect(title).toBeTruthy();
+  it('should handle error loading dashboard', async () => {
+    mockDashboardApi.getDashboard.and.returnValue(
+      throwError(() => new Error('Error')),
+    );
+    await component.cargarDashboard();
+    expect(component.dashboardData).toBeNull();
   });
 
-  it('should have loading indicator', () => {
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
+  it('should refresh data on refresh event', () => {
+    const mockEvent = { target: { complete: jasmine.createSpy('complete') } };
+    component.refresh(mockEvent);
+    expect(mockDashboardApi.getDashboard).toHaveBeenCalled();
   });
 
-  it('should display statistics cards', () => {
-    component.estadisticas = {
-      totalProductos: 10,
-      productosActivos: 8,
-      bajosStock: 2,
-      totalVentas: 100,
-      totalUsuarios: 5,
-      ventasHoy: 25,
-    };
-    fixture.detectChanges();
-
-    const cards = fixture.nativeElement.querySelectorAll('ion-card');
-    expect(cards.length).toBeGreaterThan(0);
-  });
-
-  it('should handle error loading data', async () => {
-    spyOn(console, 'error');
-    component.cargarDatos?.();
-    expect(component.loading).toBeDefined();
+  it('should navigate to module', () => {
+    component.navigateTo('productos');
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/productos']);
   });
 });

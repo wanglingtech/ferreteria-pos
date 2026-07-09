@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { LoginPage } from './login.page';
 import { AuthApiService } from '../../services/auth-api.service';
 import { AuthSessionService } from '../../../core/services/auth-session.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('LoginPage', () => {
   let component: LoginPage;
@@ -13,179 +14,103 @@ describe('LoginPage', () => {
   let mockAuthApi: jasmine.SpyObj<AuthApiService>;
   let mockAuthSession: jasmine.SpyObj<AuthSessionService>;
   let mockRouter: jasmine.SpyObj<Router>;
+  let mockActivatedRoute: any;
 
   beforeEach(waitForAsync(() => {
     mockAuthApi = jasmine.createSpyObj('AuthApiService', ['login']);
     mockAuthSession = jasmine.createSpyObj('AuthSessionService', [
       'saveSession',
+      'isAuthenticated',
+      'getToken',
+      'getCurrentUser',
+      'clearSession',
     ]);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockAuthSession.isAuthenticated.and.returnValue(false);
+    mockRouter = jasmine.createSpyObj('Router', ['navigateByUrl']);
+    mockActivatedRoute = { snapshot: { queryParamMap: { get: () => null } } };
 
     TestBed.configureTestingModule({
-      declarations: [LoginPage],
-      imports: [IonicModule.forRoot(), ReactiveFormsModule],
+      imports: [
+        IonicModule.forRoot(),
+        ReactiveFormsModule,
+        HttpClientTestingModule,
+        LoginPage, // standalone
+      ],
       providers: [
-        FormBuilder,
         { provide: AuthApiService, useValue: mockAuthApi },
         { provide: AuthSessionService, useValue: mockAuthSession },
         { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginPage);
     component = fixture.componentInstance;
+    fixture.detectChanges();
   }));
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize login form', () => {
-    expect(component.loginForm).toBeDefined();
-    expect(component.loginForm.get('username')).toBeDefined();
-    expect(component.loginForm.get('password')).toBeDefined();
+  it('should initialize form', () => {
+    expect(component.form).toBeDefined();
+    expect(component.form.get('identifier')).toBeDefined();
+    expect(component.form.get('password')).toBeDefined();
   });
 
-  it('should validate email format', () => {
-    const usernameControl = component.loginForm.get('username');
-    usernameControl?.setValue('invalid');
-    expect(usernameControl?.invalid).toBe(true);
+  it('should validate identifier as email or username', () => {
+    const control = component.form.get('identifier');
+    control?.setValue('invalid!');
+    expect(control?.invalid).toBeTrue();
+    control?.setValue('validuser');
+    expect(control?.valid).toBeTrue();
+    control?.setValue('user@example.com');
+    expect(control?.valid).toBeTrue();
   });
 
-  it('should validate password length', () => {
-    const passwordControl = component.loginForm.get('password');
-    passwordControl?.setValue('123');
-    expect(passwordControl?.invalid).toBe(true);
+  it('should validate password strength', () => {
+    const control = component.form.get('password');
+    control?.setValue('weak');
+    expect(control?.invalid).toBeTrue();
+    control?.setValue('StrongP@ss1');
+    expect(control?.valid).toBeTrue();
   });
 
-  it('should enable submit button when form is valid', () => {
-    component.loginForm.patchValue({
-      username: 'usuario@example.com',
-      password: 'password123',
-    });
-
-    expect(component.loginForm.valid).toBe(true);
-  });
-
-  it('should call login API with credentials', async () => {
-    const mockResponse = {
-      token: 'mock-token',
-      user: { id: 1, username: 'test', role: 'ADMIN' },
+  it('should call login API and navigate on success', () => {
+    const loginData = {
+      tokenType: 'Bearer',
+      accessToken: 'token',
+      expiresIn: '8h',
+      user: {
+        id: 1,
+        username: 'test',
+        email: 'test@test.com',
+        fullName: 'Test',
+        role: 'SELLER',
+      },
     };
-
-    mockAuthApi.login.and.returnValue(of(mockResponse));
-
-    component.loginForm.patchValue({
-      username: 'test',
-      password: 'password123',
-    });
-
-    await component.login?.();
-
+    mockAuthApi.login.and.returnValue(of(loginData));
+    component.form.patchValue({ identifier: 'test', password: 'StrongP@ss1' });
+    component.submitLogin();
     expect(mockAuthApi.login).toHaveBeenCalled();
-  });
-
-  it('should save session on successful login', async () => {
-    const mockResponse = {
-      token: 'mock-token',
-      user: { id: 1, username: 'test', role: 'ADMIN' },
-    };
-
-    mockAuthApi.login.and.returnValue(of(mockResponse));
-    mockAuthSession.saveSession.and.returnValue(undefined);
-
-    component.loginForm.patchValue({
-      username: 'test',
-      password: 'password123',
-    });
-
-    await component.login?.();
-
-    expect(mockAuthSession.saveSession).toHaveBeenCalled();
-  });
-
-  it('should navigate to dashboard on successful login', async () => {
-    const mockResponse = {
-      token: 'mock-token',
-      user: { id: 1, username: 'test', role: 'ADMIN' },
-    };
-
-    mockAuthApi.login.and.returnValue(of(mockResponse));
-
-    component.loginForm.patchValue({
-      username: 'test',
-      password: 'password123',
-    });
-
-    await component.login?.();
-
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/dashboard'], {
+    expect(mockAuthSession.saveSession).toHaveBeenCalledWith(loginData);
+    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/app/dashboard', {
       replaceUrl: true,
     });
   });
 
-  it('should show error message on login failure', async () => {
-    mockAuthApi.login.and.returnValue(
-      throwError(() => new Error('Login failed')),
-    );
-
-    component.loginForm.patchValue({
-      username: 'test',
-      password: 'wrong',
-    });
-
-    await component.login?.();
-
-    expect(component.errorMessage).toBeDefined();
+  it('should show error on login failure', () => {
+    const error = { error: { message: 'Invalid credentials' } };
+    mockAuthApi.login.and.returnValue(throwError(() => error));
+    component.form.patchValue({ identifier: 'test', password: 'wrong' });
+    component.submitLogin();
+    expect(component.apiError).toBe('Invalid credentials');
   });
 
-  it('should display login form', () => {
-    fixture.detectChanges();
-    const form = fixture.nativeElement.querySelector('form');
-    expect(form).toBeTruthy();
-  });
-
-  it('should have username input field', () => {
-    fixture.detectChanges();
-    const usernameInput = fixture.nativeElement.querySelector(
-      'input[formControlName="username"]',
-    );
-    expect(usernameInput).toBeTruthy();
-  });
-
-  it('should have password input field', () => {
-    fixture.detectChanges();
-    const passwordInput = fixture.nativeElement.querySelector(
-      'input[formControlName="password"]',
-    );
-    expect(passwordInput).toBeTruthy();
-  });
-
-  it('should have login button', () => {
-    fixture.detectChanges();
-    const loginBtn = fixture.nativeElement.querySelector(
-      'ion-button[type="submit"]',
-    );
-    expect(loginBtn).toBeTruthy();
-  });
-
-  it('should disable login button when form is invalid', () => {
-    fixture.detectChanges();
-    const loginBtn = fixture.nativeElement.querySelector(
-      'ion-button[type="submit"]',
-    );
-    expect(loginBtn?.disabled).toBe(true);
-  });
-
-  it('should show loading state during login', async () => {
-    mockAuthApi.login.and.returnValue(of({ token: 'test', user: {} }));
-
-    component.loginForm.patchValue({
-      username: 'test',
-      password: 'password123',
-    });
-
-    component.login?.();
-    expect(component.loading).toBe(true);
+  it('should toggle password visibility', () => {
+    expect(component.showPassword).toBeFalse();
+    component.togglePassword();
+    expect(component.showPassword).toBeTrue();
   });
 });
