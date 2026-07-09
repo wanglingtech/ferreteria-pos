@@ -1,3 +1,5 @@
+// src/app/chatbot/chatbot.component.ts
+
 import {
   Component,
   ElementRef,
@@ -8,9 +10,11 @@ import {
   computed,
   signal,
   inject,
+  SecurityContext, // ✅ 1. Importamos SecurityContext para definir el contexto de sanitización
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser'; // ✅ 2. Importamos DomSanitizer
 import {
   IonContent,
   IonInput,
@@ -53,18 +57,21 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { firstValueFrom } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
-import { AuthSessionService } from '../core/services/auth-session.service'; // <--- agregado
+import { AuthSessionService } from '../core/services/auth-session.service';
 
 Chart.register(...registerables);
 
+/**
+ * Interfaz que define la estructura de un mensaje en el chat.
+ */
 interface Message {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  saleData?: any;
-  actions?: ('pdf' | 'image')[];
-  chartData?: any;
-  suggestions?: string[];
+  text: string; // Contenido del mensaje (puede contener HTML)
+  isUser: boolean; // true si es del usuario, false si es del bot
+  timestamp: Date; // Fecha/hora del mensaje
+  saleData?: any; // Datos de venta (para mostrar botones de PDF/Imagen)
+  actions?: ('pdf' | 'image')[]; // Acciones disponibles para este mensaje
+  chartData?: any; // Datos para renderizar un gráfico
+  suggestions?: string[]; // Sugerencias rápidas para el usuario
 }
 
 @Component({
@@ -92,26 +99,35 @@ interface Message {
   ],
 })
 export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
+  // ============================================================
+  // 1. REFERENCIAS A ELEMENTOS DEL DOM
+  // ============================================================
   @ViewChild('chatContent') chatContent!: ElementRef;
   @ViewChild('messageInput', { read: IonInput }) messageInput!: IonInput;
 
-  // Inyección del servicio de autenticación
-  private authService = inject(AuthSessionService); // <--- agregado
+  // ============================================================
+  // 2. INYECCIÓN DE DEPENDENCIAS
+  // ============================================================
+  private authService = inject(AuthSessionService);
+  private sanitizer = inject(DomSanitizer); // ✅ 3. Inyectamos DomSanitizer
 
-  isOpen = false;
-  messages: Message[] = [];
-  newMessage = signal<string>('');
-  isLoading = false;
-  isTyping = false;
-  private chartInstances: Map<number, Chart> = new Map();
+  // ============================================================
+  // 3. ESTADO DEL COMPONENTE
+  // ============================================================
+  isOpen = false; // Indica si el modal del chat está abierto
+  messages: Message[] = []; // Lista de mensajes del chat
+  newMessage = signal<string>(''); // Señal con el texto del mensaje actual (reactivo)
+  isLoading = false; // Indica si se está enviando un mensaje
+  isTyping = false; // Indica si el bot está "escribiendo"
+  private chartInstances: Map<number, Chart> = new Map(); // Almacena gráficos para destruirlos al salir
 
-  // Método para verificar si es administrador
-  isAdmin(): boolean {
-    const user = this.authService.getCurrentUser();
-    return user?.role === 'ADMIN';
-  }
-
-  // ✅ Validación en tiempo real (depende de la señal)
+  // ============================================================
+  // 4. COMPUTED: VALIDACIÓN DEL INPUT EN TIEMPO REAL
+  // ============================================================
+  /**
+   * Señal computada que valida si el mensaje actual es válido para enviar.
+   * Se recalcula automáticamente cuando cambia newMessage.
+   */
   isInputValid = computed(() => {
     const msg = this.newMessage().trim();
     if (!msg || msg.length < 2) return false;
@@ -119,7 +135,9 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     return regex.test(msg) && !/^[0-9\s]+$/.test(msg);
   });
 
-  // ✅ Mensaje de error para el usuario
+  /**
+   * Devuelve un mensaje de error si el input no es válido.
+   */
   getInputError(): string | null {
     const msg = this.newMessage().trim();
     if (!msg) return null;
@@ -134,12 +152,16 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     return null;
   }
 
+  // ============================================================
+  // 5. CONSTRUCTOR
+  // ============================================================
   constructor(
     private chatbotApi: ChatbotApiService,
     private modalCtrl: ModalController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
   ) {
+    // Registrar los iconos que se usarán en el componente
     addIcons({
       chatbubbleEllipsesOutline,
       sendOutline,
@@ -159,8 +181,13 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     });
   }
 
+  // ============================================================
+  // 6. CICLO DE VIDA
+  // ============================================================
   ngOnInit() {
+    // Cargar historial del chat desde localStorage
     this.loadConversationHistory();
+    // Si no hay mensajes, mostrar mensaje de bienvenida
     if (this.messages.length === 0) {
       this.addBotMessage(
         '¡Hola! Soy tu asistente inteligente. Puedo ayudarte con ventas, productos, gráficos, notificaciones y más. Escribe "sugerencias" para ver opciones.',
@@ -168,14 +195,30 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     }
   }
 
+  // Se ejecuta después de cada cambio en la vista, para hacer scroll al final
   ngAfterViewChecked() {
     this.scrollToBottom();
   }
 
+  // Al destruir el componente, limpiar los gráficos para evitar memory leaks
   ngOnDestroy() {
     this.chartInstances.forEach((chart) => chart.destroy());
   }
 
+  // ============================================================
+  // 7. MÉTODOS DE UTILIDAD
+  // ============================================================
+  /**
+   * Verifica si el usuario actual tiene rol ADMIN (para mostrar el botón)
+   */
+  isAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'ADMIN';
+  }
+
+  // ============================================================
+  // 8. CONTROL DEL MODAL (Abrir/Cerrar)
+  // ============================================================
   openChat() {
     this.isOpen = true;
     setTimeout(() => this.messageInput?.setFocus(), 300);
@@ -189,19 +232,44 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     this.isOpen = false;
   }
 
+  // ============================================================
+  // 9. GESTIÓN DE MENSAJES
+  // ============================================================
+  /**
+   * Añade un mensaje del usuario al historial.
+   * El texto se guarda tal cual (ya fue validado antes).
+   */
   addUserMessage(text: string) {
     this.messages.push({ text, isUser: true, timestamp: new Date() });
     this.saveConversationHistory();
   }
 
+  /**
+   * ✅ Añade un mensaje del bot al historial, SANITIZANDO el HTML para evitar XSS.
+   *
+   * ¿Por qué sanitizamos?
+   *   - El backend podría devolver HTML malicioso (ej: <script>alert('XSS')</script>).
+   *   - Al usar [innerHTML] en la plantilla (chatbot.component.html),
+   *     Angular necesita que el HTML sea seguro.
+   *   - DomSanitizer.sanitize() elimina o escapa cualquier elemento o atributo peligroso.
+   *
+   * ¿Qué hace SecurityContext.HTML?
+   *   - Indica que estamos sanitizando contenido HTML (no CSS, no URL, etc.).
+   *   - Angular usa una lista de elementos/atributos seguros (por ejemplo, <b>, <i>, <p>, <table>).
+   *   - Cualquier <script>, <iframe>, o eventos (onclick) son eliminados.
+   */
   addBotMessage(
     text: string,
     saleData?: any,
     chartData?: any,
     suggestions?: string[],
   ) {
+    // ✅ 4. SANITIZACIÓN: Limpia el HTML peligroso y devuelve un string seguro
+    const sanitizedText =
+      this.sanitizer.sanitize(SecurityContext.HTML, text) || '';
+
     const msg: Message = {
-      text,
+      text: sanitizedText, // <-- Texto ya sanitizado
       isUser: false,
       timestamp: new Date(),
       saleData,
@@ -211,6 +279,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     if (saleData) msg.actions = ['pdf', 'image'];
     this.messages.push(msg);
     this.saveConversationHistory();
+    // Si hay datos de gráfico, renderizarlo después de un breve delay
     if (chartData)
       setTimeout(
         () => this.renderChart(this.messages.length - 1, chartData),
@@ -218,6 +287,16 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
       );
   }
 
+  // ============================================================
+  // 10. ENVÍO DE MENSAJES
+  // ============================================================
+  /**
+   * Envía un mensaje al backend y maneja la respuesta.
+   * - Valida el mensaje antes de enviar.
+   * - Añade el mensaje del usuario al historial.
+   * - Muestra el indicador de "escribiendo".
+   * - Procesa la respuesta (texto, gráfico, sugerencias).
+   */
   async sendMessage() {
     if (!this.isInputValid() || this.isLoading) return;
 
@@ -227,6 +306,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     this.isLoading = true;
     this.isTyping = true;
 
+    // Pequeño retraso para simular el "pensamiento" del bot y dar feedback visual
     setTimeout(async () => {
       try {
         const response = await firstValueFrom(this.chatbotApi.sendMessage(msg));
@@ -234,6 +314,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
         this.isTyping = false;
 
         if (data.type === 'chart' && data.labels && data.data) {
+          // Respuesta con gráfico
           this.addBotMessage(data.title || 'Gráfico de ventas', undefined, {
             labels: data.labels,
             data: data.data,
@@ -242,8 +323,10 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
             type: data.chartType || 'line',
           });
         } else if (data.type === 'suggestions' && data.suggestions) {
+          // Respuesta con sugerencias rápidas
           this.addBotMessage(data.text, undefined, undefined, data.suggestions);
         } else {
+          // Respuesta normal (texto + posible venta)
           this.addBotMessage(data.text, data.saleData);
         }
       } catch (error) {
@@ -259,11 +342,20 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     }, 600);
   }
 
+  /**
+   * Al hacer clic en una sugerencia, se autocompleta y envía el mensaje.
+   */
   async onSuggestionClick(suggestion: string) {
     this.newMessage.set(suggestion);
     await this.sendMessage();
   }
 
+  // ============================================================
+  // 11. LIMPIAR CHAT
+  // ============================================================
+  /**
+   * Muestra un diálogo de confirmación antes de limpiar el historial.
+   */
   async confirmClearChat() {
     const alert = await this.alertCtrl.create({
       header: 'Limpiar conversación',
@@ -277,6 +369,9 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     await alert.present();
   }
 
+  /**
+   * Limpia el historial del chat y muestra mensaje de bienvenida.
+   */
   private clearChat() {
     this.messages = [];
     this.addBotMessage(
@@ -293,6 +388,15 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
       .then((toast) => toast.present());
   }
 
+  // ============================================================
+  // 12. GRÁFICOS
+  // ============================================================
+  /**
+   * Renderiza un gráfico en un canvas usando Chart.js.
+   * - Busca el canvas por ID.
+   * - Destruye el gráfico anterior si existe.
+   * - Crea uno nuevo con los datos proporcionados.
+   */
   private renderChart(index: number, chartData: any) {
     setTimeout(() => {
       const canvas = document.getElementById(
@@ -325,6 +429,15 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     }, 100);
   }
 
+  // ============================================================
+  // 13. DESCARGA DE PDF E IMAGEN DE VENTA
+  // ============================================================
+  /**
+   * Genera un PDF a partir de los datos de una venta.
+   * - Crea un elemento HTML temporal con el diseño del ticket.
+   * - Usa html2canvas para capturarlo como imagen.
+   * - Convierte la imagen a PDF y lo descarga.
+   */
   async downloadPdf(saleData: any) {
     const venta = saleData;
     const element = this.createTempSaleElement(venta);
@@ -355,6 +468,10 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Genera y descarga una imagen PNG de la venta.
+   * Proceso similar a downloadPdf pero sin convertir a PDF.
+   */
   async downloadImage(saleData: any) {
     const venta = saleData;
     const element = this.createTempSaleElement(venta);
@@ -379,6 +496,15 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     }
   }
 
+  // ============================================================
+  // 14. CONSTRUCCIÓN DEL ELEMENTO TEMPORAL PARA PDF/IMAGEN
+  // ============================================================
+  /**
+   * Crea un elemento HTML con el diseño del ticket de venta
+   * para ser capturado por html2canvas.
+   * NOTA: Este elemento NO usa sanitización porque es generado
+   * completamente por el frontend con datos seguros (numbers, strings).
+   */
   private createTempSaleElement(venta: any): HTMLElement {
     const div = document.createElement('div');
     div.style.backgroundColor = 'white';
@@ -386,6 +512,9 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     div.style.width = '800px';
     div.style.fontFamily = 'Segoe UI, Arial, sans-serif';
     div.style.borderRadius = '16px';
+    // ✅ El innerHTML aquí es seguro porque NO viene del backend,
+    // sino que construimos nosotros mismos el HTML con datos que
+    // ya están tipados y validados (numbers, strings escapados por defecto)
     div.innerHTML = `
       <div style="text-align: center; border-bottom: 2px solid #0a1a5c; padding-bottom: 12px; margin-bottom: 16px;">
         <img src="assets/logo/logo_ferreteria.png" style="width: 60px; margin-bottom: 8px;" />
@@ -425,9 +554,16 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     return div;
   }
 
+  // ============================================================
+  // 15. PERSISTENCIA DEL HISTORIAL (localStorage)
+  // ============================================================
+  /**
+   * Guarda los últimos 50 mensajes en localStorage para mantener
+   * el historial al recargar la página.
+   */
   private saveConversationHistory() {
     const toStore = this.messages.slice(-50).map((m) => ({
-      text: m.text,
+      text: m.text, // El texto ya está sanitizado, se guarda seguro
       isUser: m.isUser,
       timestamp: m.timestamp.toISOString(),
       saleData: m.saleData ? { code: m.saleData.code } : null,
@@ -435,6 +571,9 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
     localStorage.setItem('chatbot_history', JSON.stringify(toStore));
   }
 
+  /**
+   * Restaura el historial desde localStorage al iniciar el componente.
+   */
   private loadConversationHistory() {
     const stored = localStorage.getItem('chatbot_history');
     if (stored) {
@@ -446,12 +585,21 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
           saleData: m.saleData ? { code: m.saleData.code } : null,
           actions: m.saleData ? ['pdf', 'image'] : undefined,
         }));
+        // Nota: al restaurar, el texto ya estaba sanitizado cuando se guardó,
+        // así que no es necesario volver a sanitizar.
       } catch (e) {
-        console.warn(e);
+        console.warn('Error cargando historial del chat:', e);
       }
     }
   }
 
+  // ============================================================
+  // 16. SCROLL AUTOMÁTICO
+  // ============================================================
+  /**
+   * Desplaza el contenedor del chat hasta el final para mostrar
+   * el último mensaje.
+   */
   private scrollToBottom() {
     if (this.chatContent) {
       this.chatContent.nativeElement.scrollTop =

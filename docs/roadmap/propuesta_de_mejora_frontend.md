@@ -13,7 +13,7 @@ _Enfocado en seguridad inmediata, corrección de pruebas y optimizaciones básic
   - Corregir referencias a propiedades obsoletas (ej. `loginForm` → `form`, `cargarDatos` → `cargarDashboard`).
   - Añadir pruebas básicas para **señales (`signal`, `computed`, `effect`)**.
   - Configurar correctamente `TestBed` para componentes standalone (usar `provideHttpClientTesting` y `provideRouter`).
-- [ ] **🔒 Sanitizar `innerHTML` en el Chatbot**:
+- [ COMPLETED ] **🔒 Sanitizar `innerHTML` en el Chatbot**:
   - Utilizar `DomSanitizer.sanitize(SecurityContext.HTML, value)` en `chatbot.component.ts` para prevenir ataques XSS, ya que el backend podría devolver HTML malicioso en el mensaje.
 - [ ] **⚡ Aplicar `ChangeDetectionStrategy.OnPush`**:
   - Implementar en **todos** los componentes posibles para reducir la detección de cambios innecesaria y mejorar el rendimiento general.
