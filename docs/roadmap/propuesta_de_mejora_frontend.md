@@ -19,7 +19,7 @@ _Enfocado en seguridad inmediata, corrección de pruebas y optimizaciones básic
   - Implementar en **todos** los componentes posibles para reducir la detección de cambios innecesaria y mejorar el rendimiento general.
 - [ ] **🏷️ Agregar `trackBy`**:
   - Añadir funciones `trackBy` en todos los `*ngFor` (productos, ventas, notificaciones, usuarios, etc.) para optimizar el renderizado de listas.
-- [ ] **⏳ Implementar `debounceTime` en búsquedas**:
+- [ COMPLETED ] **⏳ Implementar `debounceTime` en búsquedas**:
   - Añadir `Subject` con `debounceTime(500ms)` en las búsquedas de **Productos** y **Ventas** (similar a como ya se hizo en Reportes) para reducir peticiones al backend al escribir.
 - [ ] **🖼️ Lazy loading de imágenes**:
   - Añadir el atributo `loading="lazy"` a todas las etiquetas `<img>` de productos y avatares.

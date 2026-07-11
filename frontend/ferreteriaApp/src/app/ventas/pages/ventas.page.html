@@ -68,9 +68,11 @@
             <span>S/ {{ item.precio | number:'1.2-2' }}</span>
           </div>
           <div class="cart-actions">
+            <!-- ✅ Añadimos max="{{ item.stock }}" para que el spinner nativo no pueda subir más allá -->
             <input
               type="number"
               min="1"
+              [max]="item.stock"
               [value]="item.cantidad"
               (change)="updateQuantity(item, $event)"
             />
