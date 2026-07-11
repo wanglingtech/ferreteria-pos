@@ -57,8 +57,16 @@ import {
   Categoria,
 } from '../interfaces/producto.interface';
 import { AuthSessionService } from '../../core/services/auth-session.service';
-// ✅ Importamos Subject y operadores de RxJS
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+
+// ✅ Importaciones para debounce y navegación
+import {
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  takeUntil,
+  filter,
+} from 'rxjs';
+import { Router, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-productos-page',
@@ -132,13 +140,12 @@ export class ProductosPage implements OnInit, OnDestroy {
   private toastCtrl = inject(ToastController);
   private alertCtrl = inject(AlertController);
   private fb = inject(FormBuilder);
+  private router = inject(Router); // ✅ inyectamos Router para detectar navegación
 
   // ============================================================
-  // 4. DEBOUNCE PARA BÚSQUEDA
+  // 4. DEBOUNCE PARA BÚSQUEDA Y RECARGA POR NAVEGACIÓN
   // ============================================================
-  /** Subject que emite el término de búsqueda cada vez que el usuario escribe */
   private searchSubject = new Subject<string>();
-  /** Para limpiar suscripciones al destruir el componente */
   private destroy$ = new Subject<void>();
 
   constructor() {
@@ -177,21 +184,36 @@ export class ProductosPage implements OnInit, OnDestroy {
   ngOnInit() {
     const user = this.authSession.getCurrentUser();
     this.isAdmin.set(user?.role === 'ADMIN');
+
+    // Carga inicial
     this.cargarProductos();
     this.cargarCategorias();
 
-    // Configurar el debounce para la búsqueda
-    // - debounceTime(400): espera 400 ms después de la última pulsación
-    // - distinctUntilChanged(): solo emite si el valor cambió
-    // - takeUntil(this.destroy$): se desuscribe al destruir el componente
+    // ✅ Configurar debounce para la búsqueda
     this.searchSubject
       .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe((term) => {
-        // Actualizar el valor de la señal 'search' y el filtro avanzado
         this.search.set(term);
         this.filtrosAvanzados.search = term;
-        // Llamar a la carga de productos con el nuevo término
         this.cargarProductos();
+      });
+
+    // ✅ RECARGA AUTOMÁTICA AL VOLVER A LA PÁGINA DE PRODUCTOS
+    // Escuchamos eventos de navegación y si la ruta es /app/productos, recargamos.
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        filter(() => this.router.url.includes('/app/productos')),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => {
+        // Solo recargamos si no estamos en medio de una carga (opcional)
+        if (!this.isLoading()) {
+          console.log('🔄 Recargando productos por navegación a la página');
+          this.cargarProductos();
+          // También recargamos categorías por si hubo cambios
+          this.cargarCategorias();
+        }
       });
   }
 
@@ -256,8 +278,7 @@ export class ProductosPage implements OnInit, OnDestroy {
   // ============================================================
   /**
    * Evento que se dispara cuando el usuario escribe en el input.
-   * En lugar de llamar directamente a cargarProductos, emitimos el valor
-   * en el Subject para que el debounce actúe.
+   * Emite el valor al Subject para aplicar el debounce.
    */
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
