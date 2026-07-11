@@ -1,19 +1,29 @@
+<!-- ============================================================
+     PÁGINA DASHBOARD - VISTA PRINCIPAL DEL SISTEMA
+     Muestra KPIs, gráficos, actividad reciente y accesos rápidos.
+     Se actualiza automáticamente al navegar a la página.
+     ============================================================ -->
+
 <ion-content [fullscreen]="true" class="dashboard-content">
   <div class="dashboard-shell">
-    <!-- HERO -->
+    <!-- ============================================================
+         HERO - Encabezado con bienvenida y acciones
+         ============================================================ -->
     <section class="hero-section">
       <div class="hero-overlay"></div>
       <div class="hero-content">
+        <!-- Badge corporativo -->
         <div class="hero-badge">
           <ion-icon name="business-outline"></ion-icon>
           Sistema Corporativo
         </div>
+        <!-- Saludo personalizado con el nombre del usuario -->
         <h2>Bienvenido{{ user ? ', ' + user.fullName : '' }}</h2>
         <p>
           Administra operaciones, monitorea indicadores y controla los módulos
           estratégicos desde un único entorno empresarial.
         </p>
-        <!-- ✅ ELIMINADO EL BOTÓN DE ACTUALIZAR -->
+        <!-- Acciones: solo mantenemos el botón "Ver reportes" (el de actualizar fue eliminado) -->
         <div class="hero-actions">
           <ion-button
             fill="outline"
@@ -23,6 +33,7 @@
             Ver reportes
           </ion-button>
         </div>
+        <!-- Indicador de última actualización -->
         @if (lastUpdate) {
         <div class="last-update">
           <ion-icon name="time-outline"></ion-icon>
@@ -32,7 +43,9 @@
       </div>
     </section>
 
-    <!-- SEGMENT -->
+    <!-- ============================================================
+         SEGMENT - Navegación entre vistas (Resumen, Analytics, Módulos)
+         ============================================================ -->
     <section class="segment-section">
       <ion-segment [(ngModel)]="activeView" mode="md">
         <ion-segment-button value="overview"
@@ -47,13 +60,16 @@
       </ion-segment>
     </section>
 
-    <!-- VISTA RESUMEN -->
+    <!-- ============================================================
+         VISTA RESUMEN - KPIs, últimas ventas y alertas de stock
+         ============================================================ -->
     @if (activeView === 'overview' && dashboardData) {
     <section class="section-block">
       <div class="section-header">
         <h3>Indicadores Principales</h3>
         <span>Resumen ejecutivo</span>
       </div>
+      <!-- Grid de 4 KPIs -->
       <div class="kpi-grid">
         <div class="kpi-card sales">
           <div class="kpi-icon"><ion-icon name="cash-outline"></ion-icon></div>
@@ -90,6 +106,7 @@
       </div>
     </section>
 
+    <!-- Dos columnas: Últimas ventas y Alertas de stock -->
     <div class="two-columns">
       <!-- Últimas ventas -->
       <section class="section-block">
@@ -113,7 +130,7 @@
         </div>
       </section>
 
-      <!-- Alertas de stock CON IMAGEN -->
+      <!-- Alertas de stock con imagen (lazy loading aplicado) -->
       <section class="section-block">
         <div class="section-header">
           <h3>Alertas de stock</h3>
@@ -123,9 +140,12 @@
           @for (prod of dashboardData!.lowStockAlerts; track prod.id) {
           <div class="alert-item">
             <div class="alert-image">
+              <!-- ✅ Lazy loading: se añade loading="lazy" para que la imagen se cargue solo cuando esté visible.
+                   Placeholder: si prod.imageUrl es null o vacío, se usa assets/default-product.png -->
               <img
                 [src]="prod.imageUrl || 'assets/default-product.png'"
                 [alt]="prod.name"
+                loading="lazy"
               />
             </div>
             <div class="alert-info">
@@ -144,7 +164,9 @@
     </div>
     }
 
-    <!-- VISTA ANALYTICS (gráficos) -->
+    <!-- ============================================================
+         VISTA ANALYTICS - Gráficos de ventas y productos
+         ============================================================ -->
     @if (activeView === 'analytics' && dashboardData) {
     <section class="section-block charts-section">
       <div class="section-header">
@@ -152,6 +174,7 @@
         <span>Gráficos en tiempo real</span>
       </div>
       <div class="charts-grid">
+        <!-- Gráfico de líneas: Ventas últimos 7 días -->
         <div class="chart-card">
           <div class="chart-header">
             <h4>Ventas últimos 7 días</h4>
@@ -166,6 +189,7 @@
             ></canvas>
           </div>
         </div>
+        <!-- Gráfico de barras: Top productos más vendidos -->
         <div class="chart-card">
           <div class="chart-header">
             <h4>Top productos más vendidos</h4>
@@ -180,6 +204,7 @@
             ></canvas>
           </div>
         </div>
+        <!-- Gráfico de doughnut: Salud del inventario -->
         <div class="chart-card">
           <div class="chart-header">
             <h4>Salud del inventario</h4>
@@ -198,7 +223,9 @@
     </section>
     }
 
-    <!-- VISTA MÓDULOS (accesos rápidos) -->
+    <!-- ============================================================
+         VISTA MÓDULOS - Accesos rápidos a las secciones principales
+         ============================================================ -->
     @if (activeView === 'modules') {
     <section class="section-block">
       <div class="section-header">

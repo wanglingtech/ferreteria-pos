@@ -1,8 +1,14 @@
+<!-- ============================================================
+     HEADER GLOBAL - Barra superior con título, notificaciones y perfil de usuario
+     Incluye lazy loading en el avatar del usuario.
+     ============================================================ -->
+
 <ion-header class="dashboard-header">
   <ion-toolbar>
     <div class="toolbar-container">
       <!-- SECCIÓN IZQUIERDA -->
       <div class="toolbar-left">
+        <!-- Botón de menú (hamburguesa) -->
         <ion-button
           fill="clear"
           class="toolbar-icon-btn menu-btn"
@@ -12,6 +18,7 @@
           <ion-icon name="menu-outline"></ion-icon>
         </ion-button>
 
+        <!-- Marca con indicador de estado -->
         <div class="brand-wrapper">
           <div class="brand-badge">
             <div class="brand-dot"></div>
@@ -25,7 +32,7 @@
 
       <!-- SECCIÓN DERECHA -->
       <div class="toolbar-right">
-        <!-- BOTÓN NOTIFICACIONES -->
+        <!-- Botón de notificaciones -->
         <ion-button
           fill="clear"
           class="toolbar-icon-btn notification-btn"
@@ -36,7 +43,7 @@
           <div class="notification-dot"></div>
         </ion-button>
 
-        <!-- CHIP DE USUARIO -->
+        <!-- CHIP DE USUARIO (solo visible si hay usuario) -->
         <ion-button
           fill="clear"
           class="user-chip"
@@ -45,10 +52,12 @@
           aria-label="Menú de usuario"
         >
           <ion-avatar class="user-avatar" slot="start">
+            <!-- ✅ Lazy loading en la imagen del avatar, con placeholder de iniciales si no hay imagen -->
             <img
               *ngIf="user.imageUrl"
               [src]="user.imageUrl"
               [alt]="user.fullName"
+              loading="lazy"
             />
             <span *ngIf="!user.imageUrl">{{ userInitials }}</span>
           </ion-avatar>
@@ -58,7 +67,7 @@
           </div>
         </ion-button>
 
-        <!-- POPOVER DE USUARIO -->
+        <!-- POPOVER DE USUARIO (menú desplegable) -->
         <ion-popover alignment="end" class="user-popover">
           <ng-template>
             <ion-content>

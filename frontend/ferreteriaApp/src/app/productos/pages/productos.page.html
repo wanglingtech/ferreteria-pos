@@ -1,6 +1,13 @@
+<!-- ============================================================
+     PÁGINA PRODUCTOS - CRUD de productos con filtros y categorías
+     Incluye lazy loading en las imágenes de la lista y en la previsualización.
+     ============================================================ -->
+
 <ion-content [fullscreen]="true" class="products-content">
   <div class="products-shell">
-    <!-- HERO ERP HEADER -->
+    <!-- ============================================================
+         HERO - Encabezado con estadísticas rápidas
+         ============================================================ -->
     <section class="hero-section">
       <div class="hero-left">
         <div class="hero-badge">🏬 Catálogo Operativo</div>
@@ -20,7 +27,9 @@
       </div>
     </section>
 
-    <!-- TOOLBAR -->
+    <!-- ============================================================
+         TOOLBAR - Búsqueda con debounce y botones de acción
+         ============================================================ -->
     <section class="toolbar-section">
       <div class="search-box">
         <ion-icon name="search-outline" class="search-icon"></ion-icon>
@@ -46,7 +55,9 @@
       </ion-button>
     </section>
 
-    <!-- SEGMENT -->
+    <!-- ============================================================
+         SEGMENT - Filtro por estado (Todos, Activos, Inactivos)
+         ============================================================ -->
     <section class="segment-wrapper">
       <ion-segment
         mode="md"
@@ -65,16 +76,20 @@
       </ion-segment>
     </section>
 
-    <!-- LISTA DE PRODUCTOS -->
+    <!-- ============================================================
+         LISTA DE PRODUCTOS - Tarjetas con imagen y datos
+         ============================================================ -->
     <section class="products-list">
       <ng-container
         *ngIf="!isLoading() && filteredProducts.length > 0; else loadingOrEmpty"
       >
+        <!-- ✅ Lazy loading en la imagen del producto: se añade loading="lazy" y se usa placeholder -->
         <div class="product-card" *ngFor="let producto of filteredProducts">
           <div class="product-image">
             <img
               [src]="producto.imageUrl || 'assets/default-product.png'"
               [alt]="producto.name"
+              loading="lazy"
             />
           </div>
           <div class="product-info">
@@ -87,7 +102,6 @@
               >
                 Stock: {{ producto.stock }}
               </div>
-
               <div
                 class="status"
                 [ngClass]="{'active-status': producto.isActive, 'inactive-status': !producto.isActive}"
@@ -129,6 +143,7 @@
           </div>
         </div>
       </ng-container>
+      <!-- Estados de carga y vacío -->
       <ng-template #loadingOrEmpty>
         <div class="loading-state" *ngIf="isLoading()">
           <ion-spinner name="crescent"></ion-spinner>
@@ -145,7 +160,9 @@
     </section>
   </div>
 
-  <!-- ================= MODAL CREAR/EDITAR PRODUCTO ================= -->
+  <!-- ============================================================
+       MODAL CREAR/EDITAR PRODUCTO
+       ============================================================ -->
   <ion-modal
     #productModal
     [breakpoints]="[0, 0.5, 0.9, 1]"
@@ -280,20 +297,22 @@
               ></ion-input>
             </ion-item>
 
-            <!-- Vista previa -->
+            <!-- Vista previa de la imagen (con lazy loading) -->
             <div
               class="image-preview"
               *ngIf="productForm.get('imagenUrl')?.value"
             >
               <p>Vista previa:</p>
+              <!-- ✅ Lazy loading en la previsualización -->
               <img
                 [src]="productForm.get('imagenUrl')?.value"
                 alt="preview"
+                loading="lazy"
                 (error)="productForm.get('imagenUrl')?.setErrors({invalidUrl:true})"
               />
             </div>
 
-            <!-- Botones de acción siempre al final -->
+            <!-- Botones de acción -->
             <div class="form-actions">
               <ion-button expand="block" fill="outline" (click)="closeModal()"
                 >Cancelar</ion-button
@@ -318,7 +337,9 @@
     </ng-template>
   </ion-modal>
 
-  <!-- ================= MODAL FILTROS AVANZADOS ================= -->
+  <!-- ============================================================
+       MODAL FILTROS AVANZADOS
+       ============================================================ -->
   <ion-modal
     #filtersModal
     [breakpoints]="[0, 0.5, 0.8, 1]"
@@ -415,7 +436,9 @@
     </ng-template>
   </ion-modal>
 
-  <!-- ================= MODAL GESTIÓN DE CATEGORÍAS ================= -->
+  <!-- ============================================================
+       MODAL GESTIÓN DE CATEGORÍAS
+       ============================================================ -->
   <ion-modal
     #categoryModal
     [breakpoints]="[0, 0.5, 0.8, 1]"

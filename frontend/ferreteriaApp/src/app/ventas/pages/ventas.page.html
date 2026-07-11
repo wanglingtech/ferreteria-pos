@@ -1,6 +1,13 @@
+<!-- ============================================================
+     PÁGINA VENTAS - Punto de Venta con búsqueda, carrito y resumen
+     Incluye lazy loading en las imágenes de productos y en el carrito.
+     ============================================================ -->
+
 <ion-content [fullscreen]="true" class="ventas-content">
   <div class="ventas-shell">
-    <!-- HERO -->
+    <!-- ============================================================
+         HERO - Encabezado del punto de venta
+         ============================================================ -->
     <section class="hero-section">
       <div class="hero-badge">💵 Punto de Venta</div>
       <h1>Nueva Venta</h1>
@@ -10,7 +17,9 @@
       </p>
     </section>
 
-    <!-- BUSCADOR -->
+    <!-- ============================================================
+         BUSCADOR DE PRODUCTOS - Con debounce y resultados con imagen
+         ============================================================ -->
     <section class="search-card">
       <div class="card-title">Buscar Producto</div>
       <div class="search-box">
@@ -27,7 +36,8 @@
           *ngFor="let product of filteredProducts()"
           (click)="addToCart(product)"
         >
-          <img [src]="product.imageUrl" class="product-img" />
+          <!-- ✅ Lazy loading en la imagen del resultado de búsqueda -->
+          <img [src]="product.imageUrl" class="product-img" loading="lazy" />
           <div class="product-info">
             <strong>{{ product.nombre }}</strong>
             <span>SKU: {{ product.sku }}</span>
@@ -40,7 +50,9 @@
       </div>
     </section>
 
-    <!-- CLIENTE (requerido) -->
+    <!-- ============================================================
+         CLIENTE - Campo requerido con validación en tiempo real
+         ============================================================ -->
     <section class="client-card">
       <div class="card-title">Cliente <span class="required">*</span></div>
       <input
@@ -57,18 +69,21 @@
       </div>
     </section>
 
-    <!-- CARRITO -->
+    <!-- ============================================================
+         CARRITO DE COMPRAS - Productos seleccionados con imagen y cantidad
+         ============================================================ -->
     <section class="cart-card">
       <div class="card-title">Productos Seleccionados</div>
       <ng-container *ngIf="cart().length > 0; else emptyCart">
         <div class="cart-item" *ngFor="let item of cart()">
-          <img [src]="item.imageUrl" class="cart-img" />
+          <!-- ✅ Lazy loading en la imagen del carrito -->
+          <img [src]="item.imageUrl" class="cart-img" loading="lazy" />
           <div class="cart-info">
             <h3>{{ item.nombre }}</h3>
             <span>S/ {{ item.precio | number:'1.2-2' }}</span>
           </div>
           <div class="cart-actions">
-            <!-- ✅ Añadimos max="{{ item.stock }}" para que el spinner nativo no pueda subir más allá -->
+            <!-- Input de cantidad con max = stock para evitar que el spinner nativo supere el stock -->
             <input
               type="number"
               min="1"
@@ -97,7 +112,9 @@
       </ng-template>
     </section>
 
-    <!-- RESUMEN -->
+    <!-- ============================================================
+         RESUMEN - Subtotal, IGV y Total
+         ============================================================ -->
     <section class="summary-card">
       <div class="summary-row">
         <span>Subtotal</span><strong>S/ {{ subtotal | number:'1.2-2' }}</strong>
@@ -110,7 +127,9 @@
       </div>
     </section>
 
-    <!-- ACCIONES -->
+    <!-- ============================================================
+         ACCIONES - Guardar o Cobrar (ambas deshabilitadas si el formulario no es válido)
+         ============================================================ -->
     <section class="actions-section">
       <ion-button
         expand="block"
@@ -132,7 +151,9 @@
     </section>
   </div>
 
-  <!-- MODAL DE RESUMEN / CONFIRMACIÓN -->
+  <!-- ============================================================
+       MODAL DE CONFIRMACIÓN DE VENTA - Muestra el resumen antes de confirmar
+       ============================================================ -->
   <ion-modal
     #resumenModal
     [breakpoints]="[0, 0.8, 1]"
@@ -194,7 +215,9 @@
   </ion-modal>
 </ion-content>
 
-<!-- PLANTILLA OCULTA PARA EL TICKET PROFESIONAL (con estilos inline para el PDF) -->
+<!-- ============================================================
+     PLANTILLA OCULTA PARA EL TICKET PROFESIONAL (se usa para generar PDF e imágenes)
+     ============================================================ -->
 <div id="ticket-content" style="display: none">
   <div
     *ngIf="ventaConfirmada"
@@ -215,10 +238,12 @@
         margin-bottom: 20px;
       "
     >
+      <!-- ✅ Lazy loading en el logo del ticket -->
       <img
         src="assets/logo/logo_ferreteria.png"
         alt="Logo"
         style="width: 80px; height: auto; margin-bottom: 8px"
+        loading="lazy"
       />
       <h2 style="margin: 0; color: #0a1a5c">Ferretería July</h2>
       <p style="margin: 4px 0; font-size: 11px; color: #555">

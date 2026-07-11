@@ -1,3 +1,8 @@
+<!-- ============================================================
+     MODAL PERFIL - Edición del perfil del usuario (nombre, email, avatar)
+     Incluye lazy loading en el avatar y en la previsualización de la imagen.
+     ============================================================ -->
+
 <ion-modal
   [isOpen]="isOpen"
   (didDismiss)="close()"
@@ -18,9 +23,13 @@
         <!-- AVATAR -->
         <div class="avatar-container">
           <ion-avatar class="profile-avatar">
-            <img [src]="previewImage || 'assets/default-avatar.png'" />
+            <!-- ✅ Lazy loading en el avatar del perfil, con placeholder por defecto -->
+            <img
+              [src]="previewImage || 'assets/default-avatar.png'"
+              loading="lazy"
+            />
           </ion-avatar>
-          <!-- Botón subir imagen (flotante sobre el avatar) -->
+          <!-- Botón para subir imagen (flotante sobre el avatar) -->
           <ion-button
             class="upload-btn"
             fill="clear"
@@ -111,7 +120,7 @@
           }}</span>
         </div>
 
-        <!-- SELECCIONAR AVATAR -->
+        <!-- SELECCIONAR AVATAR (imágenes predeterminadas) -->
         <div class="avatar-selector">
           <p class="avatar-selector-title">
             <ion-icon name="image-outline"></ion-icon>
@@ -130,7 +139,8 @@
                   (click)="selectAvatar(avatar)"
                 >
                   <ion-avatar>
-                    <img [src]="avatar" />
+                    <!-- ✅ Lazy loading en los avatares predeterminados -->
+                    <img [src]="avatar" loading="lazy" />
                   </ion-avatar>
                   <ion-icon
                     *ngIf="previewImage === avatar"

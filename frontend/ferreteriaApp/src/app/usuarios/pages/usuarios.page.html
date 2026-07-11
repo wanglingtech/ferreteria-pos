@@ -1,8 +1,11 @@
+<!-- ============================================================
+     PÁGINA USUARIOS - Gestión de usuarios del sistema
+     No contiene imágenes (los avatares son texto), por lo que no aplica lazy loading.
+     ============================================================ -->
+
 <ion-content class="usuarios-content">
   <div class="usuarios-shell">
-    <!-- =====================================================
-         HEADER CORPORATIVO
-    ===================================================== -->
+    <!-- HEADER CORPORATIVO -->
     <section class="hero-header">
       <div class="hero-content">
         <div class="hero-badge">👤 Gestión de usuarios</div>
@@ -21,9 +24,7 @@
       </div>
     </section>
 
-    <!-- =====================================================
-         BARRA DE BÚSQUEDA + BOTÓN NUEVO USUARIO
-    ===================================================== -->
+    <!-- BARRA DE BÚSQUEDA + BOTÓN NUEVO USUARIO -->
     <section class="toolbar-section">
       <div class="search-box">
         <ion-icon name="search-outline"></ion-icon>
@@ -39,9 +40,7 @@
       </ion-button>
     </section>
 
-    <!-- =====================================================
-         LISTA DE USUARIOS
-    ===================================================== -->
+    <!-- LISTA DE USUARIOS -->
     <section class="users-section">
       <div class="section-title">
         <h2>Usuarios registrados</h2>
@@ -59,6 +58,7 @@
       <div class="users-list" *ngIf="!isLoading && filteredUsers.length > 0">
         <div class="user-card" *ngFor="let user of filteredUsers">
           <div class="user-info">
+            <!-- Avatar con iniciales (no es una imagen) -->
             <div class="avatar">{{ getInitials(user.fullName) }}</div>
             <div class="user-data">
               <h3>{{ user.fullName }}</h3>
@@ -96,9 +96,7 @@
     </section>
   </div>
 
-  <!-- =====================================================
-       MODAL CREAR USUARIO
-  ===================================================== -->
+  <!-- MODAL CREAR USUARIO -->
   <ion-modal
     #createModal
     [breakpoints]="[0, 0.5, 0.75, 1]"
@@ -168,7 +166,7 @@
               {{ getFullNameErrorMessage(createUserForm) }}
             </ion-text>
 
-            <!-- CONTRASEÑA (con validador robusto) -->
+            <!-- CONTRASEÑA -->
             <ion-item class="form-item">
               <ion-label position="floating">Contraseña *</ion-label>
               <ion-input
@@ -219,9 +217,7 @@
     </ng-template>
   </ion-modal>
 
-  <!-- =====================================================
-       ACTION SHEET PARA OPCIONES DEL USUARIO
-  ===================================================== -->
+  <!-- ACTION SHEET PARA OPCIONES DEL USUARIO -->
   <ion-action-sheet
     #actionSheet
     [isOpen]="showActionSheet"
@@ -230,9 +226,7 @@
     (didDismiss)="closeActionSheet()"
   ></ion-action-sheet>
 
-  <!-- =====================================================
-       MODAL EDITAR USUARIO (SIN EL BLOQUE DE ERROR SUELTO)
-  ===================================================== -->
+  <!-- MODAL EDITAR USUARIO -->
   <ion-modal
     #editModal
     [breakpoints]="[0, 0.5, 0.75, 1]"
@@ -302,7 +296,7 @@
               {{ getFullNameErrorMessage(editUserForm) }}
             </ion-text>
 
-            <!-- CONTRASEÑA (OPCIONAL) -->
+            <!-- CONTRASEÑA (opcional) -->
             <ion-item class="form-item">
               <ion-label position="floating"
                 >Nueva contraseña (opcional)</ion-label

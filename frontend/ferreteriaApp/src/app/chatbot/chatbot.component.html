@@ -1,3 +1,8 @@
+<!-- ============================================================
+     CHATBOT - Asistente virtual con comandos y gráficos
+     No contiene imágenes directas, solo iconos y canvas.
+     ============================================================ -->
+
 <!-- Botón flotante animado - solo visible para ADMIN -->
 <ion-fab
   *ngIf="!isOpen && isAdmin()"
@@ -12,7 +17,7 @@
   </ion-fab-button>
 </ion-fab>
 
-<!-- Modal del chat (sin cambios) -->
+<!-- Modal del chat -->
 <ion-modal
   [isOpen]="isOpen"
   [breakpoints]="[0, 0.5, 0.9, 1]"

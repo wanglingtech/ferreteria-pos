@@ -1,6 +1,13 @@
+<!-- ============================================================
+     PÁGINA REPORTES - Resumen de ventas, gráficos y exportación
+     Incluye lazy loading en el logo de la sección de exportar y en el modal de detalle.
+     ============================================================ -->
+
 <ion-content class="reportes-content">
   <div class="reportes-shell">
-    <!-- HERO -->
+    <!-- ============================================================
+         HERO - Encabezado de reportes
+         ============================================================ -->
     <section class="hero-header">
       <div class="hero-badge">
         <ion-icon name="analytics-outline"></ion-icon> Reportes de Ventas y
@@ -13,7 +20,9 @@
       </p>
     </section>
 
-    <!-- FILTROS -->
+    <!-- ============================================================
+         FILTROS - Selección de rango de fechas
+         ============================================================ -->
     <section class="filters-card">
       <div class="card-title">
         <ion-icon name="calendar-outline"></ion-icon> Filtro de Fechas
@@ -36,7 +45,9 @@
       </div>
     </section>
 
-    <!-- KPIs -->
+    <!-- ============================================================
+         KPIs - Indicadores clave de rendimiento
+         ============================================================ -->
     <div class="kpi-grid" *ngIf="reporte">
       <div class="kpi-card kpi-sales">
         <span>Ventas Totales</span
@@ -68,7 +79,9 @@
       </div>
     </div>
 
-    <!-- TABS -->
+    <!-- ============================================================
+         TABS - Navegación entre vistas de reportes
+         ============================================================ -->
     <section class="tabs-section">
       <button
         [class.active]="activeTab === 'resumen'"
@@ -102,7 +115,9 @@
       </button>
     </section>
 
-    <!-- GRÁFICOS -->
+    <!-- ============================================================
+         GRÁFICOS - Evolución de ventas y top productos
+         ============================================================ -->
     <div
       class="chart-card"
       *ngIf="activeTab === 'resumen' || activeTab === 'ventas'"
@@ -123,7 +138,9 @@
       </div>
     </div>
 
-    <!-- TABLA TOP PRODUCTOS -->
+    <!-- ============================================================
+         TABLA TOP PRODUCTOS - Detalle de los más vendidos
+         ============================================================ -->
     <div class="table-card" *ngIf="activeTab === 'productos' && reporte">
       <div class="card-title">
         <ion-icon name="trending-up-outline"></ion-icon> Detalle de productos
@@ -153,7 +170,9 @@
       </div>
     </div>
 
-    <!-- TABLA GENERAL DE VENTAS (con botón de opciones) -->
+    <!-- ============================================================
+         TABLA GENERAL DE VENTAS - Con paginación y búsqueda
+         ============================================================ -->
     <div class="sales-list-card" *ngIf="activeTab === 'generales'">
       <div class="card-title">
         <ion-icon name="list-outline"></ion-icon> Listado General de Ventas
@@ -221,13 +240,17 @@
       </div>
     </div>
 
-    <!-- EXPORTAR -->
+    <!-- ============================================================
+         EXPORTAR - Sección para descargar reportes en CSV o PDF
+         ============================================================ -->
     <div class="export-card" *ngIf="activeTab === 'exportar'">
       <div class="export-header">
+        <!-- ✅ Lazy loading en el logo de exportación -->
         <img
           src="assets/logo/logo_ferreteria.png"
           alt="Logo"
           class="export-logo"
+          loading="lazy"
         />
         <h3>Ferretería July</h3>
       </div>
@@ -245,7 +268,9 @@
     </div>
   </div>
 
-  <!-- MODAL DETALLE VENTA (visualización) -->
+  <!-- ============================================================
+       MODAL DETALLE VENTA - Muestra el detalle completo de una venta
+       ============================================================ -->
   <ion-modal
     #detalleModal
     [breakpoints]="[0, 0.9, 1]"
@@ -268,7 +293,12 @@
           *ngIf="ventaSeleccionada"
         >
           <div class="detalle-header">
-            <img src="assets/logo/logo_ferreteria.png" class="detalle-logo" />
+            <!-- ✅ Lazy loading en el logo del detalle de venta -->
+            <img
+              src="assets/logo/logo_ferreteria.png"
+              class="detalle-logo"
+              loading="lazy"
+            />
             <h3>Ferretería July</h3>
             <p>RUC: 10097428951 | Av. México 118, Comas</p>
           </div>
