@@ -7,6 +7,7 @@ import {
   signal,
   computed,
   effect,
+  OnDestroy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -31,7 +32,6 @@ import {
   closeOutline,
   alertCircleOutline,
 } from 'ionicons/icons';
-
 import { ProductosApiService } from '../../productos/services/productos-api.service';
 import { VentasApiService } from '../services/ventas-api.service';
 import { AuthSessionService } from '../../core/services/auth-session.service';
@@ -42,6 +42,9 @@ import {
   Venta,
 } from '../interfaces/venta.interface';
 import { PdfGeneratorService } from '../services/pdf-generator.service';
+
+// ✅ Importamos Subject y operadores RxJS
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
@@ -64,32 +67,39 @@ import html2canvas from 'html2canvas';
     IonTitle,
   ],
 })
-export class VentasPage implements OnInit {
+export class VentasPage implements OnInit, OnDestroy {
   @ViewChild('resumenModal') resumenModal!: IonModal;
 
-  // ✅ clienteNombre como señal
+  // ============================================================
+  // 1. SEÑALES
+  // ============================================================
   clienteNombre = signal<string>('');
-  searchTerm = '';
+  searchTerm = ''; // solo para almacenar el valor actual, lo usamos en el input
   productos = signal<ProductoParaVenta[]>([]);
   filteredProducts = signal<ProductoParaVenta[]>([]);
   cart = signal<CartItem[]>([]);
   isLoading = signal(false);
   isAdmin = signal(false);
   ventaConfirmada: Venta | null = null;
-
-  // ✅ Señal para mensaje de error
   clienteError = signal<string>('');
 
-  // ✅ Computed que indica si el formulario es válido
+  // ============================================================
+  // 2. DEBOUNCE PARA BÚSQUEDA
+  // ============================================================
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
+  // ============================================================
+  // 3. COMPUTED
+  // ============================================================
   isFormValid = computed(() => {
     const nombre = this.clienteNombre().trim();
-    const isValid =
-      nombre.length > 0 && !this.clienteError() && this.cart().length > 0;
-    // Para depuración (opcional)
-    // console.log('isFormValid:', isValid, 'nombre:', nombre, 'error:', this.clienteError(), 'cart:', this.cart().length);
-    return isValid;
+    return nombre.length > 0 && !this.clienteError() && this.cart().length > 0;
   });
 
+  // ============================================================
+  // 4. INYECCIÓN DE DEPENDENCIAS
+  // ============================================================
   private productosApi = inject(ProductosApiService);
   private ventasApi = inject(VentasApiService);
   private authSession = inject(AuthSessionService);
@@ -109,29 +119,48 @@ export class VentasPage implements OnInit {
       alertCircleOutline,
     });
 
-    // ✅ effect para validar automáticamente cuando el nombre o el carrito cambian
+    // Efecto para validar cliente automáticamente
     effect(() => {
-      // Leer las señales para que Angular se suscriba a ellas
       const nombre = this.clienteNombre();
-      const cartLength = this.cart().length;
-      // Solo validar si hay nombre (evita validación en cada tecla)
       if (nombre.length > 0) {
         this.validarCliente();
       } else {
-        // Si el nombre está vacío, mostrar error
         this.clienteError.set('El nombre del cliente es obligatorio');
       }
     });
   }
 
+  // ============================================================
+  // 5. CICLO DE VIDA
+  // ============================================================
   ngOnInit() {
     const user = this.authSession.getCurrentUser();
     this.isAdmin.set(user?.role === 'ADMIN');
     this.cargarProductos();
-    // Validación inicial para deshabilitar botones
     this.clienteError.set('El nombre del cliente es obligatorio');
+
+    // ✅ Configurar debounce para la búsqueda de productos
+    // En Ventas la búsqueda es local (no llama al backend), pero aplicamos debounce
+    // para no saturar el filtrado si la lista es grande (se ejecuta en cada letra)
+    this.searchSubject
+      .pipe(
+        debounceTime(300), // un poco más rápido que en Productos porque es local
+        distinctUntilChanged(),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((term) => {
+        this.filtrarProductos(term);
+      });
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ============================================================
+  // 6. CARGA DE PRODUCTOS Y BÚSQUEDA
+  // ============================================================
   cargarProductos() {
     this.productosApi.listar({ isActive: true }).subscribe({
       next: (data) => {
@@ -150,21 +179,36 @@ export class VentasPage implements OnInit {
     });
   }
 
+  /**
+   * Evento que se dispara en cada input del buscador.
+   * Emitimos el valor al Subject para que el debounce actúe.
+   */
   onSearch(event: Event) {
-    const value = (event.target as HTMLInputElement).value.toLowerCase();
-    this.searchTerm = value;
-    if (!value.trim()) {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm = value; // guardamos para enlazar con ngModel si se usa
+    this.searchSubject.next(value);
+  }
+
+  /**
+   * Filtrado local de productos (se ejecuta después del debounce)
+   */
+  private filtrarProductos(term: string) {
+    if (!term.trim()) {
       this.filteredProducts.set([]);
       return;
     }
+    const lower = term.toLowerCase();
     const filtered = this.productos().filter(
       (p) =>
-        p.nombre.toLowerCase().includes(value) ||
-        p.sku.toLowerCase().includes(value),
+        p.nombre.toLowerCase().includes(lower) ||
+        p.sku.toLowerCase().includes(lower),
     );
     this.filteredProducts.set(filtered);
   }
 
+  // ============================================================
+  // 7. CARRITO (sin cambios, pero incluidos)
+  // ============================================================
   addToCart(producto: ProductoParaVenta) {
     if (producto.stock <= 0) {
       this.mostrarError(
@@ -187,6 +231,7 @@ export class VentasPage implements OnInit {
     } else {
       this.cart.set([...this.cart(), { ...producto, cantidad: 1 }]);
     }
+    // Limpiar resultados de búsqueda
     this.filteredProducts.set([]);
     this.searchTerm = '';
     this.mostrarExito('Producto agregado');
@@ -222,9 +267,9 @@ export class VentasPage implements OnInit {
     return Number((this.subtotal + this.igv).toFixed(2));
   }
 
-  /**
-   * ✅ VALIDACIÓN ESTRICTA DEL NOMBRE DEL CLIENTE
-   */
+  // ============================================================
+  // 8. VALIDACIÓN DE CLIENTE
+  // ============================================================
   validarCliente() {
     const nombre = this.clienteNombre().trim();
     if (nombre.length === 0) {
@@ -239,7 +284,6 @@ export class VentasPage implements OnInit {
       this.clienteError.set('Máximo 80 caracteres');
       return false;
     }
-    // Regex: al menos dos palabras
     const regex = /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+(?:[\s\-'\.][A-Za-zÁÉÍÓÚÑáéíóúñ]+)+$/;
     if (!regex.test(nombre)) {
       this.clienteError.set(
@@ -261,7 +305,10 @@ export class VentasPage implements OnInit {
     return true;
   }
 
-  // =================== MÉTODOS PRINCIPALES ===================
+  // ============================================================
+  // 9. MÉTODOS DE VENTA
+  // ============================================================
+  private tipoVentaPendiente: 'guardar' | 'cobrar' = 'guardar';
 
   async guardarVenta() {
     if (!this.validarCliente()) return;
@@ -285,8 +332,6 @@ export class VentasPage implements OnInit {
     this.tipoVentaPendiente = 'cobrar';
   }
 
-  private tipoVentaPendiente: 'guardar' | 'cobrar' = 'guardar';
-
   async confirmarVenta() {
     if (!this.validarCliente()) return;
     if (this.cart().length === 0) {
@@ -309,6 +354,10 @@ export class VentasPage implements OnInit {
         this.ventaConfirmada = venta;
         this.mostrarExito('Venta registrada exitosamente');
         this.limpiarCarrito();
+
+        // ✅ Recargar productos para actualizar el stock en tiempo real
+        this.cargarProductos();
+
         this.resumenModal.dismiss();
 
         if (this.tipoVentaPendiente === 'guardar') {
@@ -356,7 +405,6 @@ export class VentasPage implements OnInit {
     this.clienteError.set('El nombre del cliente es obligatorio');
   }
 
-  // =================== MÉTODOS DE IMPRESIÓN Y COMPARTIR ===================
   imprimirTicket(venta: Venta) {
     this.ventaConfirmada = venta;
     const qrData = `${window.location.origin}/ventas/detalle/${venta.id}`;
@@ -455,7 +503,9 @@ export class VentasPage implements OnInit {
     this.mostrarExito('Venta cancelada');
   }
 
-  // =================== NOTIFICACIONES ===================
+  // ============================================================
+  // 10. TOASTS
+  // ============================================================
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
       header: titulo,

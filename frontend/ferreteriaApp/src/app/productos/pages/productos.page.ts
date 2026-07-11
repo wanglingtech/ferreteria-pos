@@ -1,14 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  inject,
+  signal,
+  OnDestroy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-
 import {
   IonButton,
   IonContent,
@@ -30,7 +35,6 @@ import {
   ToastController,
   AlertController,
 } from '@ionic/angular/standalone';
-
 import { addIcons } from 'ionicons';
 import {
   addOutline,
@@ -44,7 +48,6 @@ import {
   checkmarkCircleOutline,
   pricetagsOutline,
 } from 'ionicons/icons';
-
 import { ProductosApiService } from '../services/productos-api.service';
 import { CategoriasApiService } from '../services/categorias-api.service';
 import {
@@ -54,6 +57,8 @@ import {
   Categoria,
 } from '../interfaces/producto.interface';
 import { AuthSessionService } from '../../core/services/auth-session.service';
+// ✅ Importamos Subject y operadores de RxJS
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-productos-page',
@@ -83,11 +88,14 @@ import { AuthSessionService } from '../../core/services/auth-session.service';
     IonSpinner,
   ],
 })
-export class ProductosPage implements OnInit {
+export class ProductosPage implements OnInit, OnDestroy {
   @ViewChild('productModal') productModal!: IonModal;
   @ViewChild('filtersModal') filtersModal!: IonModal;
   @ViewChild('categoryModal') categoryModal!: IonModal;
 
+  // ============================================================
+  // 1. SEÑALES (estado reactivo)
+  // ============================================================
   search = signal('');
   selectedFilter = signal<'all' | 'active' | 'inactive'>('all');
   productos = signal<Producto[]>([]);
@@ -98,6 +106,7 @@ export class ProductosPage implements OnInit {
   imagenPreview = signal<string | null>(null);
   isAdmin = signal(false);
 
+  // Filtros avanzados
   filtrosAvanzados = {
     search: '',
     categoryId: null as number | null,
@@ -107,16 +116,30 @@ export class ProductosPage implements OnInit {
     status: null as 'active' | 'inactive' | null,
   };
 
+  // ============================================================
+  // 2. FORMULARIOS
+  // ============================================================
   productForm: FormGroup;
   categoryForm: FormGroup;
   editingCategoryId: number | null = null;
 
+  // ============================================================
+  // 3. INYECCIÓN DE DEPENDENCIAS
+  // ============================================================
   private productosApi = inject(ProductosApiService);
   private categoriasApi = inject(CategoriasApiService);
   private authSession = inject(AuthSessionService);
   private toastCtrl = inject(ToastController);
   private alertCtrl = inject(AlertController);
   private fb = inject(FormBuilder);
+
+  // ============================================================
+  // 4. DEBOUNCE PARA BÚSQUEDA
+  // ============================================================
+  /** Subject que emite el término de búsqueda cada vez que el usuario escribe */
+  private searchSubject = new Subject<string>();
+  /** Para limpiar suscripciones al destruir el componente */
+  private destroy$ = new Subject<void>();
 
   constructor() {
     addIcons({
@@ -148,13 +171,39 @@ export class ProductosPage implements OnInit {
     });
   }
 
+  // ============================================================
+  // 5. CICLO DE VIDA
+  // ============================================================
   ngOnInit() {
     const user = this.authSession.getCurrentUser();
     this.isAdmin.set(user?.role === 'ADMIN');
     this.cargarProductos();
     this.cargarCategorias();
+
+    // Configurar el debounce para la búsqueda
+    // - debounceTime(400): espera 400 ms después de la última pulsación
+    // - distinctUntilChanged(): solo emite si el valor cambió
+    // - takeUntil(this.destroy$): se desuscribe al destruir el componente
+    this.searchSubject
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((term) => {
+        // Actualizar el valor de la señal 'search' y el filtro avanzado
+        this.search.set(term);
+        this.filtrosAvanzados.search = term;
+        // Llamar a la carga de productos con el nuevo término
+        this.cargarProductos();
+      });
   }
 
+  ngOnDestroy() {
+    // Limpiar suscripciones para evitar memory leaks
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ============================================================
+  // 6. MÉTODOS DE CARGA
+  // ============================================================
   cargarProductos() {
     this.isLoading.set(true);
     let isActive: boolean | undefined;
@@ -202,13 +251,22 @@ export class ProductosPage implements OnInit {
     });
   }
 
+  // ============================================================
+  // 7. MANEJO DE BÚSQUEDA CON DEBOUNCE
+  // ============================================================
+  /**
+   * Evento que se dispara cuando el usuario escribe en el input.
+   * En lugar de llamar directamente a cargarProductos, emitimos el valor
+   * en el Subject para que el debounce actúe.
+   */
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
-    this.search.set(value);
-    this.filtrosAvanzados.search = value;
-    this.cargarProductos();
+    this.searchSubject.next(value);
   }
 
+  // ============================================================
+  // 8. RESTO DE MÉTODOS (sin cambios, pero incluidos por completitud)
+  // ============================================================
   onFilterChange(event: CustomEvent) {
     const value = event.detail.value as
       | 'all'
@@ -434,12 +492,13 @@ export class ProductosPage implements OnInit {
       : '';
   }
 
-  // =================== UTILIDADES ===================
   onImagenUrlChange(url: string | null | undefined) {
     this.imagenPreview.set(url ?? '');
   }
 
-  // =================== CRUD CATEGORÍAS ===================
+  // ============================================================
+  // CRUD CATEGORÍAS
+  // ============================================================
   openCategoryModal() {
     this.resetCategoryForm();
     this.categoryModal.present();
@@ -510,6 +569,9 @@ export class ProductosPage implements OnInit {
     this.cargarCategorias();
   }
 
+  // ============================================================
+  // GETTERS PARA LA VISTA
+  // ============================================================
   get totalProductos(): number {
     return this.productos().length;
   }
@@ -523,6 +585,9 @@ export class ProductosPage implements OnInit {
     return this.productos();
   }
 
+  // ============================================================
+  // TOASTS
+  // ============================================================
   private async mostrarError(titulo: string, mensaje?: string) {
     const toast = await this.toastCtrl.create({
       header: titulo,
