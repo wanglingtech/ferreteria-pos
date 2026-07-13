@@ -26,7 +26,7 @@ _Enfocado en seguridad inmediata, corrección de pruebas y optimizaciones básic
   - Usar un placeholder (ej. `assets/default-product.png`) mientras se carga la imagen real.
 - [ ] **🧩 Centralizar validadores de formularios**:
   - Extraer los validadores personalizados (`usernameValidator`, `fullNameValidator`, `passwordValidator`, `identifierValidator`) a archivos compartidos en `src/app/shared/validators/` para reutilizarlos en todos los formularios.
-- [ ] **📦 Extraer lógica de gráficos**:
+- [ COMPLETED ] **📦 Extraer lógica de gráficos**:
   - Mover la creación y actualización de gráficos (Chart.js) de `dashboard.page.ts` y `reportes.page.ts` a servicios específicos (`ChartService`) para limpiar los componentes.
 
 ---
