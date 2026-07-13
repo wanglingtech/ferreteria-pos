@@ -185,16 +185,16 @@ Interfaz Venta
 
 <p align="center">
   <br>
-  <img src="/frontend/ferreteriaApp/src/assets/icon/wangling.jpg" alt="Foto de perfil" width="120" style="border-radius: 50%;">
+  <img src="frontend\ferreteriaApp\src\assets\icon\wangling_tech.png" alt="Foto de perfil" width="120" style="border-radius: 50%;">
   <br>
-  <strong>WangLing</strong>
+  <strong>WangLing Tech</strong>
   <br>
   <em>Desarrollador Full-Stack | Apasionado por la tecnología y las soluciones empresariales</em>
 </p>
 
 <p align="center">
-  <a href="https://github.com/wangling941">
-    <img src="https://img.shields.io/badge/GitHub-wangling941-181717?style=for-the-badge&logo=github" alt="GitHub">
+  <a href="https://github.com/wanglingtech">
+    <img src="https://img.shields.io/badge/GitHub-wangling tech-181717?style=for-the-badge&logo=github" alt="GitHub">
   </a>
   &nbsp;
   <a href="mailto:kevinvillegas.dev@gmail.com">
