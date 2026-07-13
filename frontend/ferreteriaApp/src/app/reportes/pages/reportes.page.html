@@ -1,6 +1,6 @@
 <!-- ============================================================
      PÁGINA REPORTES - Resumen de ventas, gráficos y exportación
-     Incluye lazy loading en el logo de la sección de exportar y en el modal de detalle.
+     Ahora usa la directiva baseChart para los gráficos, gestionados por ChartService.
      ============================================================ -->
 
 <ion-content class="reportes-content">
@@ -116,8 +116,9 @@
     </section>
 
     <!-- ============================================================
-         GRÁFICOS - Evolución de ventas y top productos
+         GRÁFICOS - Usando la directiva baseChart (ng2-charts)
          ============================================================ -->
+    <!-- Gráfico de líneas: Evolución de ventas -->
     <div
       class="chart-card"
       *ngIf="activeTab === 'resumen' || activeTab === 'ventas'"
@@ -125,16 +126,29 @@
       <div class="card-title">
         <ion-icon name="stats-chart-outline"></ion-icon> Evolución de ventas
       </div>
-      <div class="chart-container"><canvas #salesChartCanvas></canvas></div>
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="salesChartData"
+          [options]="salesChartOptions"
+          type="line"
+        ></canvas>
+      </div>
     </div>
 
+    <!-- Gráfico de barras: Top productos -->
     <div class="chart-card" *ngIf="activeTab === 'productos' && reporte">
       <div class="card-title">
         <ion-icon name="bar-chart-outline"></ion-icon> Productos más vendidos
         (unidades)
       </div>
       <div class="chart-container">
-        <canvas #topProductsChartCanvas></canvas>
+        <canvas
+          baseChart
+          [data]="topProductsChartData"
+          [options]="barChartOptions"
+          type="bar"
+        ></canvas>
       </div>
     </div>
 
@@ -245,7 +259,6 @@
          ============================================================ -->
     <div class="export-card" *ngIf="activeTab === 'exportar'">
       <div class="export-header">
-        <!-- ✅ Lazy loading en el logo de exportación -->
         <img
           src="assets/logo/logo_ferreteria.png"
           alt="Logo"
@@ -293,7 +306,6 @@
           *ngIf="ventaSeleccionada"
         >
           <div class="detalle-header">
-            <!-- ✅ Lazy loading en el logo del detalle de venta -->
             <img
               src="assets/logo/logo_ferreteria.png"
               class="detalle-logo"

@@ -1,3 +1,8 @@
+// ============================================================
+// DASHBOARD PAGE - VISTA PRINCIPAL CON KPIs, GRÁFICOS Y ALERTAS
+// Los gráficos ahora son gestionados por ChartService para mantener el componente limpio.
+// ============================================================
+
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -5,8 +10,6 @@ import {
   OnDestroy,
   inject,
   AfterViewInit,
-  ViewChildren,
-  QueryList,
 } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -38,15 +41,16 @@ import {
   timeOutline,
 } from 'ionicons/icons';
 
-import { Chart, registerables } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { firstValueFrom, Subject, filter, takeUntil } from 'rxjs';
 
 import { DashboardApiService } from '../services/dashboard-api.service';
 import { DashboardData } from '../interfaces/dashboard.interface';
 import { AuthSessionService } from '../../core/services/auth-session.service';
+// ✅ Importar el servicio de gráficos
+import { ChartService } from '../../core/services/chart.service';
 
-Chart.register(...registerables);
+// NOTA: Ya no necesitamos importar Chart y registerables aquí, porque el servicio los maneja.
 
 @Component({
   selector: 'app-dashboard-page',
@@ -62,12 +66,10 @@ Chart.register(...registerables);
     IonSegment,
     IonSegmentButton,
     IonLabel,
-    BaseChartDirective,
+    BaseChartDirective, // Aún usamos la directiva para renderizar, pero los datos los manejamos nosotros
   ],
 })
 export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
-
   // ============================================================
   // 1. INYECCIÓN DE DEPENDENCIAS
   // ============================================================
@@ -75,6 +77,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
   private dashboardApi = inject(DashboardApiService);
   private router = inject(Router);
   private toastCtrl = inject(ToastController);
+  private chartService = inject(ChartService); // ✅ Servicio de gráficos
 
   // ============================================================
   // 2. ESTADO Y DATOS
@@ -97,44 +100,28 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
   lastUpdate: Date | null = null;
 
   // ============================================================
-  // 3. DATOS PARA GRÁFICOS (Chart.js)
+  // 3. DATOS PARA GRÁFICOS (Chart.js) - Ahora solo almacenamos los datos,
+  //    la creación y actualización la hace el servicio.
   // ============================================================
+  /** Datos para el gráfico de línea (ventas últimos 7 días) */
   lineChartData: any = { labels: [], datasets: [] };
+  /** Datos para el gráfico de barras (top productos) */
   barChartData: any = { labels: [], datasets: [] };
+  /** Datos para el gráfico de dona (salud de inventario) */
   doughnutChartData: any = { labels: [], datasets: [] };
 
-  /** Opciones comunes para gráficos de línea y barras */
-  chartOptions = {
-    responsive: true,
-    maintainAspectRatio: true,
-    aspectRatio: 1.5,
-    plugins: {
-      legend: { position: 'top' as const, labels: { font: { size: 10 } } },
-      tooltip: { mode: 'index' as const, intersect: false },
-    },
-    scales: {
-      y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
-      x: { grid: { display: false } },
-    },
-  };
-
-  /** Opciones para el gráfico de dona (inventario) */
-  doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: true,
-    aspectRatio: 1.2,
-    plugins: {
-      legend: { position: 'top' as const, labels: { font: { size: 10 } } },
-    },
-  };
+  // Las opciones ahora vienen del servicio
+  get chartOptions() {
+    return this.chartService.defaultChartOptions;
+  }
+  get doughnutOptions() {
+    return this.chartService.doughnutOptions;
+  }
 
   // ============================================================
   // 4. POLLING Y RECARGA POR NAVEGACIÓN
   // ============================================================
-  /** Intervalo para actualización automática cada 30 segundos */
   private refreshInterval: any;
-
-  /** Subject para limpiar suscripciones al destruir el componente */
   private destroy$ = new Subject<void>();
 
   // ============================================================
@@ -162,17 +149,15 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
-    // 1. Carga inicial de datos
+    // Carga inicial
     this.cargarDashboard();
 
-    // 2. Configurar polling cada 30 segundos (en segundo plano)
+    // Polling cada 30 segundos
     this.refreshInterval = setInterval(() => {
-      // Cargar en modo silencioso (sin mostrar spinner ni errores)
       this.cargarDashboard(true);
     }, 30000);
 
-    // 3. ✅ RECARGA AUTOMÁTICA AL VOLVER AL DASHBOARD
-    // Escuchamos eventos de navegación y si la ruta es /app/dashboard, recargamos.
+    // Recarga automática al volver al dashboard
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
@@ -180,56 +165,56 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
         takeUntil(this.destroy$),
       )
       .subscribe(() => {
-        // Solo recargamos si no estamos en medio de una carga
         if (!this.isLoading) {
-          console.log('🔄 Recargando dashboard por navegación a la página');
+          console.log('🔄 Recargando dashboard por navegación');
           this.cargarDashboard();
         }
       });
   }
 
   ngAfterViewInit() {
-    // Esperar a que los gráficos se rendericen y redimensionarlos
+    // Los gráficos se renderizan automáticamente a través de la directiva BaseChartDirective.
+    // Pero necesitamos asegurar que se redimensionen después de que la vista esté lista.
     setTimeout(() => {
-      this.charts.forEach((chart) => chart?.chart?.resize());
+      // Redimensionar gráficos usando el servicio
+      this.chartService.resizeChart('lineChart');
+      this.chartService.resizeChart('barChart');
+      this.chartService.resizeChart('doughnutChart');
     }, 300);
   }
 
   ngOnDestroy() {
-    // Limpiar intervalos y suscripciones para evitar memory leaks
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
     this.destroy$.next();
     this.destroy$.complete();
+    // Destruir todos los gráficos al salir
+    this.chartService.destroyAll();
   }
 
   // ============================================================
   // 6. CARGA DE DATOS
   // ============================================================
-  /**
-   * Carga los datos del dashboard desde el backend.
-   * @param silent Si es true, no muestra spinner ni errores (para polling).
-   */
   async cargarDashboard(silent = false) {
     if (!silent) this.isLoading = true;
 
     try {
-      // Obtener datos del API
       const data = await firstValueFrom(this.dashboardApi.getDashboard());
       this.dashboardData = data;
       this.lastUpdate = new Date();
 
-      // Actualizar gráficos con los nuevos datos
+      // Actualizar datos de gráficos (los objetos se pasan a la directiva)
       this.actualizarGraficos();
 
       // Redimensionar gráficos después de actualizar
       setTimeout(() => {
-        this.charts.forEach((chart) => chart?.chart?.resize());
+        this.chartService.resizeChart('lineChart');
+        this.chartService.resizeChart('barChart');
+        this.chartService.resizeChart('doughnutChart');
       }, 100);
     } catch (error) {
       console.error('Error cargando dashboard:', error);
-      // Solo mostramos error si no es silencioso
       if (!silent) {
         const toast = await this.toastCtrl.create({
           header: 'Error',
@@ -248,16 +233,16 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
   // 7. ACTUALIZACIÓN DE GRÁFICOS
   // ============================================================
   /**
-   * Actualiza los tres gráficos del dashboard con los datos actuales.
-   * Se ejecuta cada vez que se cargan nuevos datos.
+   * Actualiza los objetos de datos de los gráficos.
+   * La directiva BaseChartDirective se encargará de renderizar los cambios.
    */
   actualizarGraficos() {
     if (!this.dashboardData) return;
 
-    // 1. Gráfico de ventas de los últimos 7 días (línea)
+    // 1. Gráfico de ventas (línea)
     const ventas7d = this.dashboardData.salesLast7Days;
     this.lineChartData = {
-      labels: ventas7d.map((d) => d.date.slice(5)), // formato 'MM-DD'
+      labels: ventas7d.map((d) => d.date.slice(5)),
       datasets: [
         {
           label: 'Ventas (S/.)',
@@ -291,7 +276,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
       ],
     };
 
-    // 3. Gráfico de salud del inventario (dona)
+    // 3. Gráfico de inventario (dona)
     const kpis = this.dashboardData.kpis;
     const totalProd = kpis.productosTotales;
     const bajo = kpis.productosStockBajo;
@@ -309,34 +294,12 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // ============================================================
-  // 8. MÉTODOS DEL BOTÓN DE ACTUALIZACIÓN (DESCONTINUADO)
+  // 8. NAVEGACIÓN Y UTILIDADES
   // ============================================================
-  /**
-   * Método para actualizar manualmente (ya no se usa, se mantiene por compatibilidad)
-   * PERO LO QUITAMOS DE LA VISTA (HTML) PARA NO MOSTRARLO.
-   * Lo dejamos aquí por si se necesitara en el futuro.
-   */
-  // refresh(event: any) {
-  //   this.cargarDashboard().finally(() => event.target.complete());
-  // }
-
-  // ============================================================
-  // 9. NAVEGACIÓN A MÓDULOS
-  // ============================================================
-  /**
-   * Navega a un módulo específico desde la vista de "Módulos".
-   * @param route Nombre de la ruta (ej: 'inventario', 'ventas').
-   */
   navigateTo(route: string) {
     this.router.navigate([`/app/${route}`]);
   }
 
-  // ============================================================
-  // 10. UTILIDADES DE FORMATO
-  // ============================================================
-  /**
-   * Formatea un número como moneda en soles (PEN).
-   */
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('es-PE', {
       style: 'currency',
@@ -345,9 +308,6 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
     }).format(value);
   }
 
-  /**
-   * Formatea una fecha a formato local (es-PE).
-   */
   formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleString('es-PE');
   }

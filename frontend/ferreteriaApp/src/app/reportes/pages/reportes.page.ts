@@ -1,12 +1,16 @@
+// ============================================================
+// REPORTES PAGE - ANÁLISIS DE VENTAS CON GRÁFICOS Y EXPORTACIÓN
+// Usa la directiva baseChart (ng2-charts) para renderizar gráficos,
+// gestionados por ChartService para opciones y consistencia.
+// ============================================================
+
 import { CommonModule } from '@angular/common';
 import {
   Component,
   OnInit,
   inject,
-  AfterViewInit,
-  ViewChild,
-  ElementRef,
   OnDestroy,
+  ViewChild, // ✅ IMPORTANTE: agregar ViewChild
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -42,18 +46,22 @@ import {
   closeOutline,
   shareSocialOutline,
 } from 'ionicons/icons';
-import { Chart, registerables } from 'chart.js';
+
+// ✅ Importar la directiva baseChart
+import { BaseChartDirective } from 'ng2-charts';
 import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+
 import { ReportesApiService } from '../services/reportes-api.service';
 import { ReportesExportService } from '../services/reportes-export.service';
 import { ReporteGeneral, VentaPorDia } from '../interfaces/reportes.interface';
 import { Venta } from '../../ventas/interfaces/venta.interface';
 import { AuthSessionService } from '../../core/services/auth-session.service';
 import { NotificationService } from '../../core/services/notification.service';
+// ✅ Importar el servicio de gráficos (para opciones)
+import { ChartService } from '../../core/services/chart.service';
+// Para generar imágenes de ventas
 import html2canvas from 'html2canvas';
-
-Chart.register(...registerables);
 
 @Component({
   selector: 'app-reportes-page',
@@ -71,17 +79,18 @@ Chart.register(...registerables);
     IonHeader,
     IonToolbar,
     IonTitle,
+    BaseChartDirective, // ✅ IMPRESCINDIBLE para usar baseChart en el HTML
   ],
 })
-export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('salesChartCanvas')
-  salesChartCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('topProductsChartCanvas')
-  topProductsChartCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('detalleModal') detalleModal!: IonModal;
-  private salesChart: Chart | null = null;
-  private topProductsChart: Chart | null = null;
+export class ReportesPage implements OnInit, OnDestroy {
+  // ============================================================
+  // 1. REFERENCIAS A MODALES
+  // ============================================================
+  @ViewChild('detalleModal') detalleModal!: IonModal; // ✅ Ahora ViewChild está importado
 
+  // ============================================================
+  // 2. ESTADO Y DATOS
+  // ============================================================
   from = '';
   to = '';
   activeTab = 'resumen';
@@ -100,18 +109,45 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
 
   private pollingInterval: any = null;
 
+  // ============================================================
+  // 3. DATOS Y OPCIONES PARA GRÁFICOS (baseChart)
+  // ============================================================
+  /** Datos para el gráfico de líneas (evolución de ventas) */
+  salesChartData: any = { labels: [], datasets: [] };
+  /** Datos para el gráfico de barras (top productos) */
+  topProductsChartData: any = { labels: [], datasets: [] };
+
+  /** Opciones para el gráfico de líneas (tomadas del servicio) */
+  get salesChartOptions() {
+    return this.chartService.lineChartOptions;
+  }
+  /** Opciones para el gráfico de barras (tomadas del servicio) */
+  get barChartOptions() {
+    return this.chartService.barChartOptions;
+  }
+
+  // ============================================================
+  // 4. INYECCIÓN DE DEPENDENCIAS
+  // ============================================================
   private reportesApi = inject(ReportesApiService);
   private exportService = inject(ReportesExportService);
   private authSession = inject(AuthSessionService);
   private toastCtrl = inject(ToastController);
   private notificationService = inject(NotificationService);
   private actionSheetCtrl = inject(ActionSheetController);
+  private chartService = inject(ChartService); // Para opciones
 
+  // ============================================================
+  // 5. GETTER PARA NOMBRE DE USUARIO (usado en exportación)
+  // ============================================================
   get currentUserName(): string {
     const user = this.authSession.getCurrentUser();
     return user?.fullName || user?.username || 'Usuario';
   }
 
+  // ============================================================
+  // 6. CICLO DE VIDA
+  // ============================================================
   constructor() {
     addIcons({
       analyticsOutline,
@@ -136,28 +172,34 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Fechas por defecto: últimos 7 días
     const today = new Date();
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(today.getDate() - 7);
     this.to = today.toISOString().split('T')[0];
     this.from = sevenDaysAgo.toISOString().split('T')[0];
+
+    // Carga inicial
     this.loadReport();
 
+    // Debounce para búsqueda en tabla general
     this.searchSubject.pipe(debounceTime(500)).subscribe(() => {
       this.pageGeneral = 1;
       this.cargarVentasGenerales();
     });
-    // Opcional: polling cada 30 segundos
+
+    // Polling opcional (comentado)
     // this.iniciarPolling();
   }
-
-  ngAfterViewInit() {}
 
   ngOnDestroy() {
     if (this.pollingInterval) clearInterval(this.pollingInterval);
     this.searchSubject.complete();
   }
 
+  // ============================================================
+  // 7. CARGA DEL REPORTE
+  // ============================================================
   async loadReport() {
     this.isLoading = true;
     try {
@@ -169,8 +211,13 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
       ]);
       this.reporte = resumen;
       this.ventasPorDia = ventas;
-      this.renderCharts();
-      if (this.activeTab === 'generales') this.cargarVentasGenerales();
+
+      // Actualizar gráficos
+      this.actualizarGraficos();
+
+      if (this.activeTab === 'generales') {
+        this.cargarVentasGenerales();
+      }
     } catch (error) {
       console.error(error);
       this.mostrarError('No se pudo cargar el reporte');
@@ -179,71 +226,49 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  renderCharts() {
-    this.renderSalesChart();
-    this.renderTopProductsChart();
-  }
-
-  renderSalesChart() {
-    if (!this.salesChartCanvas) return;
-    if (this.salesChart) this.salesChart.destroy();
-    const ctx = this.salesChartCanvas.nativeElement.getContext('2d');
-    if (!ctx) return;
-    let labels: string[] = [],
-      data: number[] = [];
+  // ============================================================
+  // 8. ACTUALIZACIÓN DE GRÁFICOS (asignando datos a las propiedades)
+  // ============================================================
+  /**
+   * Actualiza los datos de los gráficos. La directiva baseChart
+   * detecta los cambios automáticamente y re-renderiza.
+   */
+  actualizarGraficos() {
+    // 1. Gráfico de líneas (ventas por día)
+    let labels: string[] = [];
+    let data: number[] = [];
     if (this.ventasPorDia && this.ventasPorDia.length) {
-      labels = this.ventasPorDia.map((v) => v.date.slice(5));
+      labels = this.ventasPorDia.map((v) => v.date.slice(5)); // 'MM-DD'
       data = this.ventasPorDia.map((v) => v.total);
     } else {
       labels = ['Sin datos'];
       data = [0];
     }
-    this.salesChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Ventas (S/.)',
-            data,
-            borderColor: '#f97316',
-            backgroundColor: 'rgba(249,115,22,0.1)',
-            borderWidth: 3,
-            tension: 0.3,
-            fill: true,
-            pointBackgroundColor: '#f97316',
-            pointBorderColor: '#ffffff',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top' },
-          tooltip: {
-            callbacks: { label: (ctx) => `S/ ${ctx.parsed.y.toFixed(2)}` },
-          },
-        },
-        scales: {
-          y: { beginAtZero: true, ticks: { callback: (val) => `S/ ${val}` } },
-        },
-      },
-    });
-  }
 
-  renderTopProductsChart() {
-    if (!this.topProductsChartCanvas || !this.reporte) return;
-    if (this.topProductsChart) this.topProductsChart.destroy();
-    const ctx = this.topProductsChartCanvas.nativeElement.getContext('2d');
-    if (!ctx) return;
-    const top = this.reporte.topProductos.slice(0, 5);
-    if (!top.length) {
-      this.topProductsChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
+    this.salesChartData = {
+      labels,
+      datasets: [
+        {
+          label: 'Ventas (S/.)',
+          data,
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249,115,22,0.1)',
+          borderWidth: 3,
+          tension: 0.3,
+          fill: true,
+          pointBackgroundColor: '#f97316',
+          pointBorderColor: '#ffffff',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        },
+      ],
+    };
+
+    // 2. Gráfico de barras (top productos)
+    if (this.reporte) {
+      const top = this.reporte.topProductos.slice(0, 5);
+      if (top.length === 0) {
+        this.topProductsChartData = {
           labels: ['Sin datos'],
           datasets: [
             {
@@ -252,42 +277,29 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
               backgroundColor: '#cbd5e1',
             },
           ],
-        },
-        options: { responsive: true, maintainAspectRatio: false },
-      });
-      return;
+        };
+      } else {
+        this.topProductsChartData = {
+          labels: top.map((p) =>
+            p.nombre.length > 15 ? p.nombre.slice(0, 12) + '…' : p.nombre,
+          ),
+          datasets: [
+            {
+              label: 'Unidades vendidas',
+              data: top.map((p) => p.cantidadVendida),
+              backgroundColor: '#3b82f6',
+              borderRadius: 6,
+              barPercentage: 0.7,
+            },
+          ],
+        };
+      }
     }
-    const labels = top.map((p) =>
-      p.nombre.length > 15 ? p.nombre.slice(0, 12) + '…' : p.nombre,
-    );
-    const data = top.map((p) => p.cantidadVendida);
-    this.topProductsChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Unidades vendidas',
-            data,
-            backgroundColor: '#3b82f6',
-            borderRadius: 6,
-            barPercentage: 0.7,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          tooltip: {
-            callbacks: { label: (ctx) => `${ctx.parsed.y} unidades` },
-          },
-        },
-        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
-      },
-    });
   }
 
+  // ============================================================
+  // 9. TABLA GENERAL DE VENTAS (paginada)
+  // ============================================================
   async cargarVentasGenerales() {
     this.loadingGeneral = true;
     try {
@@ -320,7 +332,9 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     this.cargarVentasGenerales();
   }
 
-  // ==================== MENÚ DE OPCIONES PARA CADA VENTA ====================
+  // ============================================================
+  // 10. MENÚ DE OPCIONES PARA VENTAS
+  // ============================================================
   async opcionesVenta(venta: Venta) {
     const actionSheet = await this.actionSheetCtrl.create({
       header: 'Opciones de venta',
@@ -350,13 +364,14 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     await actionSheet.present();
   }
 
-  // Mostrar modal con detalle
   verDetalleVenta(venta: Venta) {
     this.ventaSeleccionada = venta;
     this.detalleModal.present();
   }
 
-  // Genera y comparte imagen de la venta (sin abrir modal)
+  // ============================================================
+  // 11. COMPARTIR / DESCARGAR IMAGEN DE VENTA
+  // ============================================================
   async compartirImagenVenta(venta: Venta) {
     const blobImagen = await this.generarImagenVenta(venta);
     if (!blobImagen) return;
@@ -380,7 +395,6 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // Genera y descarga la imagen de la venta
   async descargarImagenVenta(venta: Venta) {
     const blobImagen = await this.generarImagenVenta(venta);
     if (!blobImagen) return;
@@ -393,7 +407,6 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     this.mostrarExito('Imagen descargada');
   }
 
-  // Construye un elemento HTML temporal con los datos de la venta y lo convierte a imagen
   private async generarImagenVenta(venta: Venta): Promise<Blob | null> {
     const divTemp = document.createElement('div');
     divTemp.className = 'temp-detalle-venta';
@@ -458,13 +471,15 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // Compartir desde el modal (si se desea)
   async compartirDesdeModalComoImagen() {
     if (!this.ventaSeleccionada) return;
     await this.compartirImagenVenta(this.ventaSeleccionada);
     this.detalleModal.dismiss();
   }
 
+  // ============================================================
+  // 12. POLLING (opcional)
+  // ============================================================
   iniciarPolling() {
     if (this.pollingInterval) clearInterval(this.pollingInterval);
     this.pollingInterval = setInterval(() => {
@@ -475,6 +490,9 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     }, 30000);
   }
 
+  // ============================================================
+  // 13. EXPORTACIÓN A CSV / PDF
+  // ============================================================
   async exportToCSV() {
     if (!this.reporte) return;
     try {
@@ -526,15 +544,22 @@ export class ReportesPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  // ============================================================
+  // 14. CAMBIO DE PESTAÑA
+  // ============================================================
   changeTab(tab: string) {
     this.activeTab = tab;
-    if (tab === 'resumen' || tab === 'ventas')
-      setTimeout(() => this.renderSalesChart(), 100);
-    else if (tab === 'productos')
-      setTimeout(() => this.renderTopProductsChart(), 100);
-    else if (tab === 'generales') this.cargarVentasGenerales();
+    // Al cambiar a pestañas que muestran gráficos, forzamos la actualización
+    if (tab === 'resumen' || tab === 'ventas' || tab === 'productos') {
+      this.actualizarGraficos();
+    } else if (tab === 'generales') {
+      this.cargarVentasGenerales();
+    }
   }
 
+  // ============================================================
+  // 15. UTILIDADES
+  // ============================================================
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('es-PE', {
       style: 'currency',
