@@ -601,6 +601,7 @@ export class ChatbotComponent implements AfterViewChecked, OnInit, OnDestroy {
    * el último mensaje.
    */
   private scrollToBottom() {
+    //warning
     if (this.chatContent) {
       this.chatContent.nativeElement.scrollTop =
         this.chatContent.nativeElement.scrollHeight;
