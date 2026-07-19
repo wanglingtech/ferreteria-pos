@@ -8,7 +8,7 @@
 
 _Enfocado en seguridad inmediata, corrección de pruebas y optimizaciones básicas de rendimiento._
 
-- [ ] **📝 Actualizar todas las pruebas unitarias (`*.spec.ts`)**:
+- [ COMPLETED] **📝 Actualizar todas las pruebas unitarias (`*.spec.ts`)**:
   - Ajustar los `mocks` de servicios (añadir métodos faltantes como `cargarNotificaciones`).
   - Corregir referencias a propiedades obsoletas (ej. `loginForm` → `form`, `cargarDatos` → `cargarDashboard`).
   - Añadir pruebas básicas para **señales (`signal`, `computed`, `effect`)**.
